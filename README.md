@@ -74,13 +74,25 @@ kunt ze later desgewenst tot beheerder maken (rechtstreeks in de
 `profiles`-tabel in Supabase, of via een latere uitbreiding van de
 instellingenpagina).
 
-## 6. Deployen naar Vercel
+## 6. Deployen naar Netlify
 
-1. Zet de code op GitHub en importeer het project in
-   [vercel.com](https://vercel.com).
-2. Voeg in **Project Settings → Environment Variables** dezelfde twee
-   variabelen toe als in `.env.local`.
-3. Koppel het domein `i-lab.online` via **Project Settings → Domains**.
+De code staat al op GitHub (`beheerilab/i-lab-hub`) en bevat een
+`netlify.toml` met de officiële Next.js-runtime (`@netlify/plugin-nextjs`),
+die App Router, server actions en route handlers (zoals de Excel-export)
+automatisch ondersteunt — geen verdere configuratie nodig.
+
+1. Ga naar [app.netlify.com](https://app.netlify.com) → **Add new site** →
+   **Import an existing project** → kies GitHub → selecteer
+   `beheerilab/i-lab-hub`.
+2. Netlify herkent Next.js automatisch via `netlify.toml`. Laat de
+   build-instellingen op hun voorstel staan en klik **Deploy**.
+3. Voeg daarna in **Site configuration → Environment variables** dezelfde
+   twee variabelen toe als in `.env.local`
+   (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`), en trigger
+   een nieuwe deploy (**Deploys → Trigger deploy**) zodat de variabelen
+   meegenomen worden.
+4. Koppel het domein `i-lab.online` via **Site configuration → Domain
+   management → Add a domain**.
 
 Omdat authenticatie en database volledig via Supabase lopen (geen lokale
 SQLite-toestand zoals bij sommige andere projecten), werkt lokaal en
