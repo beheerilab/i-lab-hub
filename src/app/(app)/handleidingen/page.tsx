@@ -39,14 +39,19 @@ export default async function HandleidingenPage({
 
       <ManualForm />
 
-      <form method="GET" className="mb-6">
+      <form method="GET" className="mb-6 flex max-w-sm gap-2">
         <Input
           type="search"
           name="q"
           placeholder="Zoek op apparaatnaam…"
           defaultValue={q}
-          className="max-w-sm"
         />
+        <button
+          type="submit"
+          className="shrink-0 rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-medium hover:bg-black/[.03]"
+        >
+          Zoeken
+        </button>
       </form>
 
       {manuals.length === 0 ? (
