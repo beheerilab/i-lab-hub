@@ -120,3 +120,11 @@ export async function deleteRoomAction(id: string) {
   await supabase.from("labs").delete().eq("id", id);
   revalidatePath("/planning");
 }
+
+export async function reorderRoomsAction(orderedIds: string[]) {
+  const supabase = await createClient();
+  await Promise.all(
+    orderedIds.map((id, i) => supabase.from("labs").update({ volgorde: i + 1 }).eq("id", id)),
+  );
+  revalidatePath("/planning");
+}

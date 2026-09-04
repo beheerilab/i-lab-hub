@@ -209,6 +209,7 @@ export interface Database {
           toegewezen_aan: string | null;
           status: TaskStatus;
           afgevinkt_op: string | null;
+          deadline_op: string | null;
           gearchiveerd: boolean;
           created_by: string | null;
           created_at: string;
@@ -218,6 +219,7 @@ export interface Database {
           beschrijving?: string | null;
           datum: string;
           toegewezen_aan?: string | null;
+          deadline_op?: string | null;
           created_by?: string | null;
         };
         Update: {
@@ -227,6 +229,7 @@ export interface Database {
           toegewezen_aan?: string | null;
           status?: TaskStatus;
           afgevinkt_op?: string | null;
+          deadline_op?: string | null;
           gearchiveerd?: boolean;
         };
         Relationships: [

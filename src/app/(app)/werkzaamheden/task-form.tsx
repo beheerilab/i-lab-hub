@@ -10,8 +10,10 @@ const initialState: ActionState = {};
 
 export function TaskForm({
   members,
+  standaardDatum,
 }: {
   members: { id: string; full_name: string | null }[];
+  standaardDatum: string;
 }) {
   const [state, formAction] = useActionState(createTaskAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
@@ -24,7 +26,7 @@ export function TaskForm({
 
   return (
     <Card className="mb-6">
-      <h2 className="mb-4 text-lg font-semibold">Nieuwe taak</h2>
+      <h2 className="mb-4 text-lg font-semibold">Nieuwe werkzaamheid</h2>
       <form
         ref={formRef}
         action={formAction}
@@ -35,7 +37,7 @@ export function TaskForm({
           <Input id="titel" name="titel" required />
         </Field>
         <Field label="Datum" htmlFor="datum">
-          <Input id="datum" name="datum" type="date" required />
+          <Input id="datum" name="datum" type="date" defaultValue={standaardDatum} required />
         </Field>
         <div className="sm:col-span-2">
           <Field label="Beschrijving (optioneel)" htmlFor="beschrijving">
@@ -54,10 +56,13 @@ export function TaskForm({
             ))}
           </Select>
         </Field>
+        <Field label="Deadline (optioneel)" htmlFor="deadline_op">
+          <Input id="deadline_op" name="deadline_op" type="datetime-local" />
+        </Field>
 
         {state.error && <p className="text-sm text-danger sm:col-span-2">{state.error}</p>}
         <div className="sm:col-span-2">
-          <SubmitButton size="lg">Taak aanmaken</SubmitButton>
+          <SubmitButton size="lg">Werkzaamheid aanmaken</SubmitButton>
         </div>
       </form>
     </Card>

@@ -1,7 +1,8 @@
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { addDays, format, parseISO, startOfWeek } from "date-fns";
+import { addDays, format, startOfWeek } from "date-fns";
 import { nl } from "date-fns/locale";
+import { huidigeDatumAmsterdam, formatAmsterdam } from "@/lib/tijd";
 import { Card } from "@/components/ui/card";
 import { TaskForm } from "./task-form";
 import { TaskItem } from "./task-item";
@@ -9,7 +10,15 @@ import { WeekNav } from "./week-nav";
 
 const WEEKDAGEN = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag"];
 
-export default async function TakenPage({
+function deadlineLabel(deadlineOp: string | null): string | null {
+  if (!deadlineOp) return null;
+  const vandaag = formatAmsterdam(new Date(), "yyyy-MM-dd");
+  const deadlineDag = formatAmsterdam(deadlineOp, "yyyy-MM-dd");
+  if (deadlineDag === vandaag) return `vandaag ${formatAmsterdam(deadlineOp, "HH:mm")}`;
+  return formatAmsterdam(deadlineOp, "d MMM HH:mm");
+}
+
+export default async function WerkzaamhedenPage({
   searchParams,
 }: {
   searchParams: Promise<{ week?: string }>;
@@ -18,7 +27,8 @@ export default async function TakenPage({
   const { userId, profile } = await requireProfile();
   const supabase = await createClient();
 
-  const referenceDate = week ? parseISO(week) : new Date();
+  const vandaag = huidigeDatumAmsterdam();
+  const referenceDate = week ? new Date(`${week}T00:00:00`) : vandaag;
   const weekStart = startOfWeek(referenceDate, { weekStartsOn: 1 });
   const weekEnd = addDays(weekStart, 4);
   const weekDays = Array.from({ length: 5 }, (_, i) => addDays(weekStart, i));
@@ -55,25 +65,28 @@ export default async function TakenPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-white">Taken</h1>
-      <p className="mb-6 text-white/80">Openstaande en afgevinkte taken per week.</p>
+      <h1 className="mb-1 text-2xl font-semibold text-white">Werkzaamheden</h1>
+      <p className="mb-6 text-white/80">Openstaande en afgevinkte werkzaamheden per week.</p>
 
-      {profile.role === "admin" && <TaskForm members={members ?? []} />}
+      {profile.role === "admin" && (
+        <TaskForm members={members ?? []} standaardDatum={format(vandaag, "yyyy-MM-dd")} />
+      )}
 
       <Card className="mb-6">
-        <h2 className="mb-3 text-lg font-semibold">Jouw open taken</h2>
+        <h2 className="mb-3 text-lg font-semibold">Jouw open werkzaamheden</h2>
         {!ownOpenTasks || ownOpenTasks.length === 0 ? (
-          <p className="text-muted">Je hebt geen openstaande taken.</p>
+          <p className="text-muted">Je hebt geen openstaande werkzaamheden.</p>
         ) : (
           <div className="space-y-2">
             {ownOpenTasks.map((task) => (
               <TaskItem
                 key={task.id}
                 id={task.id}
-                titel={`${task.titel} — ${format(new Date(task.datum), "d MMM", { locale: nl })}`}
+                titel={`${task.titel} — ${format(new Date(`${task.datum}T00:00:00`), "d MMM", { locale: nl })}`}
                 beschrijving={task.beschrijving}
                 toegewezenAanNaam={task.profiles?.full_name || "onbekend"}
                 status={task.status}
+                deadlineLabel={deadlineLabel(task.deadline_op)}
                 magAfvinken={true}
                 magArchiveren={false}
               />
@@ -101,7 +114,7 @@ export default async function TakenPage({
               </h3>
               <div className="space-y-2">
                 {dayTasks.length === 0 ? (
-                  <p className="text-sm text-muted">Geen taken</p>
+                  <p className="text-sm text-muted">Geen werkzaamheden</p>
                 ) : (
                   dayTasks.map((task) => (
                     <TaskItem
@@ -111,6 +124,7 @@ export default async function TakenPage({
                       beschrijving={task.beschrijving}
                       toegewezenAanNaam={task.profiles?.full_name || "onbekend"}
                       status={task.status}
+                      deadlineLabel={deadlineLabel(task.deadline_op)}
                       magAfvinken={profile.role === "admin" || task.toegewezen_aan === userId}
                       magArchiveren={profile.role === "admin"}
                     />

@@ -1,7 +1,6 @@
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { format } from "date-fns";
-import { nl } from "date-fns/locale";
+import { formatAmsterdam } from "@/lib/tijd";
 import { Card } from "@/components/ui/card";
 import { BestellijstTabs } from "../tabs";
 
@@ -31,7 +30,7 @@ export default async function BestellijstHistoriePage() {
             <Card key={batch.id}>
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="font-semibold">
-                  Besteld op {format(new Date(batch.besteld_op), "d MMMM yyyy 'om' HH:mm", { locale: nl })}
+                  Besteld op {formatAmsterdam(batch.besteld_op, "d MMMM yyyy 'om' HH:mm")}
                 </h2>
                 <span className="text-sm text-muted">door {batch.profiles?.full_name || "onbekend"}</span>
               </div>

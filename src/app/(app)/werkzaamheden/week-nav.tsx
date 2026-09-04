@@ -16,7 +16,7 @@ export function WeekNav({
   return (
     <div className="mb-4 flex items-center justify-between">
       <Link
-        href={`/taken?week=${prevWeekParam}`}
+        href={`/werkzaamheden?week=${prevWeekParam}`}
         className="rounded-lg border border-border bg-white px-3 py-1.5 text-sm hover:bg-black/[.03]"
       >
         ← Vorige week
@@ -25,7 +25,7 @@ export function WeekNav({
         {format(weekStart, "d MMM", { locale: nl })} – {format(weekEnd, "d MMM yyyy", { locale: nl })}
       </span>
       <Link
-        href={`/taken?week=${nextWeekParam}`}
+        href={`/werkzaamheden?week=${nextWeekParam}`}
         className="rounded-lg border border-border bg-white px-3 py-1.5 text-sm hover:bg-black/[.03]"
       >
         Volgende week →

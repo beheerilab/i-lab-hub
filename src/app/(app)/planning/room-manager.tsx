@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useRef, useEffect, useState, useTransition } from "react";
+import { useActionState, useRef, useEffect, useOptimistic, useState, useTransition } from "react";
 import {
   createRoomAction,
   renameRoomAction,
   toggleRoomActiveAction,
   deleteRoomAction,
+  reorderRoomsAction,
   type RoomActionState,
 } from "./actions";
 import { Card } from "@/components/ui/card";
@@ -16,7 +17,21 @@ type Room = { id: string; naam: string; volgorde: number; actief: boolean };
 
 const initialState: RoomActionState = {};
 
-function RoomRow({ room }: { room: Room }) {
+function RoomRow({
+  room,
+  ontgrendeld,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  isDragTarget,
+}: {
+  room: Room;
+  ontgrendeld: boolean;
+  onDragStart: () => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: () => void;
+  isDragTarget: boolean;
+}) {
   const [isPending, startTransition] = useTransition();
   const [naam, setNaam] = useState(room.naam);
   const [editing, setEditing] = useState(false);
@@ -31,7 +46,16 @@ function RoomRow({ room }: { room: Room }) {
   }
 
   return (
-    <li className="flex items-center gap-2 border-b border-border py-2 last:border-none">
+    <li
+      draggable={ontgrendeld}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      className={`flex items-center gap-2 border-b border-border py-2 last:border-none ${
+        ontgrendeld ? "cursor-grab active:cursor-grabbing" : ""
+      } ${isDragTarget ? "bg-accent/5" : ""}`}
+    >
+      {ontgrendeld && <span className="shrink-0 text-muted">⠿</span>}
       {editing ? (
         <Input
           autoFocus
@@ -44,41 +68,53 @@ function RoomRow({ room }: { room: Room }) {
       ) : (
         <button
           type="button"
-          onClick={() => setEditing(true)}
+          onClick={() => !ontgrendeld && setEditing(true)}
           className={`flex-1 truncate text-left ${!room.actief ? "text-muted line-through" : ""}`}
         >
           {room.naam}
         </button>
       )}
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={() =>
-          startTransition(() => toggleRoomActiveAction(room.id, !room.actief))
-        }
-        className="shrink-0 rounded-lg px-2 py-1 text-xs text-muted hover:bg-black/[.04] disabled:opacity-50"
-      >
-        {room.actief ? "Verberg" : "Activeer"}
-      </button>
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={() => {
-          if (confirm(`Ruimte "${room.naam}" verwijderen? Boekingen erin gaan mee weg.`)) {
-            startTransition(() => deleteRoomAction(room.id));
-          }
-        }}
-        className="shrink-0 rounded-lg px-2 py-1 text-xs text-danger hover:bg-danger/10 disabled:opacity-50"
-      >
-        Verwijderen
-      </button>
+      {!ontgrendeld && (
+        <>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() =>
+              startTransition(() => toggleRoomActiveAction(room.id, !room.actief))
+            }
+            className="shrink-0 rounded-lg px-2 py-1 text-xs text-muted hover:bg-black/[.04] disabled:opacity-50"
+          >
+            {room.actief ? "Verberg" : "Activeer"}
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => {
+              if (confirm(`Ruimte "${room.naam}" verwijderen? Boekingen erin gaan mee weg.`)) {
+                startTransition(() => deleteRoomAction(room.id));
+              }
+            }}
+            className="shrink-0 rounded-lg px-2 py-1 text-xs text-danger hover:bg-danger/10 disabled:opacity-50"
+          >
+            Verwijderen
+          </button>
+        </>
+      )}
     </li>
   );
 }
 
 export function RoomManager({ rooms }: { rooms: Room[] }) {
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useActionState(createRoomAction, initialState);
+  const [ontgrendeld, setOntgrendeld] = useState(false);
+  const [orderedRooms, setOrderedRooms] = useOptimistic(
+    rooms,
+    (_huidig, nieuweVolgorde: Room[]) => nieuweVolgorde,
+  );
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [, startReorderTransition] = useTransition();
+  const state0: RoomActionState = initialState;
+  const [state, formAction] = useActionState(createRoomAction, state0);
   const formRef = useRef<HTMLFormElement>(null);
   const wasSubmitting = useRef(false);
 
@@ -86,6 +122,21 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
     if (wasSubmitting.current && !state.error) formRef.current?.reset();
     wasSubmitting.current = false;
   }, [state]);
+
+  function handleDrop(targetId: string) {
+    if (!dragId || dragId === targetId) return;
+    const van = orderedRooms.findIndex((r) => r.id === dragId);
+    const naar = orderedRooms.findIndex((r) => r.id === targetId);
+    if (van === -1 || naar === -1) return;
+    const nieuw = [...orderedRooms];
+    const [verplaatst] = nieuw.splice(van, 1);
+    nieuw.splice(naar, 0, verplaatst);
+    setDragId(null);
+    startReorderTransition(async () => {
+      setOrderedRooms(nieuw);
+      await reorderRoomsAction(nieuw.map((r) => r.id));
+    });
+  }
 
   return (
     <Card className="mb-6">
@@ -110,9 +161,35 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
             <SubmitButton variant="secondary">Toevoegen</SubmitButton>
           </form>
           {state.error && <p className="mb-3 text-sm text-danger">{state.error}</p>}
+
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm text-muted">
+              {ontgrendeld ? "Sleep om de volgorde te wijzigen." : "Volgorde staat vast."}
+            </p>
+            <button
+              type="button"
+              onClick={() => setOntgrendeld((o) => !o)}
+              className={`rounded-lg border px-2.5 py-1 text-xs font-medium ${
+                ontgrendeld
+                  ? "border-accent bg-accent/10 text-accent-hover"
+                  : "border-border text-muted hover:bg-black/[.04]"
+              }`}
+            >
+              {ontgrendeld ? "🔓 Volgorde vergrendelen" : "🔒 Volgorde ontgrendelen"}
+            </button>
+          </div>
+
           <ul>
-            {rooms.map((room) => (
-              <RoomRow key={room.id} room={room} />
+            {orderedRooms.map((room) => (
+              <RoomRow
+                key={room.id}
+                room={room}
+                ontgrendeld={ontgrendeld}
+                isDragTarget={ontgrendeld && dragId !== null && dragId !== room.id}
+                onDragStart={() => setDragId(room.id)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => handleDrop(room.id)}
+              />
             ))}
           </ul>
         </div>

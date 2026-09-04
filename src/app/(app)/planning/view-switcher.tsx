@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { addDays, addMonths, format } from "date-fns";
 import { nl } from "date-fns/locale";
+import { huidigeDatumAmsterdam } from "@/lib/tijd";
 
 type Modus = "dag" | "week" | "maand";
 
 export function ViewSwitcher({ modus, datum }: { modus: Modus; datum: Date }) {
-  const vandaag = format(new Date(), "yyyy-MM-dd");
+  const vandaag = format(huidigeDatumAmsterdam(), "yyyy-MM-dd");
 
   let vorige: Date;
   let volgende: Date;

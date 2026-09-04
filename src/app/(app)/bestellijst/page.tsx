@@ -1,7 +1,6 @@
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { format } from "date-fns";
-import { nl } from "date-fns/locale";
+import { formatAmsterdam } from "@/lib/tijd";
 import { Card } from "@/components/ui/card";
 import { BestellijstTabs } from "./tabs";
 import { AddItemForm } from "./add-item-form";
@@ -50,7 +49,7 @@ export default async function BestellijstPage() {
                 notitie={item.notitie}
                 link={item.link}
                 toegevoegdDoorNaam={item.profiles?.full_name || "onbekend"}
-                datum={format(new Date(item.created_at), "d MMMM yyyy", { locale: nl })}
+                datum={formatAmsterdam(item.created_at, "d MMMM yyyy")}
                 magVerwijderen={profile.role === "admin" || item.toegevoegd_door === userId}
               />
             ))}

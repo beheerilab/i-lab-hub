@@ -4,12 +4,13 @@ import {
   endOfMonth,
   endOfWeek,
   format,
+  isSameDay,
   isSameMonth,
-  isToday,
   startOfMonth,
   startOfWeek,
 } from "date-fns";
 import { nl } from "date-fns/locale";
+import { huidigeDatumAmsterdam } from "@/lib/tijd";
 
 const WEEKDAGEN = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 
@@ -23,6 +24,7 @@ export function MonthView({
   const start = startOfWeek(startOfMonth(maand), { weekStartsOn: 1 });
   const eind = endOfWeek(endOfMonth(maand), { weekStartsOn: 1 });
   const dagen = eachDayOfInterval({ start, end: eind });
+  const vandaag = huidigeDatumAmsterdam();
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-white">
@@ -48,7 +50,7 @@ export function MonthView({
               }`}
             >
               <span
-                className={`text-sm ${isToday(dag) ? "flex h-6 w-6 items-center justify-center rounded-full bg-accent text-white" : inMaand ? "text-foreground" : "text-muted"}`}
+                className={`text-sm ${isSameDay(dag, vandaag) ? "flex h-6 w-6 items-center justify-center rounded-full bg-accent text-white" : inMaand ? "text-foreground" : "text-muted"}`}
               >
                 {format(dag, "d")}
               </span>

@@ -9,6 +9,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
+import { huidigeDatumAmsterdam } from "@/lib/tijd";
 import { ViewSwitcher } from "./view-switcher";
 import { RoomManager } from "./room-manager";
 import { DayView } from "./day-view";
@@ -29,7 +30,7 @@ export default async function PlanningPage({
 
   const modus: Modus =
     modusParam === "week" || modusParam === "maand" ? modusParam : "dag";
-  const datum = datumParam ? parseISO(datumParam) : new Date();
+  const datum = datumParam ? parseISO(datumParam) : huidigeDatumAmsterdam();
 
   const { data: rooms } = await supabase
     .from("labs")

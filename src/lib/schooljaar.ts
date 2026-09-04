@@ -1,6 +1,8 @@
 /** Een schooljaar loopt van 1 augustus t/m 31 juli, genoteerd als "2025-2026". */
 
-export function huidigSchooljaar(referentie: Date = new Date()): string {
+import { huidigeDatumAmsterdam } from "./tijd";
+
+export function huidigSchooljaar(referentie: Date = huidigeDatumAmsterdam()): string {
   const jaar = referentie.getFullYear();
   const maand = referentie.getMonth() + 1; // 1-12
   const startJaar = maand >= 8 ? jaar : jaar - 1;
@@ -16,7 +18,7 @@ export function schooljaarBereik(schooljaar: string): { start: string; eind: str
   };
 }
 
-export function schooljaarOpties(aantal = 5, referentie: Date = new Date()): string[] {
+export function schooljaarOpties(aantal = 5, referentie: Date = huidigeDatumAmsterdam()): string[] {
   const huidig = huidigSchooljaar(referentie);
   const [huidigStartJaar] = huidig.split("-").map(Number);
   return Array.from({ length: aantal }, (_, i) => {

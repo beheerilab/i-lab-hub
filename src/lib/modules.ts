@@ -1,5 +1,17 @@
 export const MODULES = [
   {
+    href: "/planning",
+    icon: "🗓️",
+    title: "Planning",
+    description: "Ruimtegebruik inplannen",
+  },
+  {
+    href: "/werkzaamheden",
+    icon: "✅",
+    title: "Werkzaamheden",
+    description: "Openstaande en afgevinkte werkzaamheden per week",
+  },
+  {
     href: "/bestellijst",
     icon: "📦",
     title: "Bestellijst",
@@ -10,18 +22,6 @@ export const MODULES = [
     icon: "📚",
     title: "Lesmateriaal",
     description: "Lesstof per vak en onderwerp",
-  },
-  {
-    href: "/taken",
-    icon: "✅",
-    title: "Taken",
-    description: "Openstaande en afgevinkte taken per week",
-  },
-  {
-    href: "/planning",
-    icon: "🗓️",
-    title: "Planning",
-    description: "Ruimtegebruik inplannen",
   },
   {
     href: "/jaaroverzicht",
