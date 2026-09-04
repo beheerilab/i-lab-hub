@@ -270,32 +270,41 @@ export interface Database {
           id: string;
           lab_id: string;
           datum: string;
-          start_uur: number;
+          start_tijd: string;
+          eind_tijd: string;
           vak: string;
-          klas_groep: string;
+          school: string;
+          docent: string;
           type_activiteit: ActiviteitType;
           aantal_leerlingen: number;
+          bijzonderheden: string | null;
           created_by: string | null;
           created_at: string;
         };
         Insert: {
           lab_id: string;
           datum: string;
-          start_uur: number;
+          start_tijd: string;
+          eind_tijd: string;
           vak: string;
-          klas_groep: string;
+          school: string;
+          docent: string;
           type_activiteit: ActiviteitType;
           aantal_leerlingen: number;
+          bijzonderheden?: string | null;
           created_by?: string | null;
         };
         Update: {
           lab_id?: string;
           datum?: string;
-          start_uur?: number;
+          start_tijd?: string;
+          eind_tijd?: string;
           vak?: string;
-          klas_groep?: string;
+          school?: string;
+          docent?: string;
           type_activiteit?: ActiviteitType;
           aantal_leerlingen?: number;
+          bijzonderheden?: string | null;
         };
         Relationships: [
           {

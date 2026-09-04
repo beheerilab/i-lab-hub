@@ -55,8 +55,8 @@ export default async function TakenPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold">Taken</h1>
-      <p className="mb-6 text-muted">Openstaande en afgevinkte taken per week.</p>
+      <h1 className="mb-1 text-2xl font-semibold text-white">Taken</h1>
+      <p className="mb-6 text-white/80">Openstaande en afgevinkte taken per week.</p>
 
       {profile.role === "admin" && <TaskForm members={members ?? []} />}
 

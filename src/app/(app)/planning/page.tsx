@@ -1,59 +1,93 @@
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { addDays, format, parseISO, startOfWeek } from "date-fns";
-import { DayTabs } from "./day-tabs";
-import { PlanningWeekNav } from "./week-nav";
-import { PlanningGrid } from "./planning-grid";
+import {
+  addDays,
+  endOfMonth,
+  endOfWeek,
+  format,
+  parseISO,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns";
+import { ViewSwitcher } from "./view-switcher";
+import { RoomManager } from "./room-manager";
+import { DayView } from "./day-view";
+import { WeekView } from "./week-view";
+import { MonthView } from "./month-view";
+import type { Booking } from "./types";
+
+type Modus = "dag" | "week" | "maand";
 
 export default async function PlanningPage({
   searchParams,
 }: {
-  searchParams: Promise<{ week?: string; dag?: string }>;
+  searchParams: Promise<{ modus?: string; datum?: string }>;
 }) {
-  const { week, dag } = await searchParams;
-  await requireProfile();
+  const { modus: modusParam, datum: datumParam } = await searchParams;
+  const { profile } = await requireProfile();
   const supabase = await createClient();
 
-  const referenceDate = week ? parseISO(week) : new Date();
-  const weekStart = startOfWeek(referenceDate, { weekStartsOn: 1 });
-  const weekEnd = addDays(weekStart, 4);
-  const weekDays = Array.from({ length: 5 }, (_, i) => addDays(weekStart, i));
-  const weekDayKeys = weekDays.map((d) => format(d, "yyyy-MM-dd"));
+  const modus: Modus =
+    modusParam === "week" || modusParam === "maand" ? modusParam : "dag";
+  const datum = datumParam ? parseISO(datumParam) : new Date();
 
-  const activeDatum = dag && weekDayKeys.includes(dag) ? dag : weekDayKeys[0];
-
-  const { data: labs } = await supabase
+  const { data: rooms } = await supabase
     .from("labs")
-    .select("id, naam")
-    .eq("actief", true)
+    .select("id, naam, volgorde, actief")
     .order("volgorde");
 
-  const { data: bookings } = await supabase
+  const actieveRooms = (rooms ?? []).filter((r) => r.actief);
+
+  let bereikStart: Date;
+  let bereikEind: Date;
+  if (modus === "dag") {
+    bereikStart = datum;
+    bereikEind = datum;
+  } else if (modus === "week") {
+    bereikStart = startOfWeek(datum, { weekStartsOn: 1 });
+    bereikEind = addDays(bereikStart, 4);
+  } else {
+    bereikStart = startOfWeek(startOfMonth(datum), { weekStartsOn: 1 });
+    bereikEind = endOfWeek(endOfMonth(datum), { weekStartsOn: 1 });
+  }
+
+  const { data: bookingsData } = await supabase
     .from("bookings")
-    .select("id, lab_id, start_uur, vak, klas_groep, type_activiteit, aantal_leerlingen")
-    .eq("datum", activeDatum);
+    .select(
+      "id, lab_id, datum, start_tijd, eind_tijd, vak, school, docent, type_activiteit, aantal_leerlingen, bijzonderheden",
+    )
+    .gte("datum", format(bereikStart, "yyyy-MM-dd"))
+    .lte("datum", format(bereikEind, "yyyy-MM-dd"));
+
+  const bookings: Booking[] = bookingsData ?? [];
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold">Planning</h1>
-      <p className="mb-6 text-muted">Labgebruik inplannen, per week en per lab.</p>
+      <h1 className="mb-1 text-2xl font-semibold text-white">Planning</h1>
+      <p className="mb-6 text-white/80">Ruimtegebruik inplannen — dag, week of maand.</p>
 
-      <PlanningWeekNav
-        weekStart={weekStart}
-        weekEnd={weekEnd}
-        prevWeekParam={format(addDays(weekStart, -7), "yyyy-MM-dd")}
-        nextWeekParam={format(addDays(weekStart, 7), "yyyy-MM-dd")}
-      />
-      <DayTabs
-        weekDays={weekDays}
-        activeDatum={activeDatum}
-        weekParam={format(weekStart, "yyyy-MM-dd")}
-      />
+      {profile.role === "admin" && <RoomManager rooms={rooms ?? []} />}
 
-      {!labs || labs.length === 0 ? (
-        <p className="text-muted">Er zijn nog geen labs ingesteld.</p>
+      <ViewSwitcher modus={modus} datum={datum} />
+
+      {actieveRooms.length === 0 ? (
+        <p className="text-white">Er zijn nog geen actieve ruimtes ingesteld.</p>
+      ) : modus === "dag" ? (
+        <DayView rooms={actieveRooms} datum={format(datum, "yyyy-MM-dd")} bookings={bookings} />
+      ) : modus === "week" ? (
+        <WeekView
+          rooms={actieveRooms}
+          weekDays={Array.from({ length: 5 }, (_, i) => addDays(bereikStart, i))}
+          bookings={bookings}
+        />
       ) : (
-        <PlanningGrid labs={labs} datum={activeDatum} bookings={bookings ?? []} />
+        <MonthView
+          maand={datum}
+          boekingenPerDag={bookings.reduce((map, b) => {
+            map.set(b.datum, (map.get(b.datum) ?? 0) + 1);
+            return map;
+          }, new Map<string, number>())}
+        />
       )}
     </div>
   );

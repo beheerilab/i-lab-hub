@@ -2,27 +2,18 @@
 
 import { useActionState, useEffect, useTransition } from "react";
 import { saveBookingAction, deleteBookingAction, type ActionState } from "./actions";
-import { Field, Input, Select } from "@/components/ui/field";
+import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Button } from "@/components/ui/button";
-import type { Booking } from "./planning-grid";
-
-export type SelectedCell = {
-  labId: string;
-  labNaam: string;
-  uur: number;
-  booking: Booking | null;
-};
+import type { SelectedSlot } from "./types";
 
 const initialState: ActionState = {};
 
 export function BookingModal({
-  cell,
-  datum,
+  slot,
   onClose,
 }: {
-  cell: SelectedCell;
-  datum: string;
+  slot: SelectedSlot;
   onClose: () => void;
 }) {
   const [state, formAction] = useActionState(saveBookingAction, initialState);
@@ -35,10 +26,10 @@ export function BookingModal({
   }, [state]);
 
   function handleDelete() {
-    if (!cell.booking) return;
+    if (!slot.booking) return;
     if (!confirm("Deze boeking verwijderen?")) return;
     startDeleteTransition(async () => {
-      await deleteBookingAction(cell.booking!.id);
+      await deleteBookingAction(slot.booking!.id);
       onClose();
     });
   }
@@ -52,35 +43,53 @@ export function BookingModal({
         className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="mb-1 text-lg font-semibold">
-          {cell.labNaam} · {cell.uur}:00–{cell.uur + 1}:00
-        </h2>
+        <h2 className="mb-1 text-lg font-semibold">{slot.labNaam}</h2>
         <p className="mb-4 text-sm text-muted">
-          {cell.booking ? "Boeking bewerken" : "Nieuwe boeking"}
+          {slot.booking ? "Boeking bewerken" : "Nieuwe boeking"}
         </p>
 
-        <form action={formAction} className="space-y-4">
-          <input type="hidden" name="id" value={cell.booking?.id ?? ""} />
-          <input type="hidden" name="lab_id" value={cell.labId} />
-          <input type="hidden" name="datum" value={datum} />
-          <input type="hidden" name="start_uur" value={cell.uur} />
+        <form action={formAction} className="max-h-[70vh] space-y-4 overflow-y-auto pr-1">
+          <input type="hidden" name="id" value={slot.booking?.id ?? ""} />
+          <input type="hidden" name="lab_id" value={slot.labId} />
+          <input type="hidden" name="datum" value={slot.datum} />
 
-          <Field label="Vak" htmlFor="vak">
-            <Input id="vak" name="vak" defaultValue={cell.booking?.vak} required autoFocus />
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Begintijd" htmlFor="start_tijd">
+              <Input
+                id="start_tijd"
+                name="start_tijd"
+                type="time"
+                step={300}
+                defaultValue={slot.booking?.start_tijd.slice(0, 5) ?? slot.startTijd}
+                required
+              />
+            </Field>
+            <Field label="Eindtijd" htmlFor="eind_tijd">
+              <Input
+                id="eind_tijd"
+                name="eind_tijd"
+                type="time"
+                step={300}
+                defaultValue={slot.booking?.eind_tijd.slice(0, 5) ?? slot.eindTijd}
+                required
+              />
+            </Field>
+          </div>
+
+          <Field label="Vak / les" htmlFor="vak">
+            <Input id="vak" name="vak" defaultValue={slot.booking?.vak} required autoFocus />
           </Field>
-          <Field label="Klas / groep" htmlFor="klas_groep">
-            <Input
-              id="klas_groep"
-              name="klas_groep"
-              defaultValue={cell.booking?.klas_groep}
-              required
-            />
+          <Field label="School" htmlFor="school">
+            <Input id="school" name="school" defaultValue={slot.booking?.school} required />
+          </Field>
+          <Field label="Docent / wie plant het in" htmlFor="docent">
+            <Input id="docent" name="docent" defaultValue={slot.booking?.docent} required />
           </Field>
           <Field label="Type activiteit" htmlFor="type_activiteit">
             <Select
               id="type_activiteit"
               name="type_activiteit"
-              defaultValue={cell.booking?.type_activiteit ?? "les"}
+              defaultValue={slot.booking?.type_activiteit ?? "les"}
               required
             >
               <option value="les">Les</option>
@@ -95,8 +104,16 @@ export function BookingModal({
               name="aantal_leerlingen"
               type="number"
               min={0}
-              defaultValue={cell.booking?.aantal_leerlingen ?? 0}
+              defaultValue={slot.booking?.aantal_leerlingen ?? 0}
               required
+            />
+          </Field>
+          <Field label="Bijzonderheden (optioneel)" htmlFor="bijzonderheden">
+            <Textarea
+              id="bijzonderheden"
+              name="bijzonderheden"
+              rows={2}
+              defaultValue={slot.booking?.bijzonderheden ?? ""}
             />
           </Field>
 
@@ -104,18 +121,13 @@ export function BookingModal({
 
           <div className="flex items-center justify-between gap-2 pt-2">
             <div className="flex gap-2">
-              <SubmitButton>{cell.booking ? "Opslaan" : "Boeken"}</SubmitButton>
+              <SubmitButton>{slot.booking ? "Opslaan" : "Boeken"}</SubmitButton>
               <Button type="button" variant="secondary" onClick={onClose}>
                 Annuleren
               </Button>
             </div>
-            {cell.booking && (
-              <Button
-                type="button"
-                variant="danger"
-                disabled={isDeleting}
-                onClick={handleDelete}
-              >
+            {slot.booking && (
+              <Button type="button" variant="danger" disabled={isDeleting} onClick={handleDelete}>
                 {isDeleting ? "Bezig…" : "Verwijderen"}
               </Button>
             )}

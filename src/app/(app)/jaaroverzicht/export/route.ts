@@ -30,13 +30,13 @@ export async function GET(request: NextRequest) {
 
   const { data: bookingsRaw } = await supabase
     .from("bookings")
-    .select("vak, klas_groep, datum, aantal_leerlingen, labs(naam)")
+    .select("vak, school, datum, aantal_leerlingen, labs(naam)")
     .gte("datum", start)
     .lte("datum", eind);
 
   const boekingen = (bookingsRaw ?? []).map((b) => ({
     vak: b.vak,
-    klas_groep: b.klas_groep,
+    school: b.school,
     datum: b.datum,
     aantal_leerlingen: b.aantal_leerlingen,
     lab_naam: b.labs?.naam || "onbekend",
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
   overzicht.addRow({ label: "Totaal aantal leerlingen", waarde: data.totaalLeerlingen });
 
   voegUitsplitsingToe(workbook, "Per vak", "Vak", data.perVak);
-  voegUitsplitsingToe(workbook, "Per klas", "Klas/groep", data.perKlas);
+  voegUitsplitsingToe(workbook, "Per school", "School", data.perSchool);
   voegUitsplitsingToe(workbook, "Per maand", "Maand", data.perMaand);
   voegUitsplitsingToe(workbook, "Per lab", "Lab", data.perLab);
 

@@ -1,46 +1,8 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { MODULES } from "@/lib/modules";
 import { ClaimAdminBanner } from "./claim-admin-banner";
-
-const MODULES = [
-  {
-    href: "/bestellijst",
-    icon: "📦",
-    title: "Bestellijst",
-    description: "Materiaal aanvragen en bestelhistorie bekijken",
-  },
-  {
-    href: "/lesmateriaal",
-    icon: "📚",
-    title: "Lesmateriaal",
-    description: "Lesstof per vak en onderwerp",
-  },
-  {
-    href: "/taken",
-    icon: "✅",
-    title: "Taken",
-    description: "Openstaande en afgevinkte taken per week",
-  },
-  {
-    href: "/planning",
-    icon: "🗓️",
-    title: "Planning",
-    description: "Labgebruik per week inplannen",
-  },
-  {
-    href: "/jaaroverzicht",
-    icon: "📊",
-    title: "Jaaroverzicht",
-    description: "Lessen en leerlingaantallen, te exporteren",
-  },
-  {
-    href: "/handleidingen",
-    icon: "🛠️",
-    title: "Handleidingen",
-    description: "Instructies voor apparatuur in het lab",
-  },
-];
 
 export default async function DashboardPage() {
   const { profile } = await requireProfile();
@@ -57,10 +19,10 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold">
+      <h1 className="mb-1 text-2xl font-semibold text-white">
         Welkom, {profile.full_name || "collega"}
       </h1>
-      <p className="mb-6 text-muted">Kies een onderdeel om mee aan de slag te gaan.</p>
+      <p className="mb-6 text-white/80">Kies een onderdeel om mee aan de slag te gaan.</p>
 
       {showClaimAdminBanner && <ClaimAdminBanner />}
 

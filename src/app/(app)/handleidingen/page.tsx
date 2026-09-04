@@ -34,8 +34,8 @@ export default async function HandleidingenPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold">Handleidingen</h1>
-      <p className="mb-6 text-muted">Instructies voor apparatuur en machines in het lab.</p>
+      <h1 className="mb-1 text-2xl font-semibold text-white">Handleidingen</h1>
+      <p className="mb-6 text-white/80">Instructies voor apparatuur en machines in het lab.</p>
 
       <ManualForm />
 

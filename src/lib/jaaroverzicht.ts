@@ -3,7 +3,7 @@ import { nl } from "date-fns/locale";
 
 export type JaaroverzichtBoeking = {
   vak: string;
-  klas_groep: string;
+  school: string;
   datum: string;
   aantal_leerlingen: number;
   lab_naam: string;
@@ -15,7 +15,7 @@ export type JaaroverzichtData = {
   totaalLessen: number;
   totaalLeerlingen: number;
   perVak: Uitsplitsing[];
-  perKlas: Uitsplitsing[];
+  perSchool: Uitsplitsing[];
   perMaand: Uitsplitsing[];
   perLab: Uitsplitsing[];
 };
@@ -58,7 +58,7 @@ export function berekenJaaroverzicht(boekingen: JaaroverzichtBoeking[]): Jaarove
     totaalLessen: boekingen.length,
     totaalLeerlingen: boekingen.reduce((som, b) => som + b.aantal_leerlingen, 0),
     perVak: groepeer(boekingen, (b) => b.vak),
-    perKlas: groepeer(boekingen, (b) => b.klas_groep),
+    perSchool: groepeer(boekingen, (b) => b.school),
     perMaand: groepeerPerMaand(boekingen),
     perLab: groepeer(boekingen, (b) => b.lab_naam),
   };

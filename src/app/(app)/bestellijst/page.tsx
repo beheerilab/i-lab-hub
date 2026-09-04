@@ -20,8 +20,8 @@ export default async function BestellijstPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold">Bestellijst</h1>
-      <p className="mb-6 text-muted">
+      <h1 className="mb-1 text-2xl font-semibold text-white">Bestellijst</h1>
+      <p className="mb-6 text-white/80">
         Voeg materiaal toe dat besteld moet worden. De beheerder markeert de lijst
         als besteld zodra de bestelling geplaatst is.
       </p>

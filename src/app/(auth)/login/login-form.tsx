@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Image from "next/image";
 import { loginAction, signupAction, type AuthFormState } from "./actions";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/field";
@@ -18,7 +19,14 @@ export function LoginForm() {
   return (
     <Card>
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-semibold">i-lab Hub</h1>
+        <Image
+          src="/brand/logo-kleur.png"
+          alt="i_lab"
+          width={140}
+          height={55}
+          priority
+          className="mx-auto mb-3 h-11 w-auto"
+        />
         <p className="mt-1 text-sm text-muted">
           {mode === "login" ? "Log in om verder te gaan" : "Maak een account aan"}
         </p>

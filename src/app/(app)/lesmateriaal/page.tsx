@@ -50,8 +50,8 @@ export default async function LesmateriaalPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold">Lesmateriaal</h1>
-      <p className="mb-6 text-muted">Lesstof, gesorteerd per vak en onderwerp.</p>
+      <h1 className="mb-1 text-2xl font-semibold text-white">Lesmateriaal</h1>
+      <p className="mb-6 text-white/80">Lesstof, gesorteerd per vak en onderwerp.</p>
 
       <Card className="mb-6">
         <h2 className="mb-4 text-lg font-semibold">Vakken &amp; onderwerpen</h2>

@@ -21,13 +21,13 @@ export default async function JaaroverzichtPage({
 
   const { data: bookingsRaw } = await supabase
     .from("bookings")
-    .select("vak, klas_groep, datum, aantal_leerlingen, labs(naam)")
+    .select("vak, school, datum, aantal_leerlingen, labs(naam)")
     .gte("datum", start)
     .lte("datum", eind);
 
   const boekingen = (bookingsRaw ?? []).map((b) => ({
     vak: b.vak,
-    klas_groep: b.klas_groep,
+    school: b.school,
     datum: b.datum,
     aantal_leerlingen: b.aantal_leerlingen,
     lab_naam: b.labs?.naam || "onbekend",
@@ -37,8 +37,8 @@ export default async function JaaroverzichtPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold">Jaaroverzicht</h1>
-      <p className="mb-6 text-muted">
+      <h1 className="mb-1 text-2xl font-semibold text-white">Jaaroverzicht</h1>
+      <p className="mb-6 text-white/80">
         Lessen en leerlingaantallen uit de planning, voor verantwoording aan schoolleiding.
       </p>
 
@@ -62,7 +62,7 @@ export default async function JaaroverzichtPage({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <BreakdownCard title="Per vak" data={data.perVak} />
-        <BreakdownCard title="Per klas" data={data.perKlas} />
+        <BreakdownCard title="Per school" data={data.perSchool} />
         <BreakdownCard title="Per maand" data={data.perMaand} />
         <BreakdownCard title="Per lab" data={data.perLab} />
       </div>
