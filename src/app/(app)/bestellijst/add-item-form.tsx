@@ -42,7 +42,7 @@ export function AddItemForm() {
         </div>
         <div className="sm:col-span-2">
           <Field label="Link (optioneel)" htmlFor="link">
-            <Input id="link" name="link" type="url" placeholder="https://…" />
+            <Input id="link" name="link" type="text" placeholder="https://…" />
           </Field>
         </div>
         {state.error && <p className="text-sm text-danger sm:col-span-2">{state.error}</p>}

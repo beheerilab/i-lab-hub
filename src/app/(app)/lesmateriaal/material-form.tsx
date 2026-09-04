@@ -84,7 +84,7 @@ export function MaterialForm({
       </div>
 
       <Field label="Link (bijv. Google Drive)" htmlFor="link">
-        <Input id="link" name="link" type="url" placeholder="https://…" />
+        <Input id="link" name="link" type="text" placeholder="https://…" />
       </Field>
       <Field label="Of upload een bestand" htmlFor="file">
         <input

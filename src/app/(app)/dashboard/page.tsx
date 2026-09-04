@@ -3,9 +3,10 @@ import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { MODULES } from "@/lib/modules";
 import { ClaimAdminBanner } from "./claim-admin-banner";
+import { VandaagWidget } from "./vandaag-widget";
 
 export default async function DashboardPage() {
-  const { profile } = await requireProfile();
+  const { userId, profile } = await requireProfile();
 
   let showClaimAdminBanner = false;
   if (profile.role !== "admin") {
@@ -25,6 +26,8 @@ export default async function DashboardPage() {
       <p className="mb-6 text-white/80">Kies een onderdeel om mee aan de slag te gaan.</p>
 
       {showClaimAdminBanner && <ClaimAdminBanner />}
+
+      <VandaagWidget userId={userId} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {MODULES.map((mod) => (

@@ -5,6 +5,7 @@ import {
   createRoomAction,
   renameRoomAction,
   toggleRoomActiveAction,
+  telToekomstigeBoekingenAction,
   deleteRoomAction,
   reorderRoomsAction,
   type RoomActionState,
@@ -45,6 +46,21 @@ function RoomRow({
     }
   }
 
+  async function toggleActief() {
+    if (room.actief) {
+      const aantal = await telToekomstigeBoekingenAction(room.id);
+      if (
+        aantal > 0 &&
+        !confirm(
+          `Deze ruimte heeft nog ${aantal} toekomstige boeking(en). Ze blijven bestaan maar de ruimte verdwijnt uit de planning. Toch verbergen?`,
+        )
+      ) {
+        return;
+      }
+    }
+    startTransition(() => toggleRoomActiveAction(room.id, !room.actief));
+  }
+
   return (
     <li
       draggable={ontgrendeld}
@@ -79,9 +95,7 @@ function RoomRow({
           <button
             type="button"
             disabled={isPending}
-            onClick={() =>
-              startTransition(() => toggleRoomActiveAction(room.id, !room.actief))
-            }
+            onClick={toggleActief}
             className="shrink-0 rounded-lg px-2 py-1 text-xs text-muted hover:bg-black/[.04] disabled:opacity-50"
           >
             {room.actief ? "Verberg" : "Activeer"}

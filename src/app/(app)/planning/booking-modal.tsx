@@ -38,6 +38,7 @@ export function BookingModal({
   );
   const [labId, setLabId] = useState(slot.labId);
   const [datum, setDatum] = useState(slot.datum);
+  const [herhalen, setHerhalen] = useState(false);
 
   // Een duplicaat draagt slot.booking mee (voor de defaultValues) maar heeft
   // geen id — dat is dan geen bestaande boeking om te bewerken/verwijderen.
@@ -69,7 +70,9 @@ export function BookingModal({
 
   useEffect(() => {
     if (state === initialState) return;
-    if (!state.error) onClose();
+    // Bij een herhalende boeking blijft de modal open zodat de samenvatting
+    // (X ingepland, Y overgeslagen wegens overlap) leesbaar blijft.
+    if (!state.error && !state.summary) onClose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
@@ -253,7 +256,29 @@ export function BookingModal({
             />
           </Field>
 
+          {!isBestaandeBoeking && (
+            <div className="rounded-lg border border-border p-3">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <input
+                  type="checkbox"
+                  checked={herhalen}
+                  onChange={(e) => setHerhalen(e.target.checked)}
+                  className="h-4 w-4 accent-accent"
+                />
+                Herhaal wekelijks
+              </label>
+              {herhalen && (
+                <div className="mt-3">
+                  <Field label="Tot en met" htmlFor="herhaal_tot">
+                    <Input id="herhaal_tot" name="herhaal_tot" type="date" min={datum} required />
+                  </Field>
+                </div>
+              )}
+            </div>
+          )}
+
           {state.error && <p className="text-sm text-danger">{state.error}</p>}
+          {state.summary && <p className="text-sm text-accent-dark">{state.summary}</p>}
 
           <div className="flex items-center justify-between gap-2 pt-2">
             <div className="flex gap-2">

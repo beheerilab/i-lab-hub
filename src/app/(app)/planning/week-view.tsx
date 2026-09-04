@@ -23,7 +23,16 @@ export function WeekView({
 
   return (
     <>
-      <div className="overflow-x-auto rounded-xl border border-border bg-white">
+      <div className="mb-2 flex justify-end print:hidden">
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="rounded-lg border border-white/40 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/15"
+        >
+          🖨️ Printen
+        </button>
+      </div>
+      <div className="print-area overflow-x-auto rounded-xl border border-border bg-white">
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr>
@@ -82,7 +91,7 @@ export function WeekView({
                               booking: null,
                             })
                           }
-                          className="w-full rounded-md border border-dashed border-border py-1 text-xs text-muted hover:border-accent hover:text-accent"
+                          className="w-full rounded-md border border-dashed border-border py-1 text-xs text-muted hover:border-accent hover:text-accent print:hidden"
                         >
                           + Boeken
                         </button>

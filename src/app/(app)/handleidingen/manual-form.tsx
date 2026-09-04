@@ -41,7 +41,7 @@ export function ManualForm() {
         </div>
 
         <Field label="Link naar instructievideo (optioneel)" htmlFor="video_link">
-          <Input id="video_link" name="video_link" type="url" placeholder="https://…" />
+          <Input id="video_link" name="video_link" type="text" placeholder="https://…" />
         </Field>
         <Field label="Of upload een PDF (optioneel)" htmlFor="file">
           <input

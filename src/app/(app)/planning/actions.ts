@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { addDays, format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
+import { huidigeDatumAmsterdam } from "@/lib/tijd";
 import type { ActiviteitType, BoekingCategorie } from "@/lib/supabase/database.types";
 
-export type ActionState = { error?: string };
+export type ActionState = { error?: string; summary?: string };
 
 const GELDIGE_ACTIVITEITEN: ActiviteitType[] = [
   "les",
@@ -33,6 +35,7 @@ export async function saveBookingAction(
   const typeActiviteitAnders = String(formData.get("type_activiteit_anders") ?? "").trim();
   const aantalLeerlingen = Number(formData.get("aantal_leerlingen"));
   const bijzonderheden = String(formData.get("bijzonderheden") ?? "").trim();
+  const herhaalTot = String(formData.get("herhaal_tot") ?? "").trim();
 
   if (!labId || !datum) return { error: "Ongeldige ruimte of datum." };
   if (!startTijd || !eindTijd) return { error: "Vul een begin- en eindtijd in." };
@@ -56,6 +59,9 @@ export async function saveBookingAction(
       error: categorie === "les" ? "Vul een geldig aantal leerlingen in." : "Vul een geldig aantal gasten in.",
     };
   }
+  if (herhaalTot && herhaalTot < datum) {
+    return { error: "De einddatum van de herhaling moet op of na de startdatum liggen." };
+  }
 
   const supabase = await createClient();
   const {
@@ -77,6 +83,31 @@ export async function saveBookingAction(
     aantal_leerlingen: aantalLeerlingen,
     bijzonderheden: bijzonderheden || null,
   };
+
+  if (!id && herhaalTot) {
+    const datums: string[] = [];
+    for (let d = new Date(`${datum}T00:00:00`); format(d, "yyyy-MM-dd") <= herhaalTot; d = addDays(d, 7)) {
+      datums.push(format(d, "yyyy-MM-dd"));
+    }
+
+    let gelukt = 0;
+    const overgeslagen: string[] = [];
+    for (const dt of datums) {
+      const { error } = await supabase
+        .from("bookings")
+        .insert({ ...payload, datum: dt, created_by: user.id });
+      if (error) overgeslagen.push(dt);
+      else gelukt++;
+    }
+
+    revalidatePath("/planning");
+    if (overgeslagen.length === 0) {
+      return { summary: `${gelukt} lessen ingepland, elke week t/m ${herhaalTot}.` };
+    }
+    return {
+      summary: `${gelukt} van ${datums.length} ingepland. Overgeslagen wegens overlap: ${overgeslagen.join(", ")}.`,
+    };
+  }
 
   const { error } = id
     ? await supabase.from("bookings").update(payload).eq("id", id)
@@ -137,6 +168,17 @@ export async function toggleRoomActiveAction(id: string, actief: boolean) {
   const supabase = await createClient();
   await supabase.from("labs").update({ actief }).eq("id", id);
   revalidatePath("/planning");
+}
+
+export async function telToekomstigeBoekingenAction(labId: string): Promise<number> {
+  const supabase = await createClient();
+  const vandaag = format(huidigeDatumAmsterdam(), "yyyy-MM-dd");
+  const { count } = await supabase
+    .from("bookings")
+    .select("id", { count: "exact", head: true })
+    .eq("lab_id", labId)
+    .gte("datum", vandaag);
+  return count ?? 0;
 }
 
 export async function deleteRoomAction(id: string) {
