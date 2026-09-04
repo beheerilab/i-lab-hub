@@ -8,6 +8,7 @@ import {
   addNotitieAction,
   uploadBijlageAction,
   deleteBijlageAction,
+  postponeWeekAction,
   type ActionState,
 } from "./actions";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const initial: ActionState = {};
 export function TaskDetailModal({
   taskId,
   titel,
+  datum,
   datumLabel,
   deadlineLabel,
   toegewezenAanNaam,
@@ -35,6 +37,7 @@ export function TaskDetailModal({
 }: {
   taskId: string;
   titel: string;
+  datum: string;
   datumLabel: string;
   deadlineLabel: string | null;
   toegewezenAanNaam: string;
@@ -46,6 +49,7 @@ export function TaskDetailModal({
   const [beschrijving, setBeschrijving] = useState("");
   const [opslaanBeschrijving, startOpslaanBeschrijving] = useTransition();
   const [leverancierPending, startLeverancierTransition] = useTransition();
+  const [postponePending, startPostponeTransition] = useTransition();
   const [uploadState, uploadAction] = useActionState(uploadBijlageAction, initial);
   const uploadFormRef = useRef<HTMLFormElement>(null);
   const uploadSubmitting = useRef(false);
@@ -124,6 +128,14 @@ export function TaskDetailModal({
             {details && details.gedeeldMetNamen.length > 0 && (
               <p className="text-xs text-muted">Gedeeld met: {details.gedeeldMetNamen.join(", ")}</p>
             )}
+            <button
+              type="button"
+              disabled={postponePending}
+              onClick={() => startPostponeTransition(() => postponeWeekAction(taskId, datum))}
+              className="mt-1.5 rounded-lg border border-border px-2 py-1 text-xs text-muted hover:bg-black/[.04] disabled:opacity-50"
+            >
+              {postponePending ? "Bezig…" : "→ Doorschuiven naar volgende week"}
+            </button>
           </div>
           <button type="button" onClick={onClose} className="text-muted hover:text-foreground">
             ✕

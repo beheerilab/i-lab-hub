@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { deleteOrderItemAction } from "./actions";
 import { MarkOrderedControl } from "./mark-ordered-control";
+import { BestelStatusControl } from "./bestel-status-control";
 
 export function OrderItemRow({
   id,
@@ -15,6 +16,13 @@ export function OrderItemRow({
   magVerwijderen,
   magBestellen,
   contacts,
+  status,
+  leverancierNaam,
+  besteldOp,
+  factuurnaam,
+  binnen,
+  factuurAangevraagd,
+  factuurOpgeslagen,
 }: {
   id: string;
   itemNaam: string;
@@ -26,6 +34,13 @@ export function OrderItemRow({
   magVerwijderen: boolean;
   magBestellen: boolean;
   contacts: { id: string; naam: string }[];
+  status: "actief" | "besteld" | "binnen";
+  leverancierNaam: string;
+  besteldOp: string;
+  factuurnaam: string;
+  binnen: boolean;
+  factuurAangevraagd: boolean;
+  factuurOpgeslagen: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -51,7 +66,19 @@ export function OrderItemRow({
         </p>
       </div>
       <div className="flex shrink-0 items-start gap-2">
-        {magBestellen && <MarkOrderedControl itemId={id} contacts={contacts} />}
+        {magBestellen && status === "actief" && <MarkOrderedControl itemId={id} contacts={contacts} />}
+        {magBestellen && status !== "actief" && (
+          <BestelStatusControl
+            id={id}
+            leverancierNaam={leverancierNaam}
+            besteldOp={besteldOp}
+            factuurnaam={factuurnaam}
+            binnen={binnen}
+            factuurAangevraagd={factuurAangevraagd}
+            factuurOpgeslagen={factuurOpgeslagen}
+            magBeheren={magBestellen}
+          />
+        )}
         {magVerwijderen && (
           <button
             type="button"

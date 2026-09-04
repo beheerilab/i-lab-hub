@@ -87,6 +87,7 @@ export default async function WerkzaamhedenPage({
                 key={task.id}
                 id={task.id}
                 titel={`${task.titel} — ${format(new Date(`${task.datum}T00:00:00`), "d MMM", { locale: nl })}`}
+                datum={task.datum}
                 datumLabel={format(new Date(`${task.datum}T00:00:00`), "d MMMM yyyy", { locale: nl })}
                 beschrijving={task.beschrijving}
                 toegewezenAanNaam={task.profiles?.full_name || "onbekend"}
@@ -127,6 +128,7 @@ export default async function WerkzaamhedenPage({
                       key={task.id}
                       id={task.id}
                       titel={task.titel}
+                      datum={task.datum}
                       datumLabel={format(day, "d MMMM yyyy", { locale: nl })}
                       beschrijving={task.beschrijving}
                       toegewezenAanNaam={task.profiles?.full_name || "onbekend"}

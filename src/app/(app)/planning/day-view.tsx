@@ -142,7 +142,13 @@ export function DayView({
       </div>
 
       {selectedSlot && (
-        <BookingModal slot={selectedSlot} subjects={subjects} onClose={() => setSelectedSlot(null)} />
+        <BookingModal
+          slot={selectedSlot}
+          subjects={subjects}
+          rooms={rooms}
+          onClose={() => setSelectedSlot(null)}
+          onDuplicate={setSelectedSlot}
+        />
       )}
     </>
   );

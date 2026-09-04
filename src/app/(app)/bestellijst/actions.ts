@@ -88,17 +88,27 @@ export async function toggleBinnenAction(itemId: string, binnen: boolean) {
     .from("order_items")
     .update({ status: binnen ? "binnen" : "besteld", binnen_op: binnen ? new Date().toISOString() : null })
     .eq("id", itemId);
+  revalidatePath("/bestellijst");
   revalidatePath("/bestellijst/historie");
 }
 
 export async function setFactuurAangevraagdAction(itemId: string, waarde: boolean) {
   const supabase = await createClient();
   await supabase.from("order_items").update({ factuur_aangevraagd: waarde }).eq("id", itemId);
+  revalidatePath("/bestellijst");
   revalidatePath("/bestellijst/historie");
 }
 
 export async function setFactuurOpgeslagenAction(itemId: string, waarde: boolean) {
   const supabase = await createClient();
   await supabase.from("order_items").update({ factuur_opgeslagen: waarde }).eq("id", itemId);
+  revalidatePath("/bestellijst");
+  revalidatePath("/bestellijst/historie");
+}
+
+export async function archiveOrderItemAction(itemId: string) {
+  const supabase = await createClient();
+  await supabase.from("order_items").update({ gearchiveerd: true }).eq("id", itemId);
+  revalidatePath("/bestellijst");
   revalidatePath("/bestellijst/historie");
 }

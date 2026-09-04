@@ -25,6 +25,8 @@ export type SelectedSlot = {
   startTijd: string;
   eindTijd: string;
   booking: Booking | null;
+  /** Ruimte en datum zijn zichtbare, invulbare velden i.p.v. vastgezet door een klik in het rooster. */
+  vrijeKeuze?: boolean;
 };
 
 export const ACTIVITEIT_LABELS: Record<ActiviteitType, string> = {

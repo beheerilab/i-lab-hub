@@ -21,7 +21,7 @@ export default async function ContactenPage({
   const { userId, profile } = await requireProfile();
   const supabase = await createClient();
 
-  let query = supabase.from("contacts").select("*").order("naam");
+  let query = supabase.from("contacts").select("*, contactpersonen(naam)").order("naam");
   if (soort === "leverancier" || soort === "uitvoerder") {
     query = query.eq("soort", soort);
   }
@@ -30,7 +30,9 @@ export default async function ContactenPage({
   const zoekterm = q.trim().toLowerCase();
   const contacts = (contactsRaw ?? []).filter((c) =>
     zoekterm
-      ? c.naam.toLowerCase().includes(zoekterm) || (c.categorie ?? "").toLowerCase().includes(zoekterm)
+      ? c.naam.toLowerCase().includes(zoekterm) ||
+        (c.categorie ?? "").toLowerCase().includes(zoekterm) ||
+        (c.contactpersonen ?? []).some((p) => p.naam.toLowerCase().includes(zoekterm))
       : true,
   );
 

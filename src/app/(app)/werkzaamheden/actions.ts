@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { addDays, format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { amsterdamNaarUtc, formatAmsterdam } from "@/lib/tijd";
 
@@ -61,6 +62,13 @@ export async function toggleTaskAction(taskId: string) {
 export async function archiveTaskAction(taskId: string) {
   const supabase = await createClient();
   await supabase.from("tasks").update({ gearchiveerd: true }).eq("id", taskId);
+  revalidatePath("/werkzaamheden");
+}
+
+export async function postponeWeekAction(taskId: string, huidigeDatum: string) {
+  const supabase = await createClient();
+  const nieuweDatum = format(addDays(new Date(`${huidigeDatum}T00:00:00`), 7), "yyyy-MM-dd");
+  await supabase.from("tasks").update({ datum: nieuweDatum }).eq("id", taskId);
   revalidatePath("/werkzaamheden");
 }
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ContactSoort } from "@/lib/supabase/database.types";
-import { ContactDetail } from "./contact-detail";
+import { ContactDetailModal } from "./contact-detail-modal";
 
 const SOORT_LABELS: Record<string, string> = {
   leverancier: "Leverancier",
@@ -34,7 +34,7 @@ export function ContactCard({
 
   return (
     <div className="rounded-xl border border-border bg-white p-4">
-      <button type="button" onClick={() => setOpen((o) => !o)} className="w-full text-left">
+      <button type="button" onClick={() => setOpen(true)} className="w-full text-left">
         <div className="mb-1 flex items-start justify-between gap-3">
           <div>
             <h3 className="font-semibold">{naam}</h3>
@@ -49,7 +49,7 @@ export function ContactCard({
               )}
             </div>
           </div>
-          <span className="text-muted">{open ? "▲" : "▼"}</span>
+          <span className="text-muted" title="Meer details">›</span>
         </div>
         {notities && <p className="mb-1 text-sm text-muted">{notities}</p>}
       </button>
@@ -66,7 +66,14 @@ export function ContactCard({
         )}
       </div>
       {open && (
-        <ContactDetail contactId={id} adres={adres} soort={soort} magVerwijderen={magVerwijderen} />
+        <ContactDetailModal
+          contactId={id}
+          naam={naam}
+          soort={soort}
+          adres={adres}
+          magVerwijderen={magVerwijderen}
+          onClose={() => setOpen(false)}
+        />
       )}
     </div>
   );

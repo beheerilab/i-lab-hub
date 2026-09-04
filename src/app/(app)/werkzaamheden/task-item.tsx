@@ -7,6 +7,7 @@ import { TaskDetailModal } from "./task-detail-modal";
 export function TaskItem({
   id,
   titel,
+  datum,
   datumLabel,
   beschrijving,
   toegewezenAanNaam,
@@ -18,6 +19,7 @@ export function TaskItem({
 }: {
   id: string;
   titel: string;
+  datum: string;
   datumLabel: string;
   beschrijving: string | null;
   toegewezenAanNaam: string;
@@ -74,6 +76,7 @@ export function TaskItem({
         <TaskDetailModal
           taskId={id}
           titel={titel}
+          datum={datum}
           datumLabel={datumLabel}
           deadlineLabel={deadlineLabel ?? null}
           toegewezenAanNaam={toegewezenAanNaam}

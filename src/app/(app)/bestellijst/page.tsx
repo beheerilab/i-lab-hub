@@ -12,8 +12,8 @@ export default async function BestellijstPage() {
   const [{ data: items }, { data: contacts }] = await Promise.all([
     supabase
       .from("order_items")
-      .select("*, profiles(full_name)")
-      .eq("status", "actief")
+      .select("*, profiles(full_name), contacts(naam)")
+      .eq("gearchiveerd", false)
       .order("created_at", { ascending: true }),
     supabase.from("contacts").select("id, naam").eq("soort", "leverancier").order("naam"),
   ]);
@@ -46,6 +46,13 @@ export default async function BestellijstPage() {
                 magVerwijderen={profile.role === "admin" || item.toegevoegd_door === userId}
                 magBestellen={profile.role === "admin"}
                 contacts={contacts ?? []}
+                status={item.status}
+                leverancierNaam={item.contacts?.naam || "onbekend"}
+                besteldOp={item.besteld_op ? formatAmsterdam(item.besteld_op, "d MMM yyyy") : "-"}
+                factuurnaam={item.factuurnaam || ""}
+                binnen={item.status === "binnen"}
+                factuurAangevraagd={item.factuur_aangevraagd}
+                factuurOpgeslagen={item.factuur_opgeslagen}
               />
             ))}
           </ul>

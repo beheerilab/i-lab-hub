@@ -76,6 +76,7 @@ export interface Database {
           factuur_aangevraagd: boolean;
           factuur_opgeslagen: boolean;
           factuurnaam: string | null;
+          gearchiveerd: boolean;
           created_at: string;
         };
         Insert: {
@@ -98,6 +99,7 @@ export interface Database {
           factuur_aangevraagd?: boolean;
           factuur_opgeslagen?: boolean;
           factuurnaam?: string | null;
+          gearchiveerd?: boolean;
         };
         Relationships: [
           {

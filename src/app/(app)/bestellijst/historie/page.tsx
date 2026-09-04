@@ -12,7 +12,7 @@ export default async function BestellijstHistoriePage() {
   const { data: items } = await supabase
     .from("order_items")
     .select("*, contacts(naam)")
-    .in("status", ["besteld", "binnen"])
+    .eq("gearchiveerd", true)
     .order("besteld_op", { ascending: false });
 
   return (

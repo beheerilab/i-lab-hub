@@ -12,6 +12,7 @@ import {
 import { huidigeDatumAmsterdam } from "@/lib/tijd";
 import { ViewSwitcher } from "./view-switcher";
 import { RoomManager } from "./room-manager";
+import { QuickAddButton } from "./quick-add-button";
 import { DayView } from "./day-view";
 import { WeekView } from "./week-view";
 import { MonthView } from "./month-view";
@@ -66,10 +67,11 @@ export default async function PlanningPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-white">Planning</h1>
+      <div className="mb-1 flex items-start justify-between gap-3">
+        <h1 className="text-2xl font-semibold text-white">Planning</h1>
+        <QuickAddButton rooms={actieveRooms} subjects={subjects ?? []} datum={format(datum, "yyyy-MM-dd")} />
+      </div>
       <p className="mb-6 text-white/80">Ruimtegebruik inplannen — dag, week of maand.</p>
-
-      {profile.role === "admin" && <RoomManager rooms={rooms ?? []} />}
 
       <ViewSwitcher modus={modus} datum={datum} />
 
@@ -98,6 +100,8 @@ export default async function PlanningPage({
           }, new Map<string, number>())}
         />
       )}
+
+      {profile.role === "admin" && <RoomManager rooms={rooms ?? []} />}
     </div>
   );
 }

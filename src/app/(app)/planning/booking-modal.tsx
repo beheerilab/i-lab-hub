@@ -18,11 +18,15 @@ const initialState: ActionState = {};
 export function BookingModal({
   slot,
   subjects,
+  rooms,
   onClose,
+  onDuplicate,
 }: {
   slot: SelectedSlot;
   subjects: { id: string; naam: string }[];
+  rooms: { id: string; naam: string }[];
   onClose: () => void;
+  onDuplicate?: (slot: SelectedSlot) => void;
 }) {
   const [state, formAction] = useActionState(saveBookingAction, initialState);
   const [isDeleting, startDeleteTransition] = useTransition();
@@ -32,14 +36,36 @@ export function BookingModal({
   const [typeActiviteit, setTypeActiviteit] = useState<ActiviteitType>(
     slot.booking?.type_activiteit ?? "les",
   );
+  const [labId, setLabId] = useState(slot.labId);
+  const [datum, setDatum] = useState(slot.datum);
 
+  // Een duplicaat draagt slot.booking mee (voor de defaultValues) maar heeft
+  // geen id — dat is dan geen bestaande boeking om te bewerken/verwijderen.
+  const isBestaandeBoeking = Boolean(slot.booking?.id);
   const isLes = categorie === "les";
   const typeOpties = isLes ? LES_TYPE_OPTIES : BIJEENKOMST_TYPE_OPTIES;
   const huidigVak = slot.booking?.vak;
+  // Alleen de genummerde vakken (01, 02, ...) horen in het les-dropdown; een
+  // eventueel losse, niet-genummerde vak (bijv. handmatig via Lesmateriaal
+  // aangemaakt) blijft daar wél bruikbaar, maar niet in dit dropdown.
+  const genummerdeSubjects = subjects.filter((s) => /^\d{2}\s/.test(s.naam));
   const vakOpties =
-    huidigVak && !subjects.some((s) => s.naam === huidigVak)
-      ? [{ id: "huidig", naam: huidigVak }, ...subjects]
-      : subjects;
+    huidigVak && !genummerdeSubjects.some((s) => s.naam === huidigVak)
+      ? [{ id: "huidig", naam: huidigVak }, ...genummerdeSubjects]
+      : genummerdeSubjects;
+
+  function handleDuplicate() {
+    if (!slot.booking || !onDuplicate) return;
+    onDuplicate({
+      labId: slot.labId,
+      labNaam: slot.labNaam,
+      datum: slot.datum,
+      startTijd: slot.startTijd,
+      eindTijd: slot.eindTijd,
+      booking: { ...slot.booking, id: "" },
+      vrijeKeuze: true,
+    });
+  }
 
   useEffect(() => {
     if (state === initialState) return;
@@ -48,7 +74,7 @@ export function BookingModal({
   }, [state]);
 
   function handleDelete() {
-    if (!slot.booking) return;
+    if (!isBestaandeBoeking || !slot.booking) return;
     if (!confirm("Deze boeking verwijderen?")) return;
     startDeleteTransition(async () => {
       await deleteBookingAction(slot.booking!.id);
@@ -72,7 +98,7 @@ export function BookingModal({
       >
         <h2 className="mb-1 text-lg font-semibold">{slot.labNaam}</h2>
         <p className="mb-4 text-sm text-muted">
-          {slot.booking ? "Boeking bewerken" : "Nieuwe boeking"}
+          {isBestaandeBoeking ? "Boeking bewerken" : "Nieuwe boeking"}
         </p>
 
         <div className="mb-4 grid grid-cols-2 gap-1 rounded-lg border border-border p-1 text-sm font-medium">
@@ -98,9 +124,42 @@ export function BookingModal({
 
         <form action={formAction} className="max-h-[65vh] space-y-4 overflow-y-auto pr-1">
           <input type="hidden" name="id" value={slot.booking?.id ?? ""} />
-          <input type="hidden" name="lab_id" value={slot.labId} />
-          <input type="hidden" name="datum" value={slot.datum} />
           <input type="hidden" name="categorie" value={categorie} />
+
+          {slot.vrijeKeuze ? (
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Ruimte" htmlFor="lab_id">
+                <Select
+                  id="lab_id"
+                  name="lab_id"
+                  value={labId}
+                  onChange={(e) => setLabId(e.target.value)}
+                  required
+                >
+                  {rooms.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.naam}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Datum" htmlFor="datum">
+                <Input
+                  id="datum"
+                  name="datum"
+                  type="date"
+                  value={datum}
+                  onChange={(e) => setDatum(e.target.value)}
+                  required
+                />
+              </Field>
+            </div>
+          ) : (
+            <>
+              <input type="hidden" name="lab_id" value={slot.labId} />
+              <input type="hidden" name="datum" value={slot.datum} />
+            </>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="Begintijd" htmlFor="start_tijd">
@@ -198,16 +257,23 @@ export function BookingModal({
 
           <div className="flex items-center justify-between gap-2 pt-2">
             <div className="flex gap-2">
-              <SubmitButton>{slot.booking ? "Opslaan" : "Boeken"}</SubmitButton>
+              <SubmitButton>{isBestaandeBoeking ? "Opslaan" : "Boeken"}</SubmitButton>
               <Button type="button" variant="secondary" onClick={onClose}>
                 Annuleren
               </Button>
             </div>
-            {slot.booking && (
-              <Button type="button" variant="danger" disabled={isDeleting} onClick={handleDelete}>
-                {isDeleting ? "Bezig…" : "Verwijderen"}
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {isBestaandeBoeking && onDuplicate && (
+                <Button type="button" variant="secondary" onClick={handleDuplicate}>
+                  Dupliceren
+                </Button>
+              )}
+              {isBestaandeBoeking && (
+                <Button type="button" variant="danger" disabled={isDeleting} onClick={handleDelete}>
+                  {isDeleting ? "Bezig…" : "Verwijderen"}
+                </Button>
+              )}
+            </div>
           </div>
         </form>
       </div>
