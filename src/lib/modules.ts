@@ -41,4 +41,10 @@ export const MODULES = [
     title: "Contacten",
     description: "Leveranciers en wie je waarvoor kunt bellen",
   },
+  {
+    href: "/sleutels",
+    icon: "🔑",
+    title: "Sleuteloverzicht",
+    description: "Wie welke sleutel en tag heeft",
+  },
 ] as const;

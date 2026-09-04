@@ -613,6 +613,51 @@ export interface Database {
           },
         ];
       };
+      sleutels: {
+        Row: {
+          id: string;
+          naam: string;
+          functie: string | null;
+          sleutelnummer: string | null;
+          tagnummer: string | null;
+          telefoon: string | null;
+          email: string | null;
+          adres: string | null;
+          opmerkingen: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          naam: string;
+          functie?: string | null;
+          sleutelnummer?: string | null;
+          tagnummer?: string | null;
+          telefoon?: string | null;
+          email?: string | null;
+          adres?: string | null;
+          opmerkingen?: string | null;
+          created_by?: string | null;
+        };
+        Update: {
+          naam?: string;
+          functie?: string | null;
+          sleutelnummer?: string | null;
+          tagnummer?: string | null;
+          telefoon?: string | null;
+          email?: string | null;
+          adres?: string | null;
+          opmerkingen?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "sleutels_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
