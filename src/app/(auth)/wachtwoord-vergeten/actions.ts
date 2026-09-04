@@ -19,7 +19,7 @@ export async function requestPasswordResetAction(
 
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/confirm?next=/wachtwoord-herstellen`,
+    redirectTo: `${origin}/wachtwoord-herstellen`,
   });
 
   // Altijd hetzelfde succesbericht, ook als het e-mailadres niet bestaat —

@@ -2,29 +2,33 @@
 
 import { useState, useTransition } from "react";
 import { toggleTaskAction, archiveTaskAction } from "./actions";
-import { TaskDetail } from "./task-detail";
+import { TaskDetailModal } from "./task-detail-modal";
 
 export function TaskItem({
   id,
   titel,
+  datumLabel,
   beschrijving,
   toegewezenAanNaam,
   status,
   deadlineLabel,
   magAfvinken,
   magArchiveren,
+  contacts,
 }: {
   id: string;
   titel: string;
+  datumLabel: string;
   beschrijving: string | null;
   toegewezenAanNaam: string;
   status: "open" | "afgevinkt";
   deadlineLabel?: string | null;
   magAfvinken: boolean;
   magArchiveren: boolean;
+  contacts: { id: string; naam: string }[];
 }) {
   const [isPending, startTransition] = useTransition();
-  const [uitgeklapt, setUitgeklapt] = useState(false);
+  const [openDetail, setOpenDetail] = useState(false);
   const afgevinkt = status === "afgevinkt";
 
   return (
@@ -39,7 +43,7 @@ export function TaskItem({
         />
         <button
           type="button"
-          onClick={() => setUitgeklapt((o) => !o)}
+          onClick={() => setOpenDetail(true)}
           className="min-w-0 flex-1 text-left"
         >
           <div className="flex flex-wrap items-center gap-2">
@@ -66,7 +70,17 @@ export function TaskItem({
           </button>
         )}
       </div>
-      {uitgeklapt && <TaskDetail taskId={id} />}
+      {openDetail && (
+        <TaskDetailModal
+          taskId={id}
+          titel={titel}
+          datumLabel={datumLabel}
+          deadlineLabel={deadlineLabel ?? null}
+          toegewezenAanNaam={toegewezenAanNaam}
+          contacts={contacts}
+          onClose={() => setOpenDetail(false)}
+        />
+      )}
     </div>
   );
 }

@@ -15,6 +15,10 @@ export type BoekingCategorie = "les" | "bijeenkomst";
 
 export type OrderItemStatus = "actief" | "besteld" | "binnen";
 
+export type ContactSoort = "leverancier" | "uitvoerder";
+
+export type ContactBijlageType = "visitekaartje" | "contract" | "overig";
+
 export interface Database {
   public: {
     Tables: {
@@ -123,31 +127,103 @@ export interface Database {
         Row: {
           id: string;
           naam: string;
+          soort: ContactSoort;
           categorie: string | null;
           telefoon: string | null;
           email: string | null;
+          adres: string | null;
           notities: string | null;
           created_by: string | null;
           created_at: string;
         };
         Insert: {
           naam: string;
+          soort?: ContactSoort;
           categorie?: string | null;
           telefoon?: string | null;
           email?: string | null;
+          adres?: string | null;
           notities?: string | null;
           created_by?: string | null;
         };
         Update: {
           naam?: string;
+          soort?: ContactSoort;
           categorie?: string | null;
           telefoon?: string | null;
           email?: string | null;
+          adres?: string | null;
           notities?: string | null;
         };
         Relationships: [
           {
             foreignKeyName: "contacts_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contactpersonen: {
+        Row: {
+          id: string;
+          contact_id: string;
+          naam: string;
+          functie: string | null;
+          telefoon: string | null;
+          email: string | null;
+          created_at: string;
+        };
+        Insert: {
+          contact_id: string;
+          naam: string;
+          functie?: string | null;
+          telefoon?: string | null;
+          email?: string | null;
+        };
+        Update: {
+          naam?: string;
+          functie?: string | null;
+          telefoon?: string | null;
+          email?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contactpersonen_contact_id_fkey";
+            columns: ["contact_id"];
+            isOneToOne: false;
+            referencedRelation: "contacts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contact_bijlagen: {
+        Row: {
+          id: string;
+          contact_id: string;
+          file_path: string;
+          type: ContactBijlageType;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          contact_id: string;
+          file_path: string;
+          type?: ContactBijlageType;
+          created_by?: string | null;
+        };
+        Update: Record<string, never>;
+        Relationships: [
+          {
+            foreignKeyName: "contact_bijlagen_contact_id_fkey";
+            columns: ["contact_id"];
+            isOneToOne: false;
+            referencedRelation: "contacts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contact_bijlagen_created_by_fkey";
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
@@ -278,6 +354,7 @@ export interface Database {
           status: TaskStatus;
           afgevinkt_op: string | null;
           deadline_op: string | null;
+          leverancier_id: string | null;
           gearchiveerd: boolean;
           created_by: string | null;
           created_at: string;
@@ -288,6 +365,7 @@ export interface Database {
           datum: string;
           toegewezen_aan?: string | null;
           deadline_op?: string | null;
+          leverancier_id?: string | null;
           created_by?: string | null;
         };
         Update: {
@@ -298,6 +376,7 @@ export interface Database {
           status?: TaskStatus;
           afgevinkt_op?: string | null;
           deadline_op?: string | null;
+          leverancier_id?: string | null;
           gearchiveerd?: boolean;
         };
         Relationships: [
@@ -310,6 +389,44 @@ export interface Database {
           },
           {
             foreignKeyName: "tasks_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tasks_leverancier_id_fkey";
+            columns: ["leverancier_id"];
+            isOneToOne: false;
+            referencedRelation: "contacts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      task_notities: {
+        Row: {
+          id: string;
+          task_id: string;
+          tekst: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          task_id: string;
+          tekst: string;
+          created_by?: string | null;
+        };
+        Update: Record<string, never>;
+        Relationships: [
+          {
+            foreignKeyName: "task_notities_task_id_fkey";
+            columns: ["task_id"];
+            isOneToOne: false;
+            referencedRelation: "tasks";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "task_notities_created_by_fkey";
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "profiles";

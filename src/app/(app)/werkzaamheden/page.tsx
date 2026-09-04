@@ -38,6 +38,8 @@ export default async function WerkzaamhedenPage({
     .select("id, full_name")
     .order("full_name");
 
+  const { data: contacts } = await supabase.from("contacts").select("id, naam").order("naam");
+
   const { data: ownOpenTasks } = await supabase
     .from("tasks")
     .select("*, profiles!tasks_toegewezen_aan_fkey(full_name)")
@@ -85,12 +87,14 @@ export default async function WerkzaamhedenPage({
                 key={task.id}
                 id={task.id}
                 titel={`${task.titel} — ${format(new Date(`${task.datum}T00:00:00`), "d MMM", { locale: nl })}`}
+                datumLabel={format(new Date(`${task.datum}T00:00:00`), "d MMMM yyyy", { locale: nl })}
                 beschrijving={task.beschrijving}
                 toegewezenAanNaam={task.profiles?.full_name || "onbekend"}
                 status={task.status}
                 deadlineLabel={deadlineLabel(task.deadline_op)}
                 magAfvinken={true}
                 magArchiveren={false}
+                contacts={contacts ?? []}
               />
             ))}
           </div>
@@ -123,12 +127,14 @@ export default async function WerkzaamhedenPage({
                       key={task.id}
                       id={task.id}
                       titel={task.titel}
+                      datumLabel={format(day, "d MMMM yyyy", { locale: nl })}
                       beschrijving={task.beschrijving}
                       toegewezenAanNaam={task.profiles?.full_name || "onbekend"}
                       status={task.status}
                       deadlineLabel={deadlineLabel(task.deadline_op)}
                       magAfvinken={profile.role === "admin" || task.toegewezen_aan === userId}
                       magArchiveren={profile.role === "admin" || task.created_by === userId}
+                      contacts={contacts ?? []}
                     />
                   ))
                 )}

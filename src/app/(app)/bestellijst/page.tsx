@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { formatAmsterdam } from "@/lib/tijd";
 import { Card } from "@/components/ui/card";
 import { BestellijstTabs } from "./tabs";
-import { AddItemForm } from "./add-item-form";
 import { OrderItemRow } from "./order-item-row";
 
 export default async function BestellijstPage() {
@@ -16,20 +15,17 @@ export default async function BestellijstPage() {
       .select("*, profiles(full_name)")
       .eq("status", "actief")
       .order("created_at", { ascending: true }),
-    supabase.from("contacts").select("id, naam").order("naam"),
+    supabase.from("contacts").select("id, naam").eq("soort", "leverancier").order("naam"),
   ]);
 
   return (
     <div>
       <h1 className="mb-1 text-2xl font-semibold text-white">Bestellijst</h1>
       <p className="mb-6 text-white/80">
-        Voeg materiaal toe dat besteld moet worden. De beheerder markeert per item wanneer
-        het besteld is.
+        De beheerder markeert per item wanneer het besteld is.
       </p>
 
       <BestellijstTabs active="actief" />
-
-      <AddItemForm />
 
       <Card>
         <h2 className="mb-2 text-lg font-semibold">Actieve lijst</h2>
