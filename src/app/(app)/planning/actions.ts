@@ -2,9 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { ActiviteitType } from "@/lib/supabase/database.types";
+import type { ActiviteitType, BoekingCategorie } from "@/lib/supabase/database.types";
 
 export type ActionState = { error?: string };
+
+const GELDIGE_ACTIVITEITEN: ActiviteitType[] = [
+  "les",
+  "project",
+  "vrij_gebruik",
+  "extern_bezoek",
+  "evenement",
+  "vergadering",
+  "anders",
+];
 
 export async function saveBookingAction(
   _prevState: ActionState,
@@ -15,24 +25,36 @@ export async function saveBookingAction(
   const datum = String(formData.get("datum") ?? "");
   const startTijd = String(formData.get("start_tijd") ?? "");
   const eindTijd = String(formData.get("eind_tijd") ?? "");
+  const categorie = String(formData.get("categorie") ?? "les") as BoekingCategorie;
   const vak = String(formData.get("vak") ?? "").trim();
   const school = String(formData.get("school") ?? "").trim();
   const docent = String(formData.get("docent") ?? "").trim();
   const typeActiviteit = String(formData.get("type_activiteit") ?? "") as ActiviteitType;
+  const typeActiviteitAnders = String(formData.get("type_activiteit_anders") ?? "").trim();
   const aantalLeerlingen = Number(formData.get("aantal_leerlingen"));
   const bijzonderheden = String(formData.get("bijzonderheden") ?? "").trim();
 
   if (!labId || !datum) return { error: "Ongeldige ruimte of datum." };
   if (!startTijd || !eindTijd) return { error: "Vul een begin- en eindtijd in." };
   if (startTijd >= eindTijd) return { error: "Eindtijd moet na begintijd liggen." };
-  if (!vak) return { error: "Vul een vak/les in." };
-  if (!school) return { error: "Vul de school in." };
-  if (!docent) return { error: "Vul de docent of inplanner in." };
-  if (!["les", "project", "vrij_gebruik", "extern_bezoek"].includes(typeActiviteit)) {
+  if (categorie !== "les" && categorie !== "bijeenkomst") {
+    return { error: "Kies een geldige boekingscategorie." };
+  }
+  if (!vak) return { error: categorie === "les" ? "Kies een vak/les." : "Vul een onderwerp in." };
+  if (!school) return { error: categorie === "les" ? "Vul de school in." : "Vul de organisatie in." };
+  if (!docent) {
+    return { error: categorie === "les" ? "Vul de docent in." : "Vul de aanvrager in." };
+  }
+  if (!GELDIGE_ACTIVITEITEN.includes(typeActiviteit)) {
     return { error: "Kies een type activiteit." };
   }
+  if (typeActiviteit === "anders" && !typeActiviteitAnders) {
+    return { error: "Vul in wat voor soort bijeenkomst dit is." };
+  }
   if (!Number.isFinite(aantalLeerlingen) || aantalLeerlingen < 0) {
-    return { error: "Vul een geldig aantal leerlingen in." };
+    return {
+      error: categorie === "les" ? "Vul een geldig aantal leerlingen in." : "Vul een geldig aantal gasten in.",
+    };
   }
 
   const supabase = await createClient();
@@ -46,10 +68,12 @@ export async function saveBookingAction(
     datum,
     start_tijd: startTijd,
     eind_tijd: eindTijd,
+    categorie,
     vak,
     school,
     docent,
     type_activiteit: typeActiviteit,
+    type_activiteit_anders: typeActiviteit === "anders" ? typeActiviteitAnders : null,
     aantal_leerlingen: aantalLeerlingen,
     bijzonderheden: bijzonderheden || null,
   };

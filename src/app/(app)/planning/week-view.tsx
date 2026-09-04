@@ -12,10 +12,12 @@ export function WeekView({
   rooms,
   weekDays,
   bookings,
+  subjects,
 }: {
   rooms: Room[];
   weekDays: Date[];
   bookings: Booking[];
+  subjects: { id: string; naam: string }[];
 }) {
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
 
@@ -94,7 +96,9 @@ export function WeekView({
         </table>
       </div>
 
-      {selectedSlot && <BookingModal slot={selectedSlot} onClose={() => setSelectedSlot(null)} />}
+      {selectedSlot && (
+        <BookingModal slot={selectedSlot} subjects={subjects} onClose={() => setSelectedSlot(null)} />
+      )}
     </>
   );
 }

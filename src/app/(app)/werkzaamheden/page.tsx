@@ -68,9 +68,11 @@ export default async function WerkzaamhedenPage({
       <h1 className="mb-1 text-2xl font-semibold text-white">Werkzaamheden</h1>
       <p className="mb-6 text-white/80">Openstaande en afgevinkte werkzaamheden per week.</p>
 
-      {profile.role === "admin" && (
-        <TaskForm members={members ?? []} standaardDatum={format(vandaag, "yyyy-MM-dd")} />
-      )}
+      <TaskForm
+        members={members ?? []}
+        standaardDatum={format(vandaag, "yyyy-MM-dd")}
+        huidigeGebruikerId={userId}
+      />
 
       <Card className="mb-6">
         <h2 className="mb-3 text-lg font-semibold">Jouw open werkzaamheden</h2>
@@ -126,7 +128,7 @@ export default async function WerkzaamhedenPage({
                       status={task.status}
                       deadlineLabel={deadlineLabel(task.deadline_op)}
                       magAfvinken={profile.role === "admin" || task.toegewezen_aan === userId}
-                      magArchiveren={profile.role === "admin"}
+                      magArchiveren={profile.role === "admin" || task.created_by === userId}
                     />
                   ))
                 )}

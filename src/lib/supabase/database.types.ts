@@ -2,7 +2,18 @@ export type Role = "admin" | "lid";
 
 export type TaskStatus = "open" | "afgevinkt";
 
-export type ActiviteitType = "les" | "project" | "vrij_gebruik" | "extern_bezoek";
+export type ActiviteitType =
+  | "les"
+  | "project"
+  | "vrij_gebruik"
+  | "extern_bezoek"
+  | "evenement"
+  | "vergadering"
+  | "anders";
+
+export type BoekingCategorie = "les" | "bijeenkomst";
+
+export type OrderItemStatus = "actief" | "besteld" | "binnen";
 
 export interface Database {
   public: {
@@ -54,6 +65,13 @@ export interface Database {
           link: string | null;
           toegevoegd_door: string | null;
           order_batch_id: string | null;
+          status: OrderItemStatus;
+          besteld_op: string | null;
+          leverancier_id: string | null;
+          binnen_op: string | null;
+          factuur_aangevraagd: boolean;
+          factuur_opgeslagen: boolean;
+          factuurnaam: string | null;
           created_at: string;
         };
         Insert: {
@@ -69,6 +87,13 @@ export interface Database {
           notitie?: string | null;
           link?: string | null;
           order_batch_id?: string | null;
+          status?: OrderItemStatus;
+          besteld_op?: string | null;
+          leverancier_id?: string | null;
+          binnen_op?: string | null;
+          factuur_aangevraagd?: boolean;
+          factuur_opgeslagen?: boolean;
+          factuurnaam?: string | null;
         };
         Relationships: [
           {
@@ -83,6 +108,49 @@ export interface Database {
             columns: ["order_batch_id"];
             isOneToOne: false;
             referencedRelation: "order_batches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "order_items_leverancier_id_fkey";
+            columns: ["leverancier_id"];
+            isOneToOne: false;
+            referencedRelation: "contacts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contacts: {
+        Row: {
+          id: string;
+          naam: string;
+          categorie: string | null;
+          telefoon: string | null;
+          email: string | null;
+          notities: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          naam: string;
+          categorie?: string | null;
+          telefoon?: string | null;
+          email?: string | null;
+          notities?: string | null;
+          created_by?: string | null;
+        };
+        Update: {
+          naam?: string;
+          categorie?: string | null;
+          telefoon?: string | null;
+          email?: string | null;
+          notities?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contacts_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
@@ -249,6 +317,64 @@ export interface Database {
           },
         ];
       };
+      task_shares: {
+        Row: {
+          task_id: string;
+          profile_id: string;
+        };
+        Insert: {
+          task_id: string;
+          profile_id: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [
+          {
+            foreignKeyName: "task_shares_task_id_fkey";
+            columns: ["task_id"];
+            isOneToOne: false;
+            referencedRelation: "tasks";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "task_shares_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      task_bijlagen: {
+        Row: {
+          id: string;
+          task_id: string;
+          file_path: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          task_id: string;
+          file_path: string;
+          created_by?: string | null;
+        };
+        Update: Record<string, never>;
+        Relationships: [
+          {
+            foreignKeyName: "task_bijlagen_task_id_fkey";
+            columns: ["task_id"];
+            isOneToOne: false;
+            referencedRelation: "tasks";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "task_bijlagen_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       labs: {
         Row: {
           id: string;
@@ -279,6 +405,8 @@ export interface Database {
           school: string;
           docent: string;
           type_activiteit: ActiviteitType;
+          type_activiteit_anders: string | null;
+          categorie: BoekingCategorie;
           aantal_leerlingen: number;
           bijzonderheden: string | null;
           created_by: string | null;
@@ -293,6 +421,8 @@ export interface Database {
           school: string;
           docent: string;
           type_activiteit: ActiviteitType;
+          type_activiteit_anders?: string | null;
+          categorie?: BoekingCategorie;
           aantal_leerlingen: number;
           bijzonderheden?: string | null;
           created_by?: string | null;
@@ -306,6 +436,8 @@ export interface Database {
           school?: string;
           docent?: string;
           type_activiteit?: ActiviteitType;
+          type_activiteit_anders?: string | null;
+          categorie?: BoekingCategorie;
           aantal_leerlingen?: number;
           bijzonderheden?: string | null;
         };
@@ -373,13 +505,17 @@ export interface Database {
         Args: Record<PropertyKey, never>;
         Returns: void;
       };
-      markeer_bestellijst_als_besteld: {
-        Args: Record<PropertyKey, never>;
-        Returns: string;
-      };
       toggle_task: {
         Args: { task_id: string };
         Returns: void;
+      };
+      mag_taak_zien: {
+        Args: { p_task_id: string };
+        Returns: boolean;
+      };
+      is_taak_eigenaar: {
+        Args: { p_task_id: string };
+        Returns: boolean;
       };
     };
   };

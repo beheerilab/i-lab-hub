@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { deleteOrderItemAction } from "./actions";
+import { MarkOrderedControl } from "./mark-ordered-control";
 
 export function OrderItemRow({
   id,
@@ -12,6 +13,8 @@ export function OrderItemRow({
   toegevoegdDoorNaam,
   datum,
   magVerwijderen,
+  magBestellen,
+  contacts,
 }: {
   id: string;
   itemNaam: string;
@@ -21,6 +24,8 @@ export function OrderItemRow({
   toegevoegdDoorNaam: string;
   datum: string;
   magVerwijderen: boolean;
+  magBestellen: boolean;
+  contacts: { id: string; naam: string }[];
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -45,16 +50,19 @@ export function OrderItemRow({
           Toegevoegd door {toegevoegdDoorNaam} op {datum}
         </p>
       </div>
-      {magVerwijderen && (
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => startTransition(() => deleteOrderItemAction(id))}
-          className="shrink-0 rounded-lg px-2.5 py-1.5 text-sm text-danger hover:bg-danger/10 disabled:opacity-50"
-        >
-          Verwijderen
-        </button>
-      )}
+      <div className="flex shrink-0 items-start gap-2">
+        {magBestellen && <MarkOrderedControl itemId={id} contacts={contacts} />}
+        {magVerwijderen && (
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => startTransition(() => deleteOrderItemAction(id))}
+            className="shrink-0 rounded-lg px-2.5 py-1.5 text-sm text-danger hover:bg-danger/10 disabled:opacity-50"
+          >
+            Verwijderen
+          </button>
+        )}
+      </div>
     </li>
   );
 }

@@ -52,6 +52,13 @@ export function UserMenu({
           >
             Wachtwoord wijzigen
           </Link>
+          <Link
+            href="/lesmateriaal"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg px-2 py-2 text-sm hover:bg-black/[.04]"
+          >
+            Vakken beheren
+          </Link>
           {isAdmin && (
             <Link
               href="/teamleden"

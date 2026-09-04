@@ -37,6 +37,8 @@ export default async function PlanningPage({
     .select("id, naam, volgorde, actief")
     .order("volgorde");
 
+  const { data: subjects } = await supabase.from("subjects").select("id, naam").order("naam");
+
   const actieveRooms = (rooms ?? []).filter((r) => r.actief);
 
   let bereikStart: Date;
@@ -55,7 +57,7 @@ export default async function PlanningPage({
   const { data: bookingsData } = await supabase
     .from("bookings")
     .select(
-      "id, lab_id, datum, start_tijd, eind_tijd, vak, school, docent, type_activiteit, aantal_leerlingen, bijzonderheden",
+      "id, lab_id, datum, start_tijd, eind_tijd, vak, school, docent, type_activiteit, type_activiteit_anders, categorie, aantal_leerlingen, bijzonderheden",
     )
     .gte("datum", format(bereikStart, "yyyy-MM-dd"))
     .lte("datum", format(bereikEind, "yyyy-MM-dd"));
@@ -74,12 +76,18 @@ export default async function PlanningPage({
       {actieveRooms.length === 0 ? (
         <p className="text-white">Er zijn nog geen actieve ruimtes ingesteld.</p>
       ) : modus === "dag" ? (
-        <DayView rooms={actieveRooms} datum={format(datum, "yyyy-MM-dd")} bookings={bookings} />
+        <DayView
+          rooms={actieveRooms}
+          datum={format(datum, "yyyy-MM-dd")}
+          bookings={bookings}
+          subjects={subjects ?? []}
+        />
       ) : modus === "week" ? (
         <WeekView
           rooms={actieveRooms}
           weekDays={Array.from({ length: 5 }, (_, i) => addDays(bereikStart, i))}
           bookings={bookings}
+          subjects={subjects ?? []}
         />
       ) : (
         <MonthView

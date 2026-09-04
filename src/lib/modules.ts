@@ -35,4 +35,10 @@ export const MODULES = [
     title: "Handleidingen",
     description: "Instructies voor apparatuur in het lab",
   },
+  {
+    href: "/contacten",
+    icon: "📇",
+    title: "Contacten",
+    description: "Leveranciers en wie je waarvoor kunt bellen",
+  },
 ] as const;

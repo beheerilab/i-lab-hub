@@ -29,7 +29,17 @@ function rondAf(minuten: number, stap = 15) {
   return Math.round(minuten / stap) * stap;
 }
 
-export function DayView({ rooms, datum, bookings }: { rooms: Room[]; datum: string; bookings: Booking[] }) {
+export function DayView({
+  rooms,
+  datum,
+  bookings,
+  subjects,
+}: {
+  rooms: Room[];
+  datum: string;
+  bookings: Booking[];
+  subjects: { id: string; naam: string }[];
+}) {
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const trackRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -131,7 +141,9 @@ export function DayView({ rooms, datum, bookings }: { rooms: Room[]; datum: stri
         </div>
       </div>
 
-      {selectedSlot && <BookingModal slot={selectedSlot} onClose={() => setSelectedSlot(null)} />}
+      {selectedSlot && (
+        <BookingModal slot={selectedSlot} subjects={subjects} onClose={() => setSelectedSlot(null)} />
+      )}
     </>
   );
 }

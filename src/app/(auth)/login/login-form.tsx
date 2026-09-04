@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { loginAction, signupAction, type AuthFormState } from "./actions";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/field";
@@ -64,6 +65,11 @@ export function LoginForm() {
           <SubmitButton size="lg" className="w-full">
             Inloggen
           </SubmitButton>
+          <p className="text-center text-sm">
+            <Link href="/wachtwoord-vergeten" className="text-accent hover:underline">
+              Wachtwoord vergeten?
+            </Link>
+          </p>
         </form>
       ) : (
         <form action={signupFormAction} className="space-y-4">
