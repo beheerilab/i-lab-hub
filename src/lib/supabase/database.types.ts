@@ -512,18 +512,21 @@ export interface Database {
           volgorde: number;
           actief: boolean;
           docent_boekbaar: boolean;
+          leerlingen_toegestaan: boolean;
         };
         Insert: {
           naam: string;
           volgorde?: number;
           actief?: boolean;
           docent_boekbaar?: boolean;
+          leerlingen_toegestaan?: boolean;
         };
         Update: {
           naam?: string;
           volgorde?: number;
           actief?: boolean;
           docent_boekbaar?: boolean;
+          leerlingen_toegestaan?: boolean;
         };
         Relationships: [];
       };

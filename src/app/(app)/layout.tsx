@@ -4,12 +4,17 @@ import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { TopNav } from "./top-nav";
 import { UserMenu } from "./user-menu";
+import { PreviewBanner } from "./preview-banner";
+import type { Role } from "@/lib/supabase/database.types";
+
+const ROL_LABELS: Record<Role, string> = { admin: "Beheerder", lid: "Lid", docent: "Docent" };
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const { profile, email } = await requireProfile();
+  const { profile, email, echteRol } = await requireProfile();
 
   return (
     <div className="flex min-h-screen flex-col">
+      {profile.role !== echteRol && <PreviewBanner rol={profile.role} />}
       <header className="border-b border-white/20">
         <div className="mx-auto max-w-5xl px-4 py-3 sm:px-6">
           <div className="flex items-center justify-between gap-3">
@@ -25,8 +30,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             </Link>
             <UserMenu
               naam={profile.full_name || email || "collega"}
-              rol={profile.role === "admin" ? "Beheerder" : "Lid"}
+              rol={ROL_LABELS[profile.role]}
               isAdmin={profile.role === "admin"}
+              echteRol={echteRol}
+              actieveRol={profile.role}
             />
           </div>
           <div className="-mx-4 mt-2 px-4 sm:-mx-6 sm:px-6">

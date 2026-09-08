@@ -37,7 +37,7 @@ export default async function PlanningPage({
 
   const { data: rooms } = await supabase
     .from("labs")
-    .select("id, naam, volgorde, actief, docent_boekbaar")
+    .select("id, naam, volgorde, actief, docent_boekbaar, leerlingen_toegestaan")
     .order("volgorde");
 
   const { data: subjects } = await supabase.from("subjects").select("id, naam").order("naam");

@@ -6,6 +6,7 @@ import {
   renameRoomAction,
   toggleRoomActiveAction,
   toggleDocentBoekbaarAction,
+  toggleLeerlingenToegestaanAction,
   telToekomstigeBoekingenAction,
   deleteRoomAction,
   reorderRoomsAction,
@@ -21,6 +22,7 @@ type Room = {
   volgorde: number;
   actief: boolean;
   docent_boekbaar: boolean;
+  leerlingen_toegestaan: boolean;
 };
 
 const initialState: RoomActionState = {};
@@ -110,6 +112,18 @@ function RoomRow({
               className="h-3.5 w-3.5 accent-accent disabled:opacity-40"
             />
             Docent-boekbaar
+          </label>
+          <label className="flex shrink-0 items-center gap-1.5 text-xs text-muted">
+            <input
+              type="checkbox"
+              checked={room.leerlingen_toegestaan}
+              disabled={isPending}
+              onChange={(e) =>
+                startTransition(() => toggleLeerlingenToegestaanAction(room.id, e.target.checked))
+              }
+              className="h-3.5 w-3.5 accent-accent disabled:opacity-40"
+            />
+            Geschikt voor lessen
           </label>
           <button
             type="button"

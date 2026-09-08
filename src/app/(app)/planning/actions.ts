@@ -105,10 +105,14 @@ export async function saveBookingAction(
 
   const { data: lab } = await supabase
     .from("labs")
-    .select("naam, docent_boekbaar")
+    .select("naam, docent_boekbaar, leerlingen_toegestaan")
     .eq("id", labId)
     .single();
   const labNaam = lab?.naam ?? "";
+
+  if (categorie === "les" && lab && !lab.leerlingen_toegestaan) {
+    return { error: "Deze ruimte is bedoeld voor volwassenen — hier kunnen geen lessen worden ingepland." };
+  }
 
   const { data: actorProfiel } = await supabase
     .from("profiles")
@@ -288,6 +292,12 @@ export async function toggleRoomActiveAction(id: string, actief: boolean) {
 export async function toggleDocentBoekbaarAction(id: string, docentBoekbaar: boolean) {
   const supabase = await createClient();
   await supabase.from("labs").update({ docent_boekbaar: docentBoekbaar }).eq("id", id);
+  revalidatePath("/planning");
+}
+
+export async function toggleLeerlingenToegestaanAction(id: string, toegestaan: boolean) {
+  const supabase = await createClient();
+  await supabase.from("labs").update({ leerlingen_toegestaan: toegestaan }).eq("id", id);
   revalidatePath("/planning");
 }
 

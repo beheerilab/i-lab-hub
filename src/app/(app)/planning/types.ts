@@ -6,6 +6,8 @@ export type Room = {
   volgorde: number;
   actief: boolean;
   docent_boekbaar: boolean;
+  /** false voor ruimtes bedoeld voor volwassenen (overleg) — daar mag geen "les" ingepland worden. */
+  leerlingen_toegestaan: boolean;
 };
 
 /**

@@ -9,6 +9,7 @@ import {
   ACTIVITEIT_LABELS,
   BIJEENKOMST_TYPE_OPTIES,
   LES_TYPE_OPTIES,
+  type Room,
   type SelectedSlot,
 } from "./types";
 import type { ActiviteitType, BoekingCategorie } from "@/lib/supabase/database.types";
@@ -25,7 +26,7 @@ export function BookingModal({
 }: {
   slot: SelectedSlot;
   subjects: { id: string; naam: string }[];
-  rooms: { id: string; naam: string }[];
+  rooms: Room[];
   onClose: () => void;
   onDuplicate?: (slot: SelectedSlot) => void;
   /** Gezet wanneer de ingelogde gebruiker een docent is: het docent-veld wordt dan vergrendeld op hun eigen naam. */
@@ -33,15 +34,19 @@ export function BookingModal({
 }) {
   const [state, formAction] = useActionState(saveBookingAction, initialState);
   const [isDeleting, startDeleteTransition] = useTransition();
-  const [categorie, setCategorie] = useState<BoekingCategorie>(
-    slot.booking?.categorie ?? "les",
-  );
-  const [typeActiviteit, setTypeActiviteit] = useState<ActiviteitType>(
-    slot.booking?.type_activiteit ?? "les",
-  );
   const [labId, setLabId] = useState(slot.labId);
   const [datum, setDatum] = useState(slot.datum);
   const [herhalen, setHerhalen] = useState(false);
+
+  const huidigeRoom = rooms.find((r) => r.id === labId);
+  const roomToegestaanVoorLes = huidigeRoom?.leerlingen_toegestaan ?? true;
+
+  const [categorie, setCategorie] = useState<BoekingCategorie>(
+    slot.booking?.categorie ?? (roomToegestaanVoorLes ? "les" : "bijeenkomst"),
+  );
+  const [typeActiviteit, setTypeActiviteit] = useState<ActiviteitType>(
+    slot.booking?.type_activiteit ?? (roomToegestaanVoorLes ? "les" : "evenement"),
+  );
 
   // Een duplicaat draagt slot.booking mee (voor de defaultValues) maar heeft
   // geen id — dat is dan geen bestaande boeking om te bewerken/verwijderen.
@@ -107,13 +112,19 @@ export function BookingModal({
           {isBestaandeBoeking ? "Boeking bewerken" : "Nieuwe boeking"}
         </p>
 
-        <div className="mb-4 grid grid-cols-2 gap-1 rounded-lg border border-border p-1 text-sm font-medium">
+        <div className="mb-1 grid grid-cols-2 gap-1 rounded-lg border border-border p-1 text-sm font-medium">
           <button
             type="button"
+            disabled={!roomToegestaanVoorLes}
             onClick={() => wijzigCategorie("les")}
+            title={
+              !roomToegestaanVoorLes
+                ? "Deze ruimte is bedoeld voor volwassenen — niet beschikbaar voor lessen."
+                : undefined
+            }
             className={`rounded-md py-2 transition-colors ${
               isLes ? "bg-accent text-white" : "text-muted"
-            }`}
+            } ${!roomToegestaanVoorLes ? "cursor-not-allowed opacity-40" : ""}`}
           >
             Les
           </button>
@@ -127,8 +138,13 @@ export function BookingModal({
             Vergadering/evenement
           </button>
         </div>
+        {!roomToegestaanVoorLes && (
+          <p className="mb-3 text-xs text-muted">
+            ℹ️ Deze ruimte is bedoeld voor volwassenen — hier kunnen geen lessen worden ingepland.
+          </p>
+        )}
 
-        <form action={formAction} className="max-h-[65vh] space-y-4 overflow-y-auto pr-1">
+        <form action={formAction} className="mt-3 max-h-[65vh] space-y-4 overflow-y-auto pr-1">
           <input type="hidden" name="id" value={slot.booking?.id ?? ""} />
           <input type="hidden" name="categorie" value={categorie} />
 
@@ -143,8 +159,13 @@ export function BookingModal({
                   required
                 >
                   {rooms.map((r) => (
-                    <option key={r.id} value={r.id}>
+                    <option
+                      key={r.id}
+                      value={r.id}
+                      disabled={isLes && !r.leerlingen_toegestaan}
+                    >
                       {r.naam}
+                      {isLes && !r.leerlingen_toegestaan ? " (niet voor lessen)" : ""}
                     </option>
                   ))}
                 </Select>
