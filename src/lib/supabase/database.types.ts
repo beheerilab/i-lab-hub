@@ -1,4 +1,4 @@
-export type Role = "admin" | "lid";
+export type Role = "admin" | "lid" | "docent";
 
 export type TaskStatus = "open" | "afgevinkt";
 
@@ -27,16 +27,19 @@ export interface Database {
           id: string;
           full_name: string | null;
           role: Role;
+          email: string | null;
           created_at: string;
         };
         Insert: {
           id: string;
           full_name?: string | null;
           role?: Role;
+          email?: string | null;
         };
         Update: {
           full_name?: string | null;
           role?: Role;
+          email?: string | null;
         };
         Relationships: [];
       };
@@ -500,16 +503,19 @@ export interface Database {
           naam: string;
           volgorde: number;
           actief: boolean;
+          docent_boekbaar: boolean;
         };
         Insert: {
           naam: string;
           volgorde?: number;
           actief?: boolean;
+          docent_boekbaar?: boolean;
         };
         Update: {
           naam?: string;
           volgorde?: number;
           actief?: boolean;
+          docent_boekbaar?: boolean;
         };
         Relationships: [];
       };
@@ -659,11 +665,39 @@ export interface Database {
         ];
       };
     };
-    Views: Record<string, never>;
+    Views: {
+      bookings_docent_view: {
+        Row: {
+          id: string;
+          lab_id: string;
+          datum: string;
+          start_tijd: string;
+          eind_tijd: string;
+          categorie: BoekingCategorie;
+          type_activiteit: ActiviteitType;
+          vak: string | null;
+          school: string | null;
+          docent: string | null;
+          type_activiteit_anders: string | null;
+          aantal_leerlingen: number | null;
+          bijzonderheden: string | null;
+          created_by: string | null;
+        };
+        Relationships: [];
+      };
+    };
     Functions: {
       is_admin: {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
+      };
+      is_crew: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
+      crew_emails: {
+        Args: Record<PropertyKey, never>;
+        Returns: string[];
       };
       claim_admin: {
         Args: Record<PropertyKey, never>;

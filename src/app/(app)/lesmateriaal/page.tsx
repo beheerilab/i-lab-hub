@@ -53,15 +53,19 @@ export default async function LesmateriaalPage({
       <h1 className="mb-1 text-2xl font-semibold text-white">Lesmateriaal</h1>
       <p className="mb-6 text-white/80">Lesstof, gesorteerd per vak en onderwerp.</p>
 
-      <Card className="mb-6">
-        <h2 className="mb-4 text-lg font-semibold">Vakken &amp; onderwerpen</h2>
-        <SubjectTopicForm subjects={subjects ?? []} />
-      </Card>
+      {profile.role !== "docent" && (
+        <>
+          <Card className="mb-6">
+            <h2 className="mb-4 text-lg font-semibold">Vakken &amp; onderwerpen</h2>
+            <SubjectTopicForm subjects={subjects ?? []} />
+          </Card>
 
-      <Card className="mb-6">
-        <h2 className="mb-4 text-lg font-semibold">Materiaal toevoegen</h2>
-        <MaterialForm subjects={subjects ?? []} topics={topics ?? []} />
-      </Card>
+          <Card className="mb-6">
+            <h2 className="mb-4 text-lg font-semibold">Materiaal toevoegen</h2>
+            <MaterialForm subjects={subjects ?? []} topics={topics ?? []} />
+          </Card>
+        </>
+      )}
 
       <MaterialFilters
         subjects={subjects ?? []}

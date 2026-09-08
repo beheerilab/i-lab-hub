@@ -37,7 +37,7 @@ export default async function HandleidingenPage({
       <h1 className="mb-1 text-2xl font-semibold text-white">Handleidingen</h1>
       <p className="mb-6 text-white/80">Instructies voor apparatuur en machines in het lab.</p>
 
-      <ManualForm />
+      {profile.role !== "docent" && <ManualForm />}
 
       <form method="GET" className="mb-6 flex max-w-sm gap-2">
         <Input

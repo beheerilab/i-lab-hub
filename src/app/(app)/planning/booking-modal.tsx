@@ -21,12 +21,15 @@ export function BookingModal({
   rooms,
   onClose,
   onDuplicate,
+  vergrendelDocentNaam,
 }: {
   slot: SelectedSlot;
   subjects: { id: string; naam: string }[];
   rooms: { id: string; naam: string }[];
   onClose: () => void;
   onDuplicate?: (slot: SelectedSlot) => void;
+  /** Gezet wanneer de ingelogde gebruiker een docent is: het docent-veld wordt dan vergrendeld op hun eigen naam. */
+  vergrendelDocentNaam?: string;
 }) {
   const [state, formAction] = useActionState(saveBookingAction, initialState);
   const [isDeleting, startDeleteTransition] = useTransition();
@@ -202,15 +205,22 @@ export function BookingModal({
             </Field>
           ) : (
             <Field label="Onderwerp / naam bijeenkomst" htmlFor="vak">
-              <Input id="vak" name="vak" defaultValue={slot.booking?.vak} required autoFocus />
+              <Input id="vak" name="vak" defaultValue={slot.booking?.vak ?? ""} required autoFocus />
             </Field>
           )}
 
           <Field label={isLes ? "School" : "Organisatie"} htmlFor="school">
-            <Input id="school" name="school" defaultValue={slot.booking?.school} required />
+            <Input id="school" name="school" defaultValue={slot.booking?.school ?? ""} required />
           </Field>
           <Field label={isLes ? "Docent" : "Aanvrager"} htmlFor="docent">
-            <Input id="docent" name="docent" defaultValue={slot.booking?.docent} required />
+            <Input
+              id="docent"
+              name="docent"
+              defaultValue={vergrendelDocentNaam ?? slot.booking?.docent ?? ""}
+              readOnly={Boolean(vergrendelDocentNaam)}
+              className={vergrendelDocentNaam ? "bg-black/[.03] text-muted" : undefined}
+              required
+            />
           </Field>
           <Field label={isLes ? "Type activiteit" : "Soort bijeenkomst"} htmlFor="type_activiteit">
             <Select

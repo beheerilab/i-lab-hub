@@ -27,7 +27,7 @@ export default async function DashboardPage() {
 
       {showClaimAdminBanner && <ClaimAdminBanner />}
 
-      <VandaagWidget userId={userId} />
+      <VandaagWidget userId={userId} isDocent={profile.role === "docent"} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {MODULES.map((mod) => (

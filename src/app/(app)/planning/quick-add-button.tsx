@@ -8,10 +8,12 @@ export function QuickAddButton({
   rooms,
   subjects,
   datum,
+  vergrendelDocentNaam,
 }: {
   rooms: Room[];
   subjects: { id: string; naam: string }[];
   datum: string;
+  vergrendelDocentNaam?: string;
 }) {
   const [slot, setSlot] = useState<SelectedSlot | null>(null);
 
@@ -44,6 +46,7 @@ export function QuickAddButton({
           rooms={rooms}
           onClose={() => setSlot(null)}
           onDuplicate={setSlot}
+          vergrendelDocentNaam={vergrendelDocentNaam}
         />
       )}
     </>

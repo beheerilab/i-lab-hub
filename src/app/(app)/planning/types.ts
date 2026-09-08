@@ -1,21 +1,34 @@
 import type { ActiviteitType, BoekingCategorie } from "@/lib/supabase/database.types";
 
-export type Room = { id: string; naam: string; volgorde: number; actief: boolean };
+export type Room = {
+  id: string;
+  naam: string;
+  volgorde: number;
+  actief: boolean;
+  docent_boekbaar: boolean;
+};
 
+/**
+ * `vak`/`school`/`docent`/`aantal_leerlingen` zijn `null` wanneer dit een
+ * "dichte reservering" is — een boeking van iemand anders, gelezen via
+ * `bookings_docent_view`, die deze velden voor niet-eigenaren afschermt.
+ * Voor de crew (die de ruwe `bookings`-tabel leest) zijn ze altijd gevuld.
+ */
 export type Booking = {
   id: string;
   lab_id: string;
   datum: string;
   start_tijd: string;
   eind_tijd: string;
-  vak: string;
-  school: string;
-  docent: string;
+  vak: string | null;
+  school: string | null;
+  docent: string | null;
   type_activiteit: ActiviteitType;
   type_activiteit_anders: string | null;
   categorie: BoekingCategorie;
-  aantal_leerlingen: number;
+  aantal_leerlingen: number | null;
   bijzonderheden: string | null;
+  created_by?: string | null;
 };
 
 export type SelectedSlot = {

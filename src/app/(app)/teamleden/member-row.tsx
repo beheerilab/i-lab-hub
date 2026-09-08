@@ -2,7 +2,14 @@
 
 import { useTransition } from "react";
 import { setRoleAction, revokeAccessAction } from "./actions";
+import { Select } from "@/components/ui/field";
 import type { Role } from "@/lib/supabase/database.types";
+
+const ROL_LABELS: Record<Role, string> = {
+  admin: "Beheerder",
+  lid: "Lid",
+  docent: "Docent",
+};
 
 export function MemberRow({
   id,
@@ -23,20 +30,20 @@ export function MemberRow({
         <p className="font-medium">
           {naam} {isJezelf && <span className="text-sm text-muted">(jij)</span>}
         </p>
-        <p className="text-sm text-muted">{rol === "admin" ? "Beheerder" : "Lid"}</p>
+        <p className="text-sm text-muted">{ROL_LABELS[rol]}</p>
       </div>
       {!isJezelf && (
-        <div className="flex shrink-0 gap-2">
-          <button
-            type="button"
+        <div className="flex shrink-0 items-center gap-2">
+          <Select
+            value={rol}
             disabled={isPending}
-            onClick={() =>
-              startTransition(() => setRoleAction(id, rol === "admin" ? "lid" : "admin"))
-            }
-            className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-black/[.04] disabled:opacity-50"
+            onChange={(e) => startTransition(() => setRoleAction(id, e.target.value as Role))}
+            className="w-36 py-1.5 text-sm"
           >
-            {rol === "admin" ? "Maak lid" : "Maak beheerder"}
-          </button>
+            <option value="admin">Beheerder</option>
+            <option value="lid">Lid</option>
+            <option value="docent">Docent</option>
+          </Select>
           <button
             type="button"
             disabled={isPending}

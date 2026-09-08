@@ -33,21 +33,28 @@ function rondAf(minuten: number, stap = 15) {
 
 export function DayView({
   rooms,
+  boekbareRooms,
   datum,
   bookings,
   subjects,
+  vergrendelDocentNaam,
 }: {
   rooms: Room[];
+  /** Bij een docent-gebruiker beperkt tot ruimtes met docent_boekbaar; anders gelijk aan `rooms`. */
+  boekbareRooms?: Room[];
   datum: string;
   bookings: Booking[];
   subjects: { id: string; naam: string }[];
+  vergrendelDocentNaam?: string;
 }) {
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const trackRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const { actief, toggle } = useRoomFilter(rooms.map((r) => r.id));
   const zichtbareRooms = rooms.filter((r) => actief.has(r.id));
+  const modalRooms = boekbareRooms ?? rooms;
 
   function handleTrackClick(room: Room, e: React.MouseEvent<HTMLDivElement>) {
+    if (boekbareRooms && !room.docent_boekbaar) return;
     const track = trackRefs.current[room.id];
     if (!track) return;
     const rect = track.getBoundingClientRect();
@@ -93,7 +100,9 @@ export function DayView({
                     trackRefs.current[room.id] = el;
                   }}
                   onClick={(e) => handleTrackClick(room, e)}
-                  className="relative h-14 flex-1 cursor-pointer"
+                  className={`relative h-14 flex-1 ${
+                    boekbareRooms && !room.docent_boekbaar ? "cursor-default" : "cursor-pointer"
+                  }`}
                 >
                   {UREN.slice(1, -1).map((uur, i) => (
                     <div
@@ -113,6 +122,21 @@ export function DayView({
                     );
                     const left = ((startMin - DAG_START_UUR * 60) / TOTAAL_MINUTEN) * 100;
                     const width = ((eindMin - startMin) / TOTAAL_MINUTEN) * 100;
+                    const isDicht = booking.vak === null;
+
+                    if (isDicht) {
+                      return (
+                        <div
+                          key={booking.id}
+                          style={{ left: `${left}%`, width: `${width}%` }}
+                          className={`absolute inset-y-1 overflow-hidden rounded-md border px-2 py-1 text-left text-xs leading-tight ${ACTIVITEIT_KLEUREN[booking.type_activiteit]}`}
+                        >
+                          <div className="truncate font-medium">
+                            {booking.start_tijd.slice(0, 5)}–{booking.eind_tijd.slice(0, 5)} Bezet
+                          </div>
+                        </div>
+                      );
+                    }
 
                     return (
                       <button
@@ -150,9 +174,10 @@ export function DayView({
         <BookingModal
           slot={selectedSlot}
           subjects={subjects}
-          rooms={rooms}
+          rooms={modalRooms}
           onClose={() => setSelectedSlot(null)}
           onDuplicate={setSelectedSlot}
+          vergrendelDocentNaam={vergrendelDocentNaam}
         />
       )}
     </>

@@ -12,20 +12,27 @@ const WEEKDAGEN = ["Ma", "Di", "Wo", "Do", "Vr"];
 
 export function WeekView({
   rooms,
+  boekbareRooms,
   weekDays,
   bookings,
   subjects,
+  vergrendelDocentNaam,
 }: {
   rooms: Room[];
+  /** Bij een docent-gebruiker beperkt tot ruimtes met docent_boekbaar; anders gelijk aan `rooms`. */
+  boekbareRooms?: Room[];
   weekDays: Date[];
   bookings: Booking[];
   subjects: { id: string; naam: string }[];
+  vergrendelDocentNaam?: string;
 }) {
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const { actief, toggle } = useRoomFilter(rooms.map((r) => r.id));
   const zichtbareRooms = rooms.filter((r) => actief.has(r.id));
+  const modalRooms = boekbareRooms ?? rooms;
 
   function openNieuw(room: Room, datum: string) {
+    if (boekbareRooms && !room.docent_boekbaar) return;
     setSelectedSlot({
       labId: room.id,
       labNaam: room.naam,
@@ -70,36 +77,51 @@ export function WeekView({
                     .filter((b) => b.lab_id === room.id && b.datum === datum)
                     .sort((a, b) => a.start_tijd.localeCompare(b.start_tijd));
 
+                  const nietBoekbaar = Boolean(boekbareRooms) && !room.docent_boekbaar;
+
                   return (
                     <td
                       key={datum}
                       onClick={() => openNieuw(room, datum)}
-                      className="cursor-pointer border-b border-border p-1.5 align-top transition-colors hover:bg-accent/5"
+                      className={`border-b border-border p-1.5 align-top transition-colors ${
+                        nietBoekbaar ? "" : "cursor-pointer hover:bg-accent/5"
+                      }`}
                     >
                       <div className="space-y-1">
-                        {dagBoekingen.map((booking) => (
-                          <button
-                            key={booking.id}
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedSlot({
-                                labId: room.id,
-                                labNaam: room.naam,
-                                datum,
-                                startTijd: booking.start_tijd.slice(0, 5),
-                                eindTijd: booking.eind_tijd.slice(0, 5),
-                                booking,
-                              });
-                            }}
-                            className={`w-full rounded-md border px-1.5 py-1 text-left text-xs leading-tight hover:opacity-80 ${ACTIVITEIT_KLEUREN[booking.type_activiteit]}`}
-                          >
-                            <div className="truncate font-medium">
-                              {booking.start_tijd.slice(0, 5)} {booking.vak}
+                        {dagBoekingen.map((booking) =>
+                          booking.vak === null ? (
+                            <div
+                              key={booking.id}
+                              className={`w-full rounded-md border px-1.5 py-1 text-left text-xs leading-tight ${ACTIVITEIT_KLEUREN[booking.type_activiteit]}`}
+                            >
+                              <div className="truncate font-medium">
+                                {booking.start_tijd.slice(0, 5)} Bezet
+                              </div>
                             </div>
-                            <div className="truncate">{booking.school}</div>
-                          </button>
-                        ))}
+                          ) : (
+                            <button
+                              key={booking.id}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedSlot({
+                                  labId: room.id,
+                                  labNaam: room.naam,
+                                  datum,
+                                  startTijd: booking.start_tijd.slice(0, 5),
+                                  eindTijd: booking.eind_tijd.slice(0, 5),
+                                  booking,
+                                });
+                              }}
+                              className={`w-full rounded-md border px-1.5 py-1 text-left text-xs leading-tight hover:opacity-80 ${ACTIVITEIT_KLEUREN[booking.type_activiteit]}`}
+                            >
+                              <div className="truncate font-medium">
+                                {booking.start_tijd.slice(0, 5)} {booking.vak}
+                              </div>
+                              <div className="truncate">{booking.school}</div>
+                            </button>
+                          ),
+                        )}
                       </div>
                     </td>
                   );
@@ -114,9 +136,10 @@ export function WeekView({
         <BookingModal
           slot={selectedSlot}
           subjects={subjects}
-          rooms={rooms}
+          rooms={modalRooms}
           onClose={() => setSelectedSlot(null)}
           onDuplicate={setSelectedSlot}
+          vergrendelDocentNaam={vergrendelDocentNaam}
         />
       )}
     </>

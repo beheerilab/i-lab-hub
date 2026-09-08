@@ -6,16 +6,21 @@ import { nl } from "date-fns/locale";
 import { Card } from "@/components/ui/card";
 import { ACTIVITEIT_KLEUREN, ACTIVITEIT_LABELS } from "../planning/types";
 
-export async function VandaagWidget({ userId }: { userId: string }) {
+export async function VandaagWidget({ userId, isDocent }: { userId: string; isDocent: boolean }) {
   const supabase = await createClient();
   const vandaag = format(huidigeDatumAmsterdam(), "yyyy-MM-dd");
 
+  // Een docent ziet hier alleen de eigen les(sen) — geen "dichte" reservering
+  // van anderen nodig op een samenvattend dashboard-kaartje.
+  let bookingsQuery = supabase
+    .from("bookings")
+    .select("id, start_tijd, eind_tijd, vak, type_activiteit, labs(naam)")
+    .eq("datum", vandaag)
+    .order("start_tijd");
+  if (isDocent) bookingsQuery = bookingsQuery.eq("created_by", userId);
+
   const [{ data: bookings }, { data: tasks }] = await Promise.all([
-    supabase
-      .from("bookings")
-      .select("id, start_tijd, eind_tijd, vak, type_activiteit, labs(naam)")
-      .eq("datum", vandaag)
-      .order("start_tijd"),
+    bookingsQuery,
     supabase
       .from("tasks")
       .select("id, titel, deadline_op")

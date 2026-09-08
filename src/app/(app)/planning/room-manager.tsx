@@ -5,6 +5,7 @@ import {
   createRoomAction,
   renameRoomAction,
   toggleRoomActiveAction,
+  toggleDocentBoekbaarAction,
   telToekomstigeBoekingenAction,
   deleteRoomAction,
   reorderRoomsAction,
@@ -14,7 +15,13 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
 
-type Room = { id: string; naam: string; volgorde: number; actief: boolean };
+type Room = {
+  id: string;
+  naam: string;
+  volgorde: number;
+  actief: boolean;
+  docent_boekbaar: boolean;
+};
 
 const initialState: RoomActionState = {};
 
@@ -92,6 +99,18 @@ function RoomRow({
       )}
       {!ontgrendeld && (
         <>
+          <label className="flex shrink-0 items-center gap-1.5 text-xs text-muted">
+            <input
+              type="checkbox"
+              checked={room.docent_boekbaar}
+              disabled={isPending}
+              onChange={(e) =>
+                startTransition(() => toggleDocentBoekbaarAction(room.id, e.target.checked))
+              }
+              className="h-3.5 w-3.5 accent-accent disabled:opacity-40"
+            />
+            Docent-boekbaar
+          </label>
           <button
             type="button"
             disabled={isPending}

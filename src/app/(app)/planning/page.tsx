@@ -29,18 +29,22 @@ export default async function PlanningPage({
   const { profile } = await requireProfile();
   const supabase = await createClient();
 
+  const isDocent = profile.role === "docent";
+
   const modus: Modus =
     modusParam === "week" || modusParam === "maand" ? modusParam : "dag";
   const datum = datumParam ? parseISO(datumParam) : huidigeDatumAmsterdam();
 
   const { data: rooms } = await supabase
     .from("labs")
-    .select("id, naam, volgorde, actief")
+    .select("id, naam, volgorde, actief, docent_boekbaar")
     .order("volgorde");
 
   const { data: subjects } = await supabase.from("subjects").select("id, naam").order("naam");
 
   const actieveRooms = (rooms ?? []).filter((r) => r.actief);
+  const boekbareRooms = isDocent ? actieveRooms.filter((r) => r.docent_boekbaar) : undefined;
+  const vergrendelDocentNaam = isDocent ? profile.full_name ?? "" : undefined;
 
   let bereikStart: Date;
   let bereikEind: Date;
@@ -55,13 +59,20 @@ export default async function PlanningPage({
     bereikEind = endOfWeek(endOfMonth(datum), { weekStartsOn: 1 });
   }
 
-  const { data: bookingsData } = await supabase
-    .from("bookings")
-    .select(
-      "id, lab_id, datum, start_tijd, eind_tijd, vak, school, docent, type_activiteit, type_activiteit_anders, categorie, aantal_leerlingen, bijzonderheden",
-    )
-    .gte("datum", format(bereikStart, "yyyy-MM-dd"))
-    .lte("datum", format(bereikEind, "yyyy-MM-dd"));
+  const boekingenSelectie =
+    "id, lab_id, datum, start_tijd, eind_tijd, vak, school, docent, type_activiteit, type_activiteit_anders, categorie, aantal_leerlingen, bijzonderheden";
+
+  const { data: bookingsData } = isDocent
+    ? await supabase
+        .from("bookings_docent_view")
+        .select(boekingenSelectie)
+        .gte("datum", format(bereikStart, "yyyy-MM-dd"))
+        .lte("datum", format(bereikEind, "yyyy-MM-dd"))
+    : await supabase
+        .from("bookings")
+        .select(boekingenSelectie)
+        .gte("datum", format(bereikStart, "yyyy-MM-dd"))
+        .lte("datum", format(bereikEind, "yyyy-MM-dd"));
 
   const bookings: Booking[] = bookingsData ?? [];
 
@@ -69,7 +80,12 @@ export default async function PlanningPage({
     <div>
       <div className="mb-1 flex items-start justify-between gap-3">
         <h1 className="text-2xl font-semibold text-white">Planning</h1>
-        <QuickAddButton rooms={actieveRooms} subjects={subjects ?? []} datum={format(datum, "yyyy-MM-dd")} />
+        <QuickAddButton
+          rooms={boekbareRooms ?? actieveRooms}
+          subjects={subjects ?? []}
+          datum={format(datum, "yyyy-MM-dd")}
+          vergrendelDocentNaam={vergrendelDocentNaam}
+        />
       </div>
       <p className="mb-6 text-white/80">Ruimtegebruik inplannen — dag, week of maand.</p>
 
@@ -80,16 +96,20 @@ export default async function PlanningPage({
       ) : modus === "dag" ? (
         <DayView
           rooms={actieveRooms}
+          boekbareRooms={boekbareRooms}
           datum={format(datum, "yyyy-MM-dd")}
           bookings={bookings}
           subjects={subjects ?? []}
+          vergrendelDocentNaam={vergrendelDocentNaam}
         />
       ) : modus === "week" ? (
         <WeekView
           rooms={actieveRooms}
+          boekbareRooms={boekbareRooms}
           weekDays={Array.from({ length: 5 }, (_, i) => addDays(bereikStart, i))}
           bookings={bookings}
           subjects={subjects ?? []}
+          vergrendelDocentNaam={vergrendelDocentNaam}
         />
       ) : (
         <MonthView

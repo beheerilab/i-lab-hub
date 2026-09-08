@@ -4,7 +4,41 @@ import { revalidatePath } from "next/cache";
 import { addDays, format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { huidigeDatumAmsterdam } from "@/lib/tijd";
+import { stuurEmail } from "@/lib/email";
+import {
+  docentBevestigingHtml,
+  crewMeldingHtml,
+  docentHerhalingBevestigingHtml,
+  crewHerhalingMeldingHtml,
+  type BoekingEmailDetails,
+} from "./booking-emails";
 import type { ActiviteitType, BoekingCategorie } from "@/lib/supabase/database.types";
+
+async function verstuurBoekingMailsAlsDocent(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userEmail: string | null | undefined,
+  actie: "aangemaakt" | "gewijzigd" | "geannuleerd",
+  details: BoekingEmailDetails,
+) {
+  const { data: crewAdressen } = await supabase.rpc("crew_emails");
+
+  await Promise.all([
+    userEmail
+      ? stuurEmail({
+          aan: userEmail,
+          onderwerp: `i-lab: ${details.vak} — ${actie}`,
+          html: docentBevestigingHtml(actie, details),
+        })
+      : Promise.resolve(),
+    crewAdressen && crewAdressen.length > 0
+      ? stuurEmail({
+          aan: crewAdressen,
+          onderwerp: `i-lab: les ${actie} door ${details.docentNaam}`,
+          html: crewMeldingHtml(actie, details),
+        })
+      : Promise.resolve(),
+  ]);
+}
 
 export type ActionState = { error?: string; summary?: string };
 
@@ -69,6 +103,22 @@ export async function saveBookingAction(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Je bent niet ingelogd." };
 
+  const { data: lab } = await supabase
+    .from("labs")
+    .select("naam, docent_boekbaar")
+    .eq("id", labId)
+    .single();
+  const labNaam = lab?.naam ?? "";
+
+  const { data: actorProfiel } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (actorProfiel?.role === "docent" && !lab?.docent_boekbaar) {
+    return { error: "Deze ruimte is niet boekbaar voor docenten." };
+  }
+
   const payload = {
     lab_id: labId,
     datum,
@@ -100,13 +150,35 @@ export async function saveBookingAction(
       else gelukt++;
     }
 
-    revalidatePath("/planning");
-    if (overgeslagen.length === 0) {
-      return { summary: `${gelukt} lessen ingepland, elke week t/m ${herhaalTot}.` };
+    const samenvatting =
+      overgeslagen.length === 0
+        ? `${gelukt} lessen ingepland, elke week t/m ${herhaalTot}.`
+        : `${gelukt} van ${datums.length} ingepland. Overgeslagen wegens overlap: ${overgeslagen.join(", ")}.`;
+
+    if (gelukt > 0) {
+      if (actorProfiel?.role === "docent") {
+        const { data: crewAdressen } = await supabase.rpc("crew_emails");
+        await Promise.all([
+          user.email
+            ? stuurEmail({
+                aan: user.email,
+                onderwerp: `i-lab: lessen ingepland`,
+                html: docentHerhalingBevestigingHtml(samenvatting),
+              })
+            : Promise.resolve(),
+          crewAdressen && crewAdressen.length > 0
+            ? stuurEmail({
+                aan: crewAdressen,
+                onderwerp: `i-lab: terugkerende lessen van ${docent}`,
+                html: crewHerhalingMeldingHtml(docent, samenvatting),
+              })
+            : Promise.resolve(),
+        ]);
+      }
     }
-    return {
-      summary: `${gelukt} van ${datums.length} ingepland. Overgeslagen wegens overlap: ${overgeslagen.join(", ")}.`,
-    };
+
+    revalidatePath("/planning");
+    return { summary: samenvatting };
   }
 
   const { error } = id
@@ -120,13 +192,56 @@ export async function saveBookingAction(
     return { error: "Opslaan mislukt: " + error.message };
   }
 
+  if (actorProfiel?.role === "docent") {
+    await verstuurBoekingMailsAlsDocent(supabase, user.email, id ? "gewijzigd" : "aangemaakt", {
+      labNaam,
+      datum,
+      startTijd,
+      eindTijd,
+      vak,
+      school,
+      docentNaam: docent,
+    });
+  }
+
   revalidatePath("/planning");
   return {};
 }
 
 export async function deleteBookingAction(id: string) {
   const supabase = await createClient();
-  await supabase.from("bookings").delete().eq("id", id);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("datum, start_tijd, eind_tijd, vak, school, docent, labs(naam)")
+    .eq("id", id)
+    .single();
+
+  const { error } = await supabase.from("bookings").delete().eq("id", id);
+  if (error) return;
+
+  if (user && booking) {
+    const { data: profiel } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profiel?.role === "docent") {
+      await verstuurBoekingMailsAlsDocent(supabase, user.email, "geannuleerd", {
+        labNaam: booking.labs?.naam ?? "",
+        datum: booking.datum,
+        startTijd: booking.start_tijd,
+        eindTijd: booking.eind_tijd,
+        vak: booking.vak,
+        school: booking.school,
+        docentNaam: booking.docent,
+      });
+    }
+  }
+
   revalidatePath("/planning");
 }
 
@@ -167,6 +282,12 @@ export async function renameRoomAction(id: string, naam: string) {
 export async function toggleRoomActiveAction(id: string, actief: boolean) {
   const supabase = await createClient();
   await supabase.from("labs").update({ actief }).eq("id", id);
+  revalidatePath("/planning");
+}
+
+export async function toggleDocentBoekbaarAction(id: string, docentBoekbaar: boolean) {
+  const supabase = await createClient();
+  await supabase.from("labs").update({ docent_boekbaar: docentBoekbaar }).eq("id", id);
   revalidatePath("/planning");
 }
 
