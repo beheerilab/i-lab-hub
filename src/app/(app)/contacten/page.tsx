@@ -32,7 +32,8 @@ export default async function ContactenPage({
     zoekterm
       ? c.naam.toLowerCase().includes(zoekterm) ||
         (c.categorie ?? "").toLowerCase().includes(zoekterm) ||
-        (c.contactpersonen ?? []).some((p) => p.naam.toLowerCase().includes(zoekterm))
+        (c.contactpersonen ?? []).some((p) => p.naam.toLowerCase().includes(zoekterm)) ||
+        (c.zoekwoorden ?? []).some((w) => w.toLowerCase().includes(zoekterm))
       : true,
   );
 
@@ -61,7 +62,12 @@ export default async function ContactenPage({
 
       <form method="GET" className="mb-6 flex max-w-sm gap-2">
         <input type="hidden" name="soort" value={soort} />
-        <Input type="search" name="q" placeholder="Zoek op naam of categorie…" defaultValue={q} />
+        <Input
+          type="search"
+          name="q"
+          placeholder="Zoek op naam, categorie, contactpersoon of zoekwoord…"
+          defaultValue={q}
+        />
         <button
           type="submit"
           className="shrink-0 rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-medium hover:bg-black/[.03]"
@@ -87,6 +93,7 @@ export default async function ContactenPage({
               email={c.email}
               notities={c.notities}
               adres={c.adres}
+              zoekwoorden={c.zoekwoorden}
               magVerwijderen={profile.role === "admin" || c.created_by === userId}
             />
           ))}

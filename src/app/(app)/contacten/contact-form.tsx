@@ -10,6 +10,7 @@ const initialState: ActionState = {};
 
 export function ContactForm() {
   const [open, setOpen] = useState(false);
+  const [zoekwoordenOpen, setZoekwoordenOpen] = useState(false);
   const [state, formAction] = useActionState(createContactAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const wasSubmitting = useRef(false);
@@ -18,6 +19,7 @@ export function ContactForm() {
     if (wasSubmitting.current && !state.error) {
       formRef.current?.reset();
       setOpen(false);
+      setZoekwoordenOpen(false);
     }
     wasSubmitting.current = false;
   }, [state]);
@@ -65,6 +67,31 @@ export function ContactForm() {
             <Field label="Waarvoor / notities (optioneel)" htmlFor="notities">
               <Textarea id="notities" name="notities" rows={2} />
             </Field>
+          </div>
+
+          <div className="sm:col-span-2">
+            <button
+              type="button"
+              onClick={() => setZoekwoordenOpen((o) => !o)}
+              className="text-sm text-accent underline"
+            >
+              {zoekwoordenOpen ? "Zoekwoorden verbergen" : "🔎 Zoekwoorden toevoegen (optioneel)"}
+            </button>
+            {zoekwoordenOpen && (
+              <div className="mt-2">
+                <Field label="Zoekwoorden (komma-gescheiden)" htmlFor="zoekwoorden">
+                  <Input
+                    id="zoekwoorden"
+                    name="zoekwoorden"
+                    placeholder="bijv. loodgieter, sanitair, riolering"
+                  />
+                </Field>
+                <p className="mt-1 text-xs text-muted">
+                  Hiermee is dit contact ook te vinden op andere termen dan de naam — handig
+                  voor collega&apos;s die een vakgebied zoeken i.p.v. een bedrijfsnaam.
+                </p>
+              </div>
+            )}
           </div>
 
           {state.error && <p className="text-sm text-danger sm:col-span-2">{state.error}</p>}

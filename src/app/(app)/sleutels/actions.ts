@@ -17,6 +17,7 @@ export async function createSleutelAction(
   const email = String(formData.get("email") ?? "").trim();
   const adres = String(formData.get("adres") ?? "").trim();
   const opmerkingen = String(formData.get("opmerkingen") ?? "").trim();
+  const alarmcode = String(formData.get("alarmcode") ?? "").trim();
 
   if (!naam) return { error: "Vul een naam in." };
 
@@ -35,6 +36,7 @@ export async function createSleutelAction(
     email: email || null,
     adres: adres || null,
     opmerkingen: opmerkingen || null,
+    alarmcode: alarmcode || null,
     created_by: user.id,
   });
 
@@ -57,6 +59,7 @@ export async function updateSleutelAction(
   const email = String(formData.get("email") ?? "").trim();
   const adres = String(formData.get("adres") ?? "").trim();
   const opmerkingen = String(formData.get("opmerkingen") ?? "").trim();
+  const alarmcode = String(formData.get("alarmcode") ?? "").trim();
 
   if (!id) return { error: "Ongeldige sleutel." };
   if (!naam) return { error: "Vul een naam in." };
@@ -73,6 +76,7 @@ export async function updateSleutelAction(
       email: email || null,
       adres: adres || null,
       opmerkingen: opmerkingen || null,
+      alarmcode: alarmcode || null,
     })
     .eq("id", id);
 

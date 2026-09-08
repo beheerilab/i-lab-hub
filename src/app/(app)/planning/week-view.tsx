@@ -27,8 +27,8 @@ export function WeekView({
   vergrendelDocentNaam?: string;
 }) {
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
-  const { actief, toggle } = useRoomFilter(rooms.map((r) => r.id));
-  const zichtbareRooms = rooms.filter((r) => actief.has(r.id));
+  const { actief, toggle, reset } = useRoomFilter(rooms.map((r) => r.id));
+  const zichtbareRooms = actief.size === 0 ? rooms : rooms.filter((r) => actief.has(r.id));
   const modalRooms = boekbareRooms ?? rooms;
 
   function openNieuw(room: Room, datum: string) {
@@ -46,7 +46,7 @@ export function WeekView({
   return (
     <>
       <div className="mb-2 flex items-start justify-between gap-3">
-        <RoomFilter rooms={rooms} actief={actief} onToggle={toggle} />
+        <RoomFilter rooms={rooms} actief={actief} onToggle={toggle} onReset={reset} />
         <button
           type="button"
           onClick={() => window.print()}
@@ -61,7 +61,10 @@ export function WeekView({
             <tr>
               <th className="w-40 border-b border-border p-2 text-left text-muted">Ruimte</th>
               {weekDays.map((day, i) => (
-                <th key={day.toISOString()} className="border-b border-border p-2 text-left">
+                <th
+                  key={day.toISOString()}
+                  className="border-b border-l border-border p-2 text-left"
+                >
                   {WEEKDAGEN[i]} {format(day, "d MMM", { locale: nl })}
                 </th>
               ))}
@@ -83,7 +86,7 @@ export function WeekView({
                     <td
                       key={datum}
                       onClick={() => openNieuw(room, datum)}
-                      className={`border-b border-border p-1.5 align-top transition-colors ${
+                      className={`border-b border-l border-border p-1.5 align-top transition-colors ${
                         nietBoekbaar ? "" : "cursor-pointer hover:bg-accent/5"
                       }`}
                     >

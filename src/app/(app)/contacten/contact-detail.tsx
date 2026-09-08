@@ -8,6 +8,7 @@ import {
   uploadContactBijlageAction,
   deleteContactBijlageAction,
   updateContactSoortAction,
+  updateZoekwoordenAction,
   deleteContactAction,
   type ActionState,
 } from "./actions";
@@ -32,11 +33,13 @@ export function ContactDetail({
   contactId,
   adres,
   soort,
+  zoekwoorden,
   magVerwijderen,
 }: {
   contactId: string;
   adres: string | null;
   soort: ContactSoort;
+  zoekwoorden: string[];
   magVerwijderen: boolean;
 }) {
   const [details, setDetails] = useState<Details | null>(null);
@@ -45,6 +48,8 @@ export function ContactDetail({
   const [isDeletingContact, startDeleteContactTransition] = useTransition();
   const [huidigSoort, setHuidigSoort] = useState(soort);
   const [soortPending, startSoortTransition] = useTransition();
+  const [zoekwoordenOpen, setZoekwoordenOpen] = useState(false);
+  const [zoekwoordenPending, startZoekwoordenTransition] = useTransition();
 
   const [persoonState, persoonAction] = useActionState(addContactpersoonAction, initial);
   const persoonFormRef = useRef<HTMLFormElement>(null);
@@ -128,6 +133,31 @@ export function ContactDetail({
           {adres}
         </p>
       )}
+
+      <div>
+        <button
+          type="button"
+          onClick={() => setZoekwoordenOpen((o) => !o)}
+          className="text-sm text-accent underline"
+        >
+          🔎 Zoekwoorden{zoekwoorden.length > 0 ? ` (${zoekwoorden.length})` : ""}
+        </button>
+        {zoekwoordenOpen && (
+          <div className="mt-2">
+            <Input
+              defaultValue={zoekwoorden.join(", ")}
+              placeholder="bijv. loodgieter, sanitair, riolering"
+              disabled={!magVerwijderen || zoekwoordenPending}
+              onBlur={(e) => {
+                if (!magVerwijderen) return;
+                startZoekwoordenTransition(() => updateZoekwoordenAction(contactId, e.target.value));
+              }}
+              className="py-1.5 text-sm"
+            />
+            <p className="mt-1 text-xs text-muted">Komma-gescheiden — hiermee is dit contact ook op andere termen te vinden.</p>
+          </div>
+        )}
+      </div>
 
       <div>
         <h4 className="mb-2 text-sm font-semibold">Contactpersonen</h4>

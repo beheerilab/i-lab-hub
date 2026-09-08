@@ -2,6 +2,8 @@ export type Role = "admin" | "lid" | "docent";
 
 export type TaskStatus = "open" | "afgevinkt";
 
+export type TaskPrioriteit = "hoog" | "normaal" | "laag";
+
 export type ActiviteitType =
   | "les"
   | "project"
@@ -138,6 +140,7 @@ export interface Database {
           email: string | null;
           adres: string | null;
           notities: string | null;
+          zoekwoorden: string[];
           created_by: string | null;
           created_at: string;
         };
@@ -149,6 +152,7 @@ export interface Database {
           email?: string | null;
           adres?: string | null;
           notities?: string | null;
+          zoekwoorden?: string[];
           created_by?: string | null;
         };
         Update: {
@@ -159,6 +163,7 @@ export interface Database {
           email?: string | null;
           adres?: string | null;
           notities?: string | null;
+          zoekwoorden?: string[];
         };
         Relationships: [
           {
@@ -361,6 +366,7 @@ export interface Database {
           deadline_op: string | null;
           leverancier_id: string | null;
           gearchiveerd: boolean;
+          prioriteit: TaskPrioriteit;
           created_by: string | null;
           created_at: string;
         };
@@ -371,6 +377,7 @@ export interface Database {
           toegewezen_aan?: string | null;
           deadline_op?: string | null;
           leverancier_id?: string | null;
+          prioriteit?: TaskPrioriteit;
           created_by?: string | null;
         };
         Update: {
@@ -383,6 +390,7 @@ export interface Database {
           deadline_op?: string | null;
           leverancier_id?: string | null;
           gearchiveerd?: boolean;
+          prioriteit?: TaskPrioriteit;
         };
         Relationships: [
           {
@@ -630,6 +638,7 @@ export interface Database {
           email: string | null;
           adres: string | null;
           opmerkingen: string | null;
+          alarmcode: string | null;
           created_by: string | null;
           created_at: string;
         };
@@ -642,6 +651,7 @@ export interface Database {
           email?: string | null;
           adres?: string | null;
           opmerkingen?: string | null;
+          alarmcode?: string | null;
           created_by?: string | null;
         };
         Update: {
@@ -653,6 +663,7 @@ export interface Database {
           email?: string | null;
           adres?: string | null;
           opmerkingen?: string | null;
+          alarmcode?: string | null;
         };
         Relationships: [
           {

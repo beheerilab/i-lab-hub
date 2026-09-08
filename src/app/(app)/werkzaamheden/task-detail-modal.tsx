@@ -5,6 +5,7 @@ import {
   getTaakDetailsAction,
   updateBeschrijvingAction,
   updateLeverancierAction,
+  updatePrioriteitAction,
   addNotitieAction,
   uploadBijlageAction,
   deleteBijlageAction,
@@ -14,6 +15,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Select, Textarea } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
+import type { TaskPrioriteit } from "@/lib/supabase/database.types";
+
+const PRIORITEIT_LABELS: Record<TaskPrioriteit, string> = {
+  hoog: "🔴 Hoog",
+  normaal: "Normaal",
+  laag: "🔵 Laag",
+};
 
 type Details = {
   beschrijving: string | null;
@@ -32,6 +40,8 @@ export function TaskDetailModal({
   datumLabel,
   deadlineLabel,
   toegewezenAanNaam,
+  prioriteit,
+  magBewerken,
   contacts,
   onClose,
 }: {
@@ -41,6 +51,8 @@ export function TaskDetailModal({
   datumLabel: string;
   deadlineLabel: string | null;
   toegewezenAanNaam: string;
+  prioriteit: TaskPrioriteit;
+  magBewerken: boolean;
   contacts: { id: string; naam: string }[];
   onClose: () => void;
 }) {
@@ -50,6 +62,8 @@ export function TaskDetailModal({
   const [opslaanBeschrijving, startOpslaanBeschrijving] = useTransition();
   const [leverancierPending, startLeverancierTransition] = useTransition();
   const [postponePending, startPostponeTransition] = useTransition();
+  const [huidigePrioriteit, setHuidigePrioriteit] = useState(prioriteit);
+  const [prioriteitPending, startPrioriteitTransition] = useTransition();
   const [uploadState, uploadAction] = useActionState(uploadBijlageAction, initial);
   const uploadFormRef = useRef<HTMLFormElement>(null);
   const uploadSubmitting = useRef(false);
@@ -143,6 +157,25 @@ export function TaskDetailModal({
         </div>
 
         <div className="max-h-[65vh] space-y-5 overflow-y-auto pr-1">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Prioriteit</label>
+            <Select
+              value={huidigePrioriteit}
+              disabled={!magBewerken || prioriteitPending}
+              onChange={(e) => {
+                const waarde = e.target.value as TaskPrioriteit;
+                setHuidigePrioriteit(waarde);
+                startPrioriteitTransition(() => updatePrioriteitAction(taskId, waarde));
+              }}
+            >
+              {(Object.keys(PRIORITEIT_LABELS) as TaskPrioriteit[]).map((p) => (
+                <option key={p} value={p}>
+                  {PRIORITEIT_LABELS[p]}
+                </option>
+              ))}
+            </Select>
+          </div>
+
           <div>
             <label className="mb-1.5 block text-sm font-medium">Beschrijving</label>
             <Textarea

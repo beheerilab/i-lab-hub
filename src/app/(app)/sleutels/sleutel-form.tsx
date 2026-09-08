@@ -61,6 +61,9 @@ export function SleutelForm() {
           <Field label="Adres (optioneel)" htmlFor="adres">
             <Input id="adres" name="adres" />
           </Field>
+          <Field label="Alarmcode (optioneel)" htmlFor="alarmcode">
+            <Input id="alarmcode" name="alarmcode" placeholder="Code voor de meldkamer" />
+          </Field>
           <div className="sm:col-span-2">
             <Field label="Opmerkingen (optioneel)" htmlFor="opmerkingen">
               <Textarea id="opmerkingen" name="opmerkingen" rows={2} />

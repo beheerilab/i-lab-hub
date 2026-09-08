@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { addDays, format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { amsterdamNaarUtc, formatAmsterdam } from "@/lib/tijd";
+import type { TaskPrioriteit } from "@/lib/supabase/database.types";
 
 export type ActionState = { error?: string };
 
@@ -16,6 +17,7 @@ export async function createTaskAction(
   const datum = String(formData.get("datum") ?? "");
   const toegewezenAan = String(formData.get("toegewezen_aan") ?? "");
   const deadlineRaw = String(formData.get("deadline_op") ?? "").trim();
+  const prioriteit = String(formData.get("prioriteit") ?? "normaal") as TaskPrioriteit;
   const gedeeldMet = formData.getAll("gedeeld_met").map(String).filter(Boolean);
 
   if (!titel) return { error: "Vul een titel in." };
@@ -36,6 +38,7 @@ export async function createTaskAction(
       datum,
       toegewezen_aan: toegewezenAan,
       deadline_op: deadlineRaw ? amsterdamNaarUtc(deadlineRaw).toISOString() : null,
+      prioriteit,
       created_by: user.id,
     })
     .select("id")
@@ -69,6 +72,19 @@ export async function postponeWeekAction(taskId: string, huidigeDatum: string) {
   const supabase = await createClient();
   const nieuweDatum = format(addDays(new Date(`${huidigeDatum}T00:00:00`), 7), "yyyy-MM-dd");
   await supabase.from("tasks").update({ datum: nieuweDatum }).eq("id", taskId);
+  revalidatePath("/werkzaamheden");
+}
+
+/** Zet een werkzaamheid op een andere datum — gebruikt door het sleepbare kanban-bord. */
+export async function moveTaskToDayAction(taskId: string, nieuweDatum: string) {
+  const supabase = await createClient();
+  await supabase.from("tasks").update({ datum: nieuweDatum }).eq("id", taskId);
+  revalidatePath("/werkzaamheden");
+}
+
+export async function updatePrioriteitAction(taskId: string, prioriteit: TaskPrioriteit) {
+  const supabase = await createClient();
+  await supabase.from("tasks").update({ prioriteit }).eq("id", taskId);
   revalidatePath("/werkzaamheden");
 }
 

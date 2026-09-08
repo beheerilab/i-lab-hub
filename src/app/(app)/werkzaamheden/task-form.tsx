@@ -71,6 +71,13 @@ export function TaskForm({
           <Field label="Deadline (optioneel)" htmlFor="deadline_op">
             <Input id="deadline_op" name="deadline_op" type="datetime-local" />
           </Field>
+          <Field label="Prioriteit" htmlFor="prioriteit">
+            <Select id="prioriteit" name="prioriteit" defaultValue="normaal">
+              <option value="hoog">🔴 Hoog</option>
+              <option value="normaal">Normaal</option>
+              <option value="laag">🔵 Laag</option>
+            </Select>
+          </Field>
 
           <div className="sm:col-span-2">
             <p className="mb-1.5 block text-sm font-medium">Delen met (optioneel)</p>

@@ -18,6 +18,7 @@ export function ContactCard({
   email,
   notities,
   adres,
+  zoekwoorden,
   magVerwijderen,
 }: {
   id: string;
@@ -28,6 +29,7 @@ export function ContactCard({
   email: string | null;
   notities: string | null;
   adres: string | null;
+  zoekwoorden: string[];
   magVerwijderen: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -71,6 +73,7 @@ export function ContactCard({
           naam={naam}
           soort={soort}
           adres={adres}
+          zoekwoorden={zoekwoorden}
           magVerwijderen={magVerwijderen}
           onClose={() => setOpen(false)}
         />

@@ -17,6 +17,10 @@ export async function createContactAction(
   const email = String(formData.get("email") ?? "").trim();
   const adres = String(formData.get("adres") ?? "").trim();
   const notities = String(formData.get("notities") ?? "").trim();
+  const zoekwoorden = String(formData.get("zoekwoorden") ?? "")
+    .split(",")
+    .map((w) => w.trim())
+    .filter(Boolean);
 
   if (!naam) return { error: "Vul een naam in." };
 
@@ -34,6 +38,7 @@ export async function createContactAction(
     email: email || null,
     adres: adres || null,
     notities: notities || null,
+    zoekwoorden,
     created_by: user.id,
   });
 
@@ -49,6 +54,16 @@ export async function updateContactSoortAction(id: string, soort: ContactSoort) 
   await supabase.from("contacts").update({ soort }).eq("id", id);
   revalidatePath("/contacten");
   revalidatePath("/bestellijst");
+}
+
+export async function updateZoekwoordenAction(id: string, ruw: string) {
+  const zoekwoorden = ruw
+    .split(",")
+    .map((w) => w.trim())
+    .filter(Boolean);
+  const supabase = await createClient();
+  await supabase.from("contacts").update({ zoekwoorden }).eq("id", id);
+  revalidatePath("/contacten");
 }
 
 export async function deleteContactAction(id: string) {

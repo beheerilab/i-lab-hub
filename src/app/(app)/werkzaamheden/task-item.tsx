@@ -3,6 +3,13 @@
 import { useState, useTransition } from "react";
 import { toggleTaskAction, archiveTaskAction } from "./actions";
 import { TaskDetailModal } from "./task-detail-modal";
+import type { TaskPrioriteit } from "@/lib/supabase/database.types";
+
+const PRIORITEIT_RAND: Record<TaskPrioriteit, string> = {
+  hoog: "border-l-4 border-l-danger",
+  normaal: "border-l-4 border-l-transparent",
+  laag: "border-l-4 border-l-accent/30",
+};
 
 export function TaskItem({
   id,
@@ -13,9 +20,13 @@ export function TaskItem({
   toegewezenAanNaam,
   status,
   deadlineLabel,
+  prioriteit,
   magAfvinken,
   magArchiveren,
   contacts,
+  draggable,
+  onDragStart,
+  onDragEnd,
 }: {
   id: string;
   titel: string;
@@ -25,16 +36,27 @@ export function TaskItem({
   toegewezenAanNaam: string;
   status: "open" | "afgevinkt";
   deadlineLabel?: string | null;
+  prioriteit: TaskPrioriteit;
   magAfvinken: boolean;
   magArchiveren: boolean;
   contacts: { id: string; naam: string }[];
+  draggable?: boolean;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
   const [openDetail, setOpenDetail] = useState(false);
   const afgevinkt = status === "afgevinkt";
 
   return (
-    <div className="rounded-xl border border-border bg-white p-3">
+    <div
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      className={`rounded-xl border border-border bg-white p-3 ${PRIORITEIT_RAND[prioriteit]} ${
+        draggable ? "cursor-grab active:cursor-grabbing" : ""
+      }`}
+    >
       <div className="flex items-start gap-3">
         <input
           type="checkbox"
@@ -50,6 +72,11 @@ export function TaskItem({
         >
           <div className="flex flex-wrap items-center gap-2">
             <div className={`font-medium ${afgevinkt ? "text-muted line-through" : ""}`}>{titel}</div>
+            {prioriteit === "hoog" && !afgevinkt && (
+              <span className="rounded-full bg-danger/10 px-2 py-0.5 text-xs text-danger">
+                🔴 Prioriteit
+              </span>
+            )}
             {deadlineLabel && !afgevinkt && (
               <span className="rounded-full bg-danger/10 px-2 py-0.5 text-xs text-danger">
                 ⏰ {deadlineLabel}
@@ -80,6 +107,8 @@ export function TaskItem({
           datumLabel={datumLabel}
           deadlineLabel={deadlineLabel ?? null}
           toegewezenAanNaam={toegewezenAanNaam}
+          prioriteit={prioriteit}
+          magBewerken={magAfvinken || magArchiveren}
           contacts={contacts}
           onClose={() => setOpenDetail(false)}
         />

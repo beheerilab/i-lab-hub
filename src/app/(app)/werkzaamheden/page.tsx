@@ -7,8 +7,11 @@ import { Card } from "@/components/ui/card";
 import { TaskForm } from "./task-form";
 import { TaskItem } from "./task-item";
 import { WeekNav } from "./week-nav";
+import { KanbanBoard, type KanbanTaak } from "./kanban-board";
+import type { TaskPrioriteit } from "@/lib/supabase/database.types";
 
 const WEEKDAGEN = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag"];
+const PRIORITEIT_GEWICHT: Record<TaskPrioriteit, number> = { hoog: 0, normaal: 1, laag: 2 };
 
 function deadlineLabel(deadlineOp: string | null): string | null {
   if (!deadlineOp) return null;
@@ -56,13 +59,33 @@ export default async function WerkzaamhedenPage({
     .lte("datum", format(weekEnd, "yyyy-MM-dd"))
     .order("datum", { ascending: true });
 
-  const tasksByDay = new Map<string, typeof weekTasks>();
-  for (const day of weekDays) {
-    tasksByDay.set(format(day, "yyyy-MM-dd"), []);
-  }
+  const dagen = weekDays.map((day, i) => ({
+    key: format(day, "yyyy-MM-dd"),
+    label: `${WEEKDAGEN[i]} ${format(day, "d MMM", { locale: nl })}`,
+  }));
+
+  const taken: Record<string, KanbanTaak[]> = Object.fromEntries(dagen.map((d) => [d.key, []]));
   for (const task of weekTasks ?? []) {
-    const list = tasksByDay.get(task.datum);
-    if (list) list.push(task);
+    const dag = weekDays.find((d) => format(d, "yyyy-MM-dd") === task.datum);
+    if (!dag || !taken[task.datum]) continue;
+    taken[task.datum].push({
+      id: task.id,
+      titel: task.titel,
+      datum: task.datum,
+      datumLabel: format(dag, "d MMMM yyyy", { locale: nl }),
+      beschrijving: task.beschrijving,
+      toegewezenAanNaam: task.profiles?.full_name || "onbekend",
+      status: task.status,
+      deadlineLabel: deadlineLabel(task.deadline_op),
+      prioriteit: task.prioriteit,
+      magAfvinken: profile.role === "admin" || task.toegewezen_aan === userId,
+      magArchiveren: profile.role === "admin" || task.created_by === userId,
+      magSlepen:
+        profile.role === "admin" || task.created_by === userId || task.toegewezen_aan === userId,
+    });
+  }
+  for (const dag of dagen) {
+    taken[dag.key].sort((a, b) => PRIORITEIT_GEWICHT[a.prioriteit] - PRIORITEIT_GEWICHT[b.prioriteit]);
   }
 
   return (
@@ -93,6 +116,7 @@ export default async function WerkzaamhedenPage({
                 toegewezenAanNaam={task.profiles?.full_name || "onbekend"}
                 status={task.status}
                 deadlineLabel={deadlineLabel(task.deadline_op)}
+                prioriteit={task.prioriteit}
                 magAfvinken={true}
                 magArchiveren={false}
                 contacts={contacts ?? []}
@@ -102,7 +126,10 @@ export default async function WerkzaamhedenPage({
         )}
       </Card>
 
-      <h2 className="mb-3 text-lg font-semibold">Weekoverzicht</h2>
+      <h2 className="mb-1 text-lg font-semibold">Weekoverzicht</h2>
+      <p className="mb-3 text-sm text-muted">
+        Sleep een werkzaamheid naar een andere dag om ze te verplaatsen.
+      </p>
       <WeekNav
         weekStart={weekStart}
         weekEnd={weekEnd}
@@ -110,41 +137,7 @@ export default async function WerkzaamhedenPage({
         nextWeekParam={format(addDays(weekStart, 7), "yyyy-MM-dd")}
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
-        {weekDays.map((day, i) => {
-          const key = format(day, "yyyy-MM-dd");
-          const dayTasks = tasksByDay.get(key) ?? [];
-          return (
-            <div key={key}>
-              <h3 className="mb-2 text-sm font-semibold text-muted">
-                {WEEKDAGEN[i]} {format(day, "d MMM", { locale: nl })}
-              </h3>
-              <div className="space-y-2">
-                {dayTasks.length === 0 ? (
-                  <p className="text-sm text-muted">Geen werkzaamheden</p>
-                ) : (
-                  dayTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      id={task.id}
-                      titel={task.titel}
-                      datum={task.datum}
-                      datumLabel={format(day, "d MMMM yyyy", { locale: nl })}
-                      beschrijving={task.beschrijving}
-                      toegewezenAanNaam={task.profiles?.full_name || "onbekend"}
-                      status={task.status}
-                      deadlineLabel={deadlineLabel(task.deadline_op)}
-                      magAfvinken={profile.role === "admin" || task.toegewezen_aan === userId}
-                      magArchiveren={profile.role === "admin" || task.created_by === userId}
-                      contacts={contacts ?? []}
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <KanbanBoard dagen={dagen} taken={taken} contacts={contacts ?? []} />
     </div>
   );
 }

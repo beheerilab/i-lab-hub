@@ -100,6 +100,15 @@ export function SleutelDetailModal({
           <Field label="Adres" htmlFor="adres">
             <Input id="adres" name="adres" defaultValue={sleutel.adres ?? ""} disabled={!magBeheren} />
           </Field>
+          <Field label="Alarmcode" htmlFor="alarmcode">
+            <Input
+              id="alarmcode"
+              name="alarmcode"
+              defaultValue={sleutel.alarmcode ?? ""}
+              placeholder="Code voor de meldkamer"
+              disabled={!magBeheren}
+            />
+          </Field>
           <Field label="Opmerkingen" htmlFor="opmerkingen">
             <Textarea
               id="opmerkingen"

@@ -13,6 +13,7 @@ export function ContactDetailModal({
   naam,
   soort,
   adres,
+  zoekwoorden,
   magVerwijderen,
   onClose,
 }: {
@@ -20,6 +21,7 @@ export function ContactDetailModal({
   naam: string;
   soort: ContactSoort;
   adres: string | null;
+  zoekwoorden: string[];
   magVerwijderen: boolean;
   onClose: () => void;
 }) {
@@ -45,7 +47,13 @@ export function ContactDetailModal({
         </div>
 
         <div className="max-h-[65vh] overflow-y-auto pr-1">
-          <ContactDetail contactId={contactId} adres={adres} soort={soort} magVerwijderen={magVerwijderen} />
+          <ContactDetail
+            contactId={contactId}
+            adres={adres}
+            soort={soort}
+            zoekwoorden={zoekwoorden}
+            magVerwijderen={magVerwijderen}
+          />
         </div>
       </div>
     </div>
