@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { BookingModal } from "./booking-modal";
+import { RoomFilter } from "./room-filter";
+import { useRoomFilter } from "./use-room-filter";
 import {
   ACTIVITEIT_KLEUREN,
   DAG_EIND_UUR,
@@ -42,6 +44,8 @@ export function DayView({
 }) {
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const trackRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const { actief, toggle } = useRoomFilter(rooms.map((r) => r.id));
+  const zichtbareRooms = rooms.filter((r) => actief.has(r.id));
 
   function handleTrackClick(room: Room, e: React.MouseEvent<HTMLDivElement>) {
     const track = trackRefs.current[room.id];
@@ -62,6 +66,7 @@ export function DayView({
 
   return (
     <>
+      <RoomFilter rooms={rooms} actief={actief} onToggle={toggle} />
       <div className="overflow-x-auto rounded-xl border border-border bg-white">
         <div className="min-w-[720px]">
           <div className="flex border-b border-border">
@@ -78,7 +83,7 @@ export function DayView({
             </div>
           </div>
 
-          {rooms.map((room) => {
+          {zichtbareRooms.map((room) => {
             const roomBookings = bookings.filter((b) => b.lab_id === room.id);
             return (
               <div key={room.id} className="flex border-b border-border last:border-none">
