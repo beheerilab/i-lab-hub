@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireProfile } from "@/lib/auth";
+import { requireGeenDocent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
@@ -18,7 +18,7 @@ export default async function ContactenPage({
   searchParams: Promise<{ q?: string; soort?: string }>;
 }) {
   const { q = "", soort = "" } = await searchParams;
-  const { userId, profile } = await requireProfile();
+  const { userId, profile } = await requireGeenDocent();
   const supabase = await createClient();
 
   let query = supabase.from("contacts").select("*, contactpersonen(naam)").order("naam");

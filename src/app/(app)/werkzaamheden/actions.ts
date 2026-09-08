@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { addDays, format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
-import { amsterdamNaarUtc, formatAmsterdam } from "@/lib/tijd";
+import { amsterdamNaarUtc, formatAmsterdam, huidigeDatumAmsterdam } from "@/lib/tijd";
 import type { TaskPrioriteit } from "@/lib/supabase/database.types";
 
 export type ActionState = { error?: string };
@@ -14,14 +14,13 @@ export async function createTaskAction(
 ): Promise<ActionState> {
   const titel = String(formData.get("titel") ?? "").trim();
   const beschrijving = String(formData.get("beschrijving") ?? "").trim();
-  const datum = String(formData.get("datum") ?? "");
+  const datum = String(formData.get("datum") ?? "").trim();
   const toegewezenAan = String(formData.get("toegewezen_aan") ?? "");
   const deadlineRaw = String(formData.get("deadline_op") ?? "").trim();
   const prioriteit = String(formData.get("prioriteit") ?? "normaal") as TaskPrioriteit;
   const gedeeldMet = formData.getAll("gedeeld_met").map(String).filter(Boolean);
 
   if (!titel) return { error: "Vul een titel in." };
-  if (!datum) return { error: "Kies een datum." };
   if (!toegewezenAan) return { error: "Kies aan wie de werkzaamheid is toegewezen." };
 
   const supabase = await createClient();
@@ -35,7 +34,7 @@ export async function createTaskAction(
     .insert({
       titel,
       beschrijving: beschrijving || null,
-      datum,
+      datum: datum || null,
       toegewezen_aan: toegewezenAan,
       deadline_op: deadlineRaw ? amsterdamNaarUtc(deadlineRaw).toISOString() : null,
       prioriteit,
@@ -82,10 +81,38 @@ export async function moveTaskToDayAction(taskId: string, nieuweDatum: string) {
   revalidatePath("/werkzaamheden");
 }
 
+/**
+ * Haalt een werkzaamheid terug naar de prioriteitenlijst (geen datum meer) —
+ * gebruikt wanneer een klus die week niet gelukt is. Zet meteen de prioriteit
+ * van de kolom waar 'm op gesleept is.
+ */
+export async function moveTaskToBacklogAction(taskId: string, prioriteit: TaskPrioriteit) {
+  const supabase = await createClient();
+  await supabase.from("tasks").update({ datum: null, prioriteit }).eq("id", taskId);
+  revalidatePath("/werkzaamheden");
+}
+
 export async function updatePrioriteitAction(taskId: string, prioriteit: TaskPrioriteit) {
   const supabase = await createClient();
   await supabase.from("tasks").update({ prioriteit }).eq("id", taskId);
   revalidatePath("/werkzaamheden");
+}
+
+/**
+ * Schuift openstaande, niet-gearchiveerde werkzaamheden die nog een datum in
+ * het verleden hebben door naar vandaag — zodat een klus die is blijven
+ * liggen niet stilzwijgend "in het verleden" verdwijnt. Wordt aangeroepen bij
+ * elk bezoek aan de pagina (lazy, geen aparte cronjob nodig).
+ */
+export async function rolOverAchterstalligeTakenAction() {
+  const supabase = await createClient();
+  const vandaag = format(huidigeDatumAmsterdam(), "yyyy-MM-dd");
+  await supabase
+    .from("tasks")
+    .update({ datum: vandaag })
+    .lt("datum", vandaag)
+    .eq("status", "open")
+    .eq("gearchiveerd", false);
 }
 
 export async function getTaakDetailsAction(taskId: string) {

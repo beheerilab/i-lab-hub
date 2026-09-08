@@ -47,8 +47,8 @@ export function TaskDetailModal({
 }: {
   taskId: string;
   titel: string;
-  datum: string;
-  datumLabel: string;
+  datum: string | null;
+  datumLabel: string | null;
   deadlineLabel: string | null;
   toegewezenAanNaam: string;
   prioriteit: TaskPrioriteit;
@@ -135,21 +135,23 @@ export function TaskDetailModal({
           <div>
             <h2 className="text-lg font-semibold">{titel}</h2>
             <p className="text-sm text-muted">
-              {datumLabel}
+              {datumLabel ?? "Nog niet ingepland (prioriteitenlijst)"}
               {deadlineLabel && ` · deadline ${deadlineLabel}`} · toegewezen aan{" "}
               {toegewezenAanNaam}
             </p>
             {details && details.gedeeldMetNamen.length > 0 && (
               <p className="text-xs text-muted">Gedeeld met: {details.gedeeldMetNamen.join(", ")}</p>
             )}
-            <button
-              type="button"
-              disabled={postponePending}
-              onClick={() => startPostponeTransition(() => postponeWeekAction(taskId, datum))}
-              className="mt-1.5 rounded-lg border border-border px-2 py-1 text-xs text-muted hover:bg-black/[.04] disabled:opacity-50"
-            >
-              {postponePending ? "Bezig…" : "→ Doorschuiven naar volgende week"}
-            </button>
+            {datum && (
+              <button
+                type="button"
+                disabled={postponePending}
+                onClick={() => startPostponeTransition(() => postponeWeekAction(taskId, datum))}
+                className="mt-1.5 rounded-lg border border-border px-2 py-1 text-xs text-muted hover:bg-black/[.04] disabled:opacity-50"
+              >
+                {postponePending ? "Bezig…" : "→ Doorschuiven naar volgende week"}
+              </button>
+            )}
           </div>
           <button type="button" onClick={onClose} className="text-muted hover:text-foreground">
             ✕

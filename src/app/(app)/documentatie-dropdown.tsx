@@ -4,18 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MODULES } from "@/lib/modules";
+import { MODULES, modulesVoorRol } from "@/lib/modules";
+import type { Role } from "@/lib/supabase/database.types";
 
 const DOCUMENTATIE_HREFS = ["/lesmateriaal", "/jaaroverzicht", "/handleidingen"];
 
-export function DocumentatieDropdown() {
+export function DocumentatieDropdown({ rol }: { rol: Role }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const items = MODULES.filter((mod) => DOCUMENTATIE_HREFS.includes(mod.href));
+  const items = modulesVoorRol(rol, MODULES.filter((mod) => DOCUMENTATIE_HREFS.includes(mod.href)));
   const isActive = items.some((mod) => pathname.startsWith(mod.href));
 
   useEffect(() => {

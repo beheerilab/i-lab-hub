@@ -48,3 +48,16 @@ export const MODULES = [
     description: "Wie welke sleutel en tag heeft",
   },
 ] as const;
+
+/**
+ * Een docent mag alleen bij Planning en de leesbare documentatie (Lesmateriaal/
+ * Handleidingen) — de rest (Werkzaamheden, Bestellijst, Jaaroverzicht, Contacten,
+ * Sleuteloverzicht) is crew-only. Gebruikt door de navigatie/dashboard-tegels
+ * én als paginabeveiliging (zie requireGeenDocent in lib/auth.ts).
+ */
+export const DOCENT_TOEGANKELIJKE_HREFS: string[] = ["/planning", "/lesmateriaal", "/handleidingen"];
+
+export function modulesVoorRol<T extends { href: string }>(rol: string, modules: readonly T[]): T[] {
+  if (rol !== "docent") return [...modules];
+  return modules.filter((mod) => DOCENT_TOEGANKELIJKE_HREFS.includes(mod.href));
+}

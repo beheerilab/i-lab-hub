@@ -1,7 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { setRoleAction, revokeAccessAction } from "./actions";
+import { ResetPasswordModal } from "./reset-password-modal";
 import { Select } from "@/components/ui/field";
 import type { Role } from "@/lib/supabase/database.types";
 
@@ -23,6 +24,7 @@ export function MemberRow({
   isJezelf: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [resetOpen, setResetOpen] = useState(false);
 
   return (
     <li className="flex items-center justify-between gap-3 border-b border-border py-3 last:border-none">
@@ -46,6 +48,13 @@ export function MemberRow({
           </Select>
           <button
             type="button"
+            onClick={() => setResetOpen(true)}
+            className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-black/[.04]"
+          >
+            Wachtwoord resetten
+          </button>
+          <button
+            type="button"
             disabled={isPending}
             onClick={() => {
               if (confirm(`Toegang van ${naam} intrekken? Dit account kan dan niet meer inloggen op i-lab Hub.`)) {
@@ -57,6 +66,9 @@ export function MemberRow({
             Toegang intrekken
           </button>
         </div>
+      )}
+      {resetOpen && (
+        <ResetPasswordModal profileId={id} naam={naam} onClose={() => setResetOpen(false)} />
       )}
     </li>
   );

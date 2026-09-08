@@ -1,4 +1,4 @@
-import { requireProfile } from "@/lib/auth";
+import { requireGeenDocent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatAmsterdam } from "@/lib/tijd";
 import { Card } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { BestellijstTabs } from "../tabs";
 import { HistorieRow } from "../historie-row";
 
 export default async function BestellijstHistoriePage() {
-  const { profile } = await requireProfile();
+  const { profile } = await requireGeenDocent();
   const supabase = await createClient();
 
   const { data: items } = await supabase

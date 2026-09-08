@@ -20,8 +20,10 @@ export function SleutelRow({ sleutel, magBeheren }: { sleutel: Sleutel; magBeher
           {sleutel.sleutelnummer || "—"}
         </span>
         <span className="min-w-0 flex-1 truncate font-medium">{sleutel.naam}</span>
-        {sleutel.functie && (
-          <span className="shrink-0 truncate text-sm text-muted">{sleutel.functie}</span>
+        {(sleutel.functie || sleutel.bedrijf) && (
+          <span className="shrink-0 truncate text-sm text-muted">
+            {[sleutel.functie, sleutel.bedrijf].filter(Boolean).join(" · ")}
+          </span>
         )}
       </button>
 

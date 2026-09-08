@@ -46,6 +46,9 @@ export function SleutelForm() {
           <Field label="Functie (optioneel)" htmlFor="functie">
             <Input id="functie" name="functie" />
           </Field>
+          <Field label="Bedrijf (optioneel)" htmlFor="bedrijf">
+            <Input id="bedrijf" name="bedrijf" />
+          </Field>
           <Field label="Sleutelnummer (optioneel)" htmlFor="sleutelnummer">
             <Input id="sleutelnummer" name="sleutelnummer" />
           </Field>

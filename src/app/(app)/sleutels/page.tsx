@@ -1,4 +1,4 @@
-import { requireProfile } from "@/lib/auth";
+import { requireGeenDocent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
@@ -11,10 +11,13 @@ export default async function SleutelsPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q = "" } = await searchParams;
-  const { userId, profile } = await requireProfile();
+  const { userId, profile } = await requireGeenDocent();
   const supabase = await createClient();
 
-  const { data: sleutelsRaw } = await supabase.from("sleutels").select("*").order("naam");
+  const { data: sleutelsRaw } = await supabase
+    .from("sleutels")
+    .select("*")
+    .order("sleutelnummer", { ascending: true, nullsFirst: false });
 
   const zoekterm = q.trim().toLowerCase();
   const sleutels = (sleutelsRaw ?? []).filter((s) =>

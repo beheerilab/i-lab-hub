@@ -2,20 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MODULES } from "@/lib/modules";
+import { MODULES, modulesVoorRol } from "@/lib/modules";
 import { DocumentatieDropdown } from "./documentatie-dropdown";
+import type { Role } from "@/lib/supabase/database.types";
 
 const DOCUMENTATIE_HREFS = ["/lesmateriaal", "/jaaroverzicht", "/handleidingen"];
 
-export function TopNav() {
+export function TopNav({ rol }: { rol: Role }) {
   const pathname = usePathname();
+  const zichtbareModules = modulesVoorRol(rol, MODULES);
 
   return (
     <nav className="flex flex-nowrap items-center gap-1.5 overflow-x-auto">
-      {MODULES.map((mod) => {
+      {zichtbareModules.map((mod) => {
         if (DOCUMENTATIE_HREFS.includes(mod.href)) {
           if (mod.href !== DOCUMENTATIE_HREFS[0]) return null;
-          return <DocumentatieDropdown key="documentatie" />;
+          return <DocumentatieDropdown key="documentatie" rol={rol} />;
         }
         const isActive = pathname.startsWith(mod.href);
         return (

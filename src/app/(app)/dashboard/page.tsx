@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { MODULES } from "@/lib/modules";
+import { MODULES, modulesVoorRol } from "@/lib/modules";
 import { ClaimAdminBanner } from "./claim-admin-banner";
 import { VandaagWidget } from "./vandaag-widget";
 
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
       <VandaagWidget userId={userId} isDocent={profile.role === "docent"} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {MODULES.map((mod) => (
+        {modulesVoorRol(profile.role, MODULES).map((mod) => (
           <Link
             key={mod.href}
             href={mod.href}

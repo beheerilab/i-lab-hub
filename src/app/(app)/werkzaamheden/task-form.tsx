@@ -10,11 +10,9 @@ const initialState: ActionState = {};
 
 export function TaskForm({
   members,
-  standaardDatum,
   huidigeGebruikerId,
 }: {
   members: { id: string; full_name: string | null }[];
-  standaardDatum: string;
   huidigeGebruikerId: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -51,9 +49,12 @@ export function TaskForm({
           <Field label="Titel" htmlFor="titel">
             <Input id="titel" name="titel" required autoFocus />
           </Field>
-          <Field label="Datum" htmlFor="datum">
-            <Input id="datum" name="datum" type="date" defaultValue={standaardDatum} required />
-          </Field>
+          <div>
+            <Field label="Datum (optioneel)" htmlFor="datum">
+              <Input id="datum" name="datum" type="date" />
+            </Field>
+            <p className="mt-1 text-xs text-muted">Leeg = komt in de prioriteitenlijst hieronder.</p>
+          </div>
           <div className="sm:col-span-2">
             <Field label="Beschrijving (optioneel)" htmlFor="beschrijving">
               <Textarea id="beschrijving" name="beschrijving" rows={2} />

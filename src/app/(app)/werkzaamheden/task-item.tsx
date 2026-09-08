@@ -30,8 +30,8 @@ export function TaskItem({
 }: {
   id: string;
   titel: string;
-  datum: string;
-  datumLabel: string;
+  datum: string | null;
+  datumLabel: string | null;
   beschrijving: string | null;
   toegewezenAanNaam: string;
   status: "open" | "afgevinkt";

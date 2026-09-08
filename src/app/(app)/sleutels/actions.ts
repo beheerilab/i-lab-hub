@@ -18,6 +18,7 @@ export async function createSleutelAction(
   const adres = String(formData.get("adres") ?? "").trim();
   const opmerkingen = String(formData.get("opmerkingen") ?? "").trim();
   const alarmcode = String(formData.get("alarmcode") ?? "").trim();
+  const bedrijf = String(formData.get("bedrijf") ?? "").trim();
 
   if (!naam) return { error: "Vul een naam in." };
 
@@ -30,6 +31,7 @@ export async function createSleutelAction(
   const { error } = await supabase.from("sleutels").insert({
     naam,
     functie: functie || null,
+    bedrijf: bedrijf || null,
     sleutelnummer: sleutelnummer || null,
     tagnummer: tagnummer || null,
     telefoon: telefoon || null,
@@ -60,6 +62,7 @@ export async function updateSleutelAction(
   const adres = String(formData.get("adres") ?? "").trim();
   const opmerkingen = String(formData.get("opmerkingen") ?? "").trim();
   const alarmcode = String(formData.get("alarmcode") ?? "").trim();
+  const bedrijf = String(formData.get("bedrijf") ?? "").trim();
 
   if (!id) return { error: "Ongeldige sleutel." };
   if (!naam) return { error: "Vul een naam in." };
@@ -70,6 +73,7 @@ export async function updateSleutelAction(
     .update({
       naam,
       functie: functie || null,
+      bedrijf: bedrijf || null,
       sleutelnummer: sleutelnummer || null,
       tagnummer: tagnummer || null,
       telefoon: telefoon || null,

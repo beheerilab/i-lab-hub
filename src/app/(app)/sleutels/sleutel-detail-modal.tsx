@@ -71,6 +71,11 @@ export function SleutelDetailModal({
             <Field label="Functie" htmlFor="functie">
               <Input id="functie" name="functie" defaultValue={sleutel.functie ?? ""} disabled={!magBeheren} />
             </Field>
+            <Field label="Bedrijf" htmlFor="bedrijf">
+              <Input id="bedrijf" name="bedrijf" defaultValue={sleutel.bedrijf ?? ""} disabled={!magBeheren} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <Field label="Sleutelnummer" htmlFor="sleutelnummer">
               <Input
                 id="sleutelnummer"
@@ -79,16 +84,16 @@ export function SleutelDetailModal({
                 disabled={!magBeheren}
               />
             </Field>
+            <Field label="Tagnummer" htmlFor="tagnummer">
+              <Input
+                id="tagnummer"
+                name="tagnummer"
+                defaultValue={sleutel.tagnummer ?? ""}
+                placeholder="Vaak gelijk aan het sleutelnummer"
+                disabled={!magBeheren}
+              />
+            </Field>
           </div>
-          <Field label="Tagnummer" htmlFor="tagnummer">
-            <Input
-              id="tagnummer"
-              name="tagnummer"
-              defaultValue={sleutel.tagnummer ?? ""}
-              placeholder="Vaak gelijk aan het sleutelnummer"
-              disabled={!magBeheren}
-            />
-          </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Telefoonnummer" htmlFor="telefoon">
               <Input id="telefoon" name="telefoon" type="tel" defaultValue={sleutel.telefoon ?? ""} disabled={!magBeheren} />

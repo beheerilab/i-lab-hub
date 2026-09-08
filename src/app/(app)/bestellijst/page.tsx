@@ -1,4 +1,4 @@
-import { requireProfile } from "@/lib/auth";
+import { requireGeenDocent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatAmsterdam } from "@/lib/tijd";
 import { Card } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { BestellijstTabs } from "./tabs";
 import { OrderItemRow } from "./order-item-row";
 
 export default async function BestellijstPage() {
-  const { userId, profile } = await requireProfile();
+  const { userId, profile } = await requireGeenDocent();
   const supabase = await createClient();
 
   const [{ data: items }, { data: contacts }] = await Promise.all([

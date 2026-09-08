@@ -37,7 +37,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             />
           </div>
           <div className="-mx-4 mt-2 px-4 sm:-mx-6 sm:px-6">
-            <TopNav />
+            <TopNav rol={profile.role} />
           </div>
         </div>
       </header>

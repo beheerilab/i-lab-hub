@@ -70,3 +70,16 @@ export async function requireAdmin() {
   }
   return result;
 }
+
+/**
+ * Voor modules die geen docent-toegang hebben (Werkzaamheden, Bestellijst,
+ * Contacten, Sleuteloverzicht) — een docent mag alleen bij Planning en de
+ * leesbare documentatie. Stuurt door naar /dashboard als dat niet zo is.
+ */
+export async function requireGeenDocent() {
+  const result = await requireProfile();
+  if (result.profile.role === "docent") {
+    redirect("/dashboard");
+  }
+  return result;
+}

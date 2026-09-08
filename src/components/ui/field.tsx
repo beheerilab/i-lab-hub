@@ -6,7 +6,7 @@ import type {
 } from "react";
 
 const fieldClasses =
-  "w-full rounded-lg border border-border bg-white px-3.5 py-2.5 text-base text-foreground placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20";
+  "w-full rounded-lg border border-muted/50 bg-black/[.035] px-3.5 py-2.5 text-base text-foreground placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20";
 
 export function Label({
   children,

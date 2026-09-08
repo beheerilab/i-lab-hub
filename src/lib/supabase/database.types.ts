@@ -359,7 +359,7 @@ export interface Database {
           id: string;
           titel: string;
           beschrijving: string | null;
-          datum: string;
+          datum: string | null;
           toegewezen_aan: string | null;
           status: TaskStatus;
           afgevinkt_op: string | null;
@@ -373,7 +373,7 @@ export interface Database {
         Insert: {
           titel: string;
           beschrijving?: string | null;
-          datum: string;
+          datum?: string | null;
           toegewezen_aan?: string | null;
           deadline_op?: string | null;
           leverancier_id?: string | null;
@@ -383,7 +383,7 @@ export interface Database {
         Update: {
           titel?: string;
           beschrijving?: string | null;
-          datum?: string;
+          datum?: string | null;
           toegewezen_aan?: string | null;
           status?: TaskStatus;
           afgevinkt_op?: string | null;
@@ -642,6 +642,7 @@ export interface Database {
           adres: string | null;
           opmerkingen: string | null;
           alarmcode: string | null;
+          bedrijf: string | null;
           created_by: string | null;
           created_at: string;
         };
@@ -655,6 +656,7 @@ export interface Database {
           adres?: string | null;
           opmerkingen?: string | null;
           alarmcode?: string | null;
+          bedrijf?: string | null;
           created_by?: string | null;
         };
         Update: {
@@ -667,6 +669,7 @@ export interface Database {
           adres?: string | null;
           opmerkingen?: string | null;
           alarmcode?: string | null;
+          bedrijf?: string | null;
         };
         Relationships: [
           {

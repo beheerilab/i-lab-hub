@@ -1,9 +1,9 @@
-import { requireProfile } from "@/lib/auth";
+import { requireGeenDocent } from "@/lib/auth";
 import { BestellijstTabs } from "../tabs";
 import { AddItemForm } from "../add-item-form";
 
 export default async function BestellijstNieuwPage() {
-  await requireProfile();
+  await requireGeenDocent();
 
   return (
     <div>
