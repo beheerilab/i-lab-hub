@@ -1,6 +1,7 @@
 export type OpslagItem = {
   naam: string;
   merk: string;
+  model: string;
   aantal: number;
 };
 

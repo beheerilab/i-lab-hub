@@ -42,6 +42,7 @@ function NaamToevoegen({
 function ItemToevoegen({ onAdd }: { onAdd: (item: OpslagItem) => void }) {
   const [naam, setNaam] = useState("");
   const [merk, setMerk] = useState("");
+  const [model, setModel] = useState("");
   const [aantal, setAantal] = useState("");
   return (
     <form
@@ -49,9 +50,10 @@ function ItemToevoegen({ onAdd }: { onAdd: (item: OpslagItem) => void }) {
         e.preventDefault();
         const n = naam.trim();
         if (!n) return;
-        onAdd({ naam: n, merk: merk.trim() || "—", aantal: Number(aantal) || 0 });
+        onAdd({ naam: n, merk: merk.trim(), model: model.trim(), aantal: Number(aantal) || 0 });
         setNaam("");
         setMerk("");
+        setModel("");
         setAantal("");
       }}
       className="mt-3 flex flex-wrap gap-2"
@@ -66,7 +68,13 @@ function ItemToevoegen({ onAdd }: { onAdd: (item: OpslagItem) => void }) {
         value={merk}
         onChange={(e) => setMerk(e.target.value)}
         placeholder="Merk (optioneel)"
-        className="w-32 py-1.5 text-sm"
+        className="w-28 py-1.5 text-sm"
+      />
+      <Input
+        value={model}
+        onChange={(e) => setModel(e.target.value)}
+        placeholder="Model (optioneel)"
+        className="w-28 py-1.5 text-sm"
       />
       <Input
         value={aantal}
@@ -80,6 +88,67 @@ function ItemToevoegen({ onAdd }: { onAdd: (item: OpslagItem) => void }) {
         Toevoegen
       </Button>
     </form>
+  );
+}
+
+const CEL_INPUT_CLASSES =
+  "w-full rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm hover:border-border focus:border-accent focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/20";
+
+function ItemRij({
+  item,
+  onWijzig,
+  onDelete,
+}: {
+  item: OpslagItem;
+  onWijzig: (item: OpslagItem) => void;
+  onDelete: () => void;
+}) {
+  return (
+    <tr className="border-b border-border last:border-none">
+      <td className="py-1 pr-2">{item.naam}</td>
+      <td className="py-1 pr-2">
+        <input
+          defaultValue={item.merk}
+          placeholder="—"
+          onBlur={(e) => {
+            if (e.target.value !== item.merk) onWijzig({ ...item, merk: e.target.value });
+          }}
+          className={CEL_INPUT_CLASSES}
+        />
+      </td>
+      <td className="py-1 pr-2">
+        <input
+          defaultValue={item.model}
+          placeholder="—"
+          onBlur={(e) => {
+            if (e.target.value !== item.model) onWijzig({ ...item, model: e.target.value });
+          }}
+          className={CEL_INPUT_CLASSES}
+        />
+      </td>
+      <td className="py-1 pr-2">
+        <input
+          type="number"
+          min={0}
+          defaultValue={item.aantal}
+          onBlur={(e) => {
+            const nieuw = Number(e.target.value) || 0;
+            if (nieuw !== item.aantal) onWijzig({ ...item, aantal: nieuw });
+          }}
+          className={`${CEL_INPUT_CLASSES} text-right`}
+        />
+      </td>
+      <td className="py-1 text-right">
+        <button
+          type="button"
+          onClick={onDelete}
+          className="rounded-lg px-1.5 py-0.5 text-sm text-danger hover:bg-danger/10"
+          title="Verwijderen"
+        >
+          ✕
+        </button>
+      </td>
+    </tr>
   );
 }
 
@@ -130,12 +199,47 @@ export function OpslagClient({
   const [navPath, setNavPath] = useState<number[]>([]);
 
   const zoektermLower = zoekterm.trim().toLowerCase();
-  const dropdownMatches = zoektermLower
-    ? zones.filter((z) => z.naam.toLowerCase().includes(zoektermLower)).slice(0, 8)
-    : [];
-  const zichtbareZones = zoektermLower
-    ? zones.filter((z) => z.naam.toLowerCase().includes(zoektermLower))
-    : zones;
+
+  const treffers = useMemo(() => {
+    if (!zoektermLower) return null;
+    const resultaten: { zone: OpslagZone; via: string | null }[] = [];
+    for (const zone of zones) {
+      const naamMatcht = zone.naam.toLowerCase().includes(zoektermLower);
+      if (naamMatcht) {
+        resultaten.push({ zone, via: null });
+        continue;
+      }
+      let via: string | null = null;
+      outer: for (const h of content[zone.naam] ?? []) {
+        if (h.naam.toLowerCase().includes(zoektermLower)) {
+          via = h.naam;
+          break outer;
+        }
+        for (const s of h.subs) {
+          if (s.naam.toLowerCase().includes(zoektermLower)) {
+            via = s.naam;
+            break outer;
+          }
+          for (const it of s.items) {
+            if (
+              it.naam.toLowerCase().includes(zoektermLower) ||
+              it.merk?.toLowerCase().includes(zoektermLower) ||
+              it.model?.toLowerCase().includes(zoektermLower)
+            ) {
+              via = it.naam;
+              break outer;
+            }
+          }
+        }
+      }
+      if (via) resultaten.push({ zone, via });
+    }
+    return resultaten;
+  }, [zoektermLower, zones, content]);
+
+  const gematchteZoneNamen = treffers ? new Set(treffers.map((t) => t.zone.naam)) : null;
+  const zichtbareZones = treffers ? treffers.map((t) => t.zone) : zones;
+  const dropdownTreffers = treffers?.slice(0, 8) ?? [];
 
   function persist(zoneNaam: string, inhoud: OpslagHoofdlijn[]) {
     setContent((c) => ({ ...c, [zoneNaam]: inhoud }));
@@ -186,6 +290,20 @@ export function OpslagClient({
     );
     persist(openZoneNaam, nieuw);
   }
+  function wijzigItem(hIndex: number, sIndex: number, itemIndex: number, item: OpslagItem) {
+    if (!openZoneNaam) return;
+    const nieuw = hoofdlijnen.map((h, i) =>
+      i !== hIndex
+        ? h
+        : {
+            ...h,
+            subs: h.subs.map((s, si) =>
+              si !== sIndex ? s : { ...s, items: s.items.map((it, ii) => (ii === itemIndex ? item : it)) },
+            ),
+          },
+    );
+    persist(openZoneNaam, nieuw);
+  }
   function deleteItem(hIndex: number, sIndex: number, itemIndex: number) {
     if (!openZoneNaam) return;
     const item = hoofdlijnen[hIndex].subs[sIndex].items[itemIndex];
@@ -213,28 +331,34 @@ export function OpslagClient({
 
   return (
     <>
-      <div className="relative mb-4 max-w-sm">
+      <div className="relative mx-auto mb-5 w-full max-w-md">
         <Input
           type="search"
           value={zoekterm}
           onChange={(e) => setZoekterm(e.target.value)}
-          placeholder="Zoek op vaknaam…"
+          placeholder="Zoek op vaknaam of wat erin ligt, bijv. “pennen”…"
         />
-        {zoektermLower && dropdownMatches.length > 0 && (
-          <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-20 max-h-64 overflow-y-auto rounded-xl border border-border bg-white p-1 shadow-lg">
-            {dropdownMatches.map((z) => (
+        {zoektermLower && dropdownTreffers.length > 0 && (
+          <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-20 max-h-72 overflow-y-auto rounded-xl border border-border bg-white p-1 shadow-lg">
+            {dropdownTreffers.map(({ zone, via }) => (
               <button
-                key={z.naam}
+                key={zone.naam}
                 type="button"
                 onClick={() => {
-                  openZone(z.naam);
+                  openZone(zone.naam);
                   setZoekterm("");
                 }}
                 className="block w-full rounded-lg px-2.5 py-1.5 text-left text-sm hover:bg-black/[.04]"
               >
-                {z.naam}
+                <span>{zone.naam}</span>
+                {via && <span className="ml-1.5 text-xs text-muted">— gevonden bij &ldquo;{via}&rdquo;</span>}
               </button>
             ))}
+          </div>
+        )}
+        {zoektermLower && dropdownTreffers.length === 0 && (
+          <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-20 rounded-xl border border-border bg-white p-3 text-sm text-muted shadow-lg">
+            Niets gevonden.
           </div>
         )}
       </div>
@@ -250,7 +374,7 @@ export function OpslagClient({
             />
             {zones.map((zone) => {
               const heeftInhoud = (content[zone.naam]?.length ?? 0) > 0;
-              const matched = Boolean(zoektermLower) && zone.naam.toLowerCase().includes(zoektermLower);
+              const matched = Boolean(gematchteZoneNamen?.has(zone.naam));
               return (
                 <button
                   key={zone.naam}
@@ -277,26 +401,32 @@ export function OpslagClient({
         </div>
 
         <Card className="w-full lg:w-72 lg:shrink-0">
-          <h2 className="mb-2 text-sm font-semibold text-muted">Vakken ({zones.length})</h2>
-          <ul className="max-h-[520px] space-y-1 overflow-y-auto">
-            {zichtbareZones.map((zone) => {
-              const heeftInhoud = (content[zone.naam]?.length ?? 0) > 0;
-              return (
-                <li key={zone.naam}>
-                  <button
-                    type="button"
-                    onClick={() => openZone(zone.naam)}
-                    className="flex w-full items-center justify-between gap-2 rounded-lg border border-border px-2.5 py-1.5 text-left text-sm hover:border-accent/40 hover:bg-accent/5"
-                  >
-                    <span className="truncate">{zone.naam}</span>
-                    <span
-                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${heeftInhoud ? "bg-accent" : "bg-border"}`}
-                    />
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          <h2 className="mb-2 text-sm font-semibold text-muted">
+            Vakken ({zichtbareZones.length}{treffers ? ` van ${zones.length}` : ""})
+          </h2>
+          {zichtbareZones.length === 0 ? (
+            <p className="text-sm text-muted">Niets gevonden.</p>
+          ) : (
+            <ul className="max-h-[520px] space-y-1 overflow-y-auto">
+              {zichtbareZones.map((zone) => {
+                const heeftInhoud = (content[zone.naam]?.length ?? 0) > 0;
+                return (
+                  <li key={zone.naam}>
+                    <button
+                      type="button"
+                      onClick={() => openZone(zone.naam)}
+                      className="flex w-full items-center justify-between gap-2 rounded-lg border border-border px-2.5 py-1.5 text-left text-sm hover:border-accent/40 hover:bg-accent/5"
+                    >
+                      <span className="truncate">{zone.naam}</span>
+                      <span
+                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${heeftInhoud ? "bg-accent" : "bg-border"}`}
+                      />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
           <p className="mt-3 text-xs text-muted">
             Wijzigingen worden direct gedeeld opgeslagen — iedereen die deze pagina opent ziet
             hetzelfde.
@@ -396,29 +526,21 @@ export function OpslagClient({
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-border text-left text-xs text-muted">
-                          <th className="py-1.5 font-medium">Item</th>
-                          <th className="py-1.5 font-medium">Merk</th>
-                          <th className="py-1.5 text-right font-medium">Aantal</th>
+                          <th className="py-1.5 pr-2 font-medium">Item</th>
+                          <th className="py-1.5 pr-2 font-medium">Merk</th>
+                          <th className="py-1.5 pr-2 font-medium">Model</th>
+                          <th className="py-1.5 pr-2 font-medium">Aantal</th>
                           <th className="py-1.5" />
                         </tr>
                       </thead>
                       <tbody>
                         {huidigeSub.items.map((item, i) => (
-                          <tr key={i} className="border-b border-border last:border-none">
-                            <td className="py-1.5">{item.naam}</td>
-                            <td className="py-1.5 text-muted">{item.merk}</td>
-                            <td className="py-1.5 text-right">{item.aantal}</td>
-                            <td className="py-1.5 text-right">
-                              <button
-                                type="button"
-                                onClick={() => deleteItem(navPath[0], navPath[1], i)}
-                                className="rounded-lg px-1.5 py-0.5 text-sm text-danger hover:bg-danger/10"
-                                title="Verwijderen"
-                              >
-                                ✕
-                              </button>
-                            </td>
-                          </tr>
+                          <ItemRij
+                            key={i}
+                            item={item}
+                            onWijzig={(nieuw) => wijzigItem(navPath[0], navPath[1], i, nieuw)}
+                            onDelete={() => deleteItem(navPath[0], navPath[1], i)}
+                          />
                         ))}
                       </tbody>
                     </table>
