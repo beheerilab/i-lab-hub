@@ -681,6 +681,24 @@ export interface Database {
           },
         ];
       };
+      opslag_content: {
+        Row: {
+          zone_naam: string;
+          inhoud: unknown;
+          updated_at: string;
+        };
+        Insert: {
+          zone_naam: string;
+          inhoud?: unknown;
+          updated_at?: string;
+        };
+        Update: {
+          zone_naam?: string;
+          inhoud?: unknown;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       bookings_docent_view: {

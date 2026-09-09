@@ -47,6 +47,12 @@ export const MODULES = [
     title: "Sleuteloverzicht",
     description: "Wie welke sleutel en tag heeft",
   },
+  {
+    href: "/opslag",
+    icon: "🗄️",
+    title: "Opslagoverzicht",
+    description: "Plattegrond met wat waar ligt opgeslagen",
+  },
 ] as const;
 
 /**
