@@ -12,6 +12,7 @@
   --muted: #8a959c;
   --danger: #b3261e;
   --gradient-start: #009fe3;
+  --gradient-mid: #a1daf8;
   --gradient-end: #0075bf;
 }
 
@@ -30,7 +31,8 @@
 }
 
 body {
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) fixed;
+  background: linear-gradient(150deg, var(--gradient-start) 0%, var(--gradient-mid) 60%, var(--gradient-end) 100%)
+    fixed;
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }

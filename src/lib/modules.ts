@@ -53,6 +53,12 @@ export const MODULES = [
     title: "Opslagoverzicht",
     description: "Plattegrond met wat waar ligt opgeslagen",
   },
+  {
+    href: "/ruimteplanner",
+    icon: "📅",
+    title: "Ruimteplanner",
+    description: "Wie, wanneer en met hoeveel personen per ruimte",
+  },
 ] as const;
 
 /**
