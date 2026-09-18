@@ -7,6 +7,7 @@ import { QuickAddReserveringButton } from "./quick-add-button";
 import { DagView } from "./dag-view";
 import { WeekView } from "./week-view";
 import { MaandView } from "./maand-view";
+import { RuimteSidebar } from "./ruimte-sidebar";
 import type { Reservering, RuimteplannerRoom } from "./types";
 
 type Modus = "dag" | "week" | "maand";
@@ -61,6 +62,25 @@ export default async function RuimteplannerPage({
     aantalGasten: b.aantal_leerlingen,
   }));
 
+  const vandaagStr = format(huidigeDatumAmsterdam(), "yyyy-MM-dd");
+  const tellingenVandaag: Record<string, number> =
+    vandaagStr >= format(bereikStart, "yyyy-MM-dd") && vandaagStr <= format(bereikEind, "yyyy-MM-dd")
+      ? reserveringen
+          .filter((r) => r.datum === vandaagStr)
+          .reduce<Record<string, number>>((map, r) => {
+            map[r.labId] = (map[r.labId] ?? 0) + 1;
+            return map;
+          }, {})
+      : {};
+
+  const { data: vandaagApart } =
+    vandaagStr < format(bereikStart, "yyyy-MM-dd") || vandaagStr > format(bereikEind, "yyyy-MM-dd")
+      ? await supabase.from("bookings").select("lab_id").eq("datum", vandaagStr)
+      : { data: null };
+  for (const b of vandaagApart ?? []) {
+    tellingenVandaag[b.lab_id] = (tellingenVandaag[b.lab_id] ?? 0) + 1;
+  }
+
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -76,22 +96,29 @@ export default async function RuimteplannerPage({
 
       {rooms.length === 0 ? (
         <p className="text-white">Er zijn nog geen actieve ruimtes ingesteld.</p>
-      ) : modus === "dag" ? (
-        <DagView rooms={rooms} datum={format(datum, "yyyy-MM-dd")} reserveringen={reserveringen} />
-      ) : modus === "week" ? (
-        <WeekView
-          rooms={rooms}
-          weekDays={Array.from({ length: 7 }, (_, i) => addDays(bereikStart, i))}
-          reserveringen={reserveringen}
-        />
       ) : (
-        <MaandView
-          maand={datum}
-          reserveringenPerDag={reserveringen.reduce((map, r) => {
-            map.set(r.datum, (map.get(r.datum) ?? 0) + 1);
-            return map;
-          }, new Map<string, number>())}
-        />
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+          <RuimteSidebar rooms={rooms} tellingenVandaag={tellingenVandaag} />
+          <div className="min-w-0 flex-1">
+            {modus === "dag" ? (
+              <DagView rooms={rooms} datum={format(datum, "yyyy-MM-dd")} reserveringen={reserveringen} />
+            ) : modus === "week" ? (
+              <WeekView
+                rooms={rooms}
+                weekDays={Array.from({ length: 7 }, (_, i) => addDays(bereikStart, i))}
+                reserveringen={reserveringen}
+              />
+            ) : (
+              <MaandView
+                maand={datum}
+                reserveringenPerDag={reserveringen.reduce((map, r) => {
+                  map.set(r.datum, (map.get(r.datum) ?? 0) + 1);
+                  return map;
+                }, new Map<string, number>())}
+              />
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
