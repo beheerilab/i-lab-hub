@@ -13,6 +13,8 @@ import { huidigeDatumAmsterdam } from "@/lib/tijd";
 import { ViewSwitcher } from "./view-switcher";
 import { RoomManager } from "./room-manager";
 import { QuickAddButton } from "./quick-add-button";
+import { SnelleReserveringButton } from "./snelle-reservering-button";
+import { RuimteSidebar } from "./ruimte-sidebar";
 import { DayView } from "./day-view";
 import { WeekView } from "./week-view";
 import { MonthView } from "./month-view";
@@ -76,16 +78,36 @@ export default async function PlanningPage({
 
   const bookings: Booking[] = bookingsData ?? [];
 
+  const vandaagStr = format(huidigeDatumAmsterdam(), "yyyy-MM-dd");
+  const inBereik =
+    vandaagStr >= format(bereikStart, "yyyy-MM-dd") && vandaagStr <= format(bereikEind, "yyyy-MM-dd");
+  const tellingenVandaag: Record<string, number> = {};
+  if (inBereik) {
+    for (const b of bookings) {
+      if (b.datum === vandaagStr) tellingenVandaag[b.lab_id] = (tellingenVandaag[b.lab_id] ?? 0) + 1;
+    }
+  } else {
+    const { data: vandaagData } = await supabase.from("bookings").select("lab_id").eq("datum", vandaagStr);
+    for (const b of vandaagData ?? []) {
+      tellingenVandaag[b.lab_id] = (tellingenVandaag[b.lab_id] ?? 0) + 1;
+    }
+  }
+
   return (
     <div>
-      <div className="mb-1 flex items-start justify-between gap-3">
+      <div className="mb-1 flex flex-wrap items-start justify-between gap-3">
         <h1 className="text-2xl font-semibold text-white">Planning</h1>
-        <QuickAddButton
-          rooms={boekbareRooms ?? actieveRooms}
-          subjects={subjects ?? []}
-          datum={format(datum, "yyyy-MM-dd")}
-          vergrendelDocentNaam={vergrendelDocentNaam}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          {!isDocent && (
+            <SnelleReserveringButton rooms={actieveRooms} datum={format(datum, "yyyy-MM-dd")} />
+          )}
+          <QuickAddButton
+            rooms={boekbareRooms ?? actieveRooms}
+            subjects={subjects ?? []}
+            datum={format(datum, "yyyy-MM-dd")}
+            vergrendelDocentNaam={vergrendelDocentNaam}
+          />
+        </div>
       </div>
       <p className="mb-6 text-white/80">Ruimtegebruik inplannen — dag, week of maand.</p>
 
@@ -93,32 +115,39 @@ export default async function PlanningPage({
 
       {actieveRooms.length === 0 ? (
         <p className="text-white">Er zijn nog geen actieve ruimtes ingesteld.</p>
-      ) : modus === "dag" ? (
-        <DayView
-          rooms={actieveRooms}
-          boekbareRooms={boekbareRooms}
-          datum={format(datum, "yyyy-MM-dd")}
-          bookings={bookings}
-          subjects={subjects ?? []}
-          vergrendelDocentNaam={vergrendelDocentNaam}
-        />
-      ) : modus === "week" ? (
-        <WeekView
-          rooms={actieveRooms}
-          boekbareRooms={boekbareRooms}
-          weekDays={Array.from({ length: 5 }, (_, i) => addDays(bereikStart, i))}
-          bookings={bookings}
-          subjects={subjects ?? []}
-          vergrendelDocentNaam={vergrendelDocentNaam}
-        />
       ) : (
-        <MonthView
-          maand={datum}
-          boekingenPerDag={bookings.reduce((map, b) => {
-            map.set(b.datum, (map.get(b.datum) ?? 0) + 1);
-            return map;
-          }, new Map<string, number>())}
-        />
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+          <RuimteSidebar rooms={actieveRooms} tellingenVandaag={tellingenVandaag} />
+          <div className="min-w-0 flex-1">
+            {modus === "dag" ? (
+              <DayView
+                rooms={actieveRooms}
+                boekbareRooms={boekbareRooms}
+                datum={format(datum, "yyyy-MM-dd")}
+                bookings={bookings}
+                subjects={subjects ?? []}
+                vergrendelDocentNaam={vergrendelDocentNaam}
+              />
+            ) : modus === "week" ? (
+              <WeekView
+                rooms={actieveRooms}
+                boekbareRooms={boekbareRooms}
+                weekDays={Array.from({ length: 5 }, (_, i) => addDays(bereikStart, i))}
+                bookings={bookings}
+                subjects={subjects ?? []}
+                vergrendelDocentNaam={vergrendelDocentNaam}
+              />
+            ) : (
+              <MonthView
+                maand={datum}
+                boekingenPerDag={bookings.reduce((map, b) => {
+                  map.set(b.datum, (map.get(b.datum) ?? 0) + 1);
+                  return map;
+                }, new Map<string, number>())}
+              />
+            )}
+          </div>
+        </div>
       )}
 
       {profile.role === "admin" && <RoomManager rooms={rooms ?? []} />}

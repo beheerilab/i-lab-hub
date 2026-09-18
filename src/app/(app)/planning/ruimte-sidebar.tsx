@@ -1,11 +1,11 @@
 import { Card } from "@/components/ui/card";
-import type { RuimteplannerRoom } from "./types";
+import type { Room } from "./types";
 
 export function RuimteSidebar({
   rooms,
   tellingenVandaag,
 }: {
-  rooms: RuimteplannerRoom[];
+  rooms: Room[];
   tellingenVandaag: Record<string, number>;
 }) {
   return (
