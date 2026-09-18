@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/app/(auth)/login/actions";
 import { setPreviewRolAction } from "./rol-wisselaar-actions";
+import { useFontSchaal } from "@/lib/font-schaal";
 import type { Role } from "@/lib/supabase/database.types";
 
 const ROL_OPTIES: { rol: Role; label: string }[] = [
@@ -30,6 +31,7 @@ export function UserMenu({
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const ref = useRef<HTMLDivElement>(null);
+  const { schaal, zetSchaal } = useFontSchaal();
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -88,6 +90,23 @@ export function UserMenu({
               </div>
             </>
           )}
+
+          <div className="my-1 border-t border-border" />
+          <div className="px-2 py-1.5">
+            <div className="mb-1 flex items-center justify-between text-xs font-medium text-muted">
+              <span>Lettergrootte</span>
+              <span>{schaal}%</span>
+            </div>
+            <input
+              type="range"
+              min={80}
+              max={150}
+              step={10}
+              value={schaal}
+              onChange={(e) => zetSchaal(Number(e.target.value))}
+              className="w-full accent-accent"
+            />
+          </div>
 
           <div className="my-1 border-t border-border" />
           <Link

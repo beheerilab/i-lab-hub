@@ -2,6 +2,7 @@
 
 import { useActionState, useRef, useEffect, useState } from "react";
 import { createContactAction, type ActionState } from "./actions";
+import { SOORT_LABELS } from "./soort";
 import { Card } from "@/components/ui/card";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -47,8 +48,11 @@ export function ContactForm() {
           </Field>
           <Field label="Soort" htmlFor="soort">
             <Select id="soort" name="soort" defaultValue="leverancier" required>
-              <option value="leverancier">Leverancier</option>
-              <option value="uitvoerder">Uitvoerder</option>
+              {Object.entries(SOORT_LABELS).map(([waarde, label]) => (
+                <option key={waarde} value={waarde}>
+                  {label}
+                </option>
+              ))}
             </Select>
           </Field>
           <Field label="Categorie (optioneel)" htmlFor="categorie">

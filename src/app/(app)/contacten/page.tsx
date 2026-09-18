@@ -4,10 +4,15 @@ import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/field";
 import { ContactForm } from "./contact-form";
-import { ContactCard } from "./contact-card";
+import { ContactRow } from "./contact-row";
+import { SOORT_OPTIES } from "./soort";
+import type { ContactSoort } from "@/lib/supabase/database.types";
 
 const SOORT_TABS = [
   { value: "", label: "Alle" },
+  { value: "gemeente", label: "Gemeente" },
+  { value: "school", label: "Scholen" },
+  { value: "bedrijfsleven", label: "Bedrijfsleven" },
   { value: "leverancier", label: "Leveranciers" },
   { value: "uitvoerder", label: "Uitvoerders" },
 ] as const;
@@ -21,9 +26,12 @@ export default async function ContactenPage({
   const { userId, profile } = await requireGeenDocent();
   const supabase = await createClient();
 
-  let query = supabase.from("contacts").select("*, contactpersonen(naam)").order("naam");
-  if (soort === "leverancier" || soort === "uitvoerder") {
-    query = query.eq("soort", soort);
+  let query = supabase
+    .from("contacts")
+    .select("*, afdelingen(naam, contactpersonen(naam))")
+    .order("naam");
+  if (SOORT_OPTIES.includes(soort as ContactSoort)) {
+    query = query.eq("soort", soort as ContactSoort);
   }
   const { data: contactsRaw } = await query;
 
@@ -32,7 +40,11 @@ export default async function ContactenPage({
     zoekterm
       ? c.naam.toLowerCase().includes(zoekterm) ||
         (c.categorie ?? "").toLowerCase().includes(zoekterm) ||
-        (c.contactpersonen ?? []).some((p) => p.naam.toLowerCase().includes(zoekterm)) ||
+        (c.afdelingen ?? []).some(
+          (a) =>
+            a.naam.toLowerCase().includes(zoekterm) ||
+            (a.contactpersonen ?? []).some((p) => p.naam.toLowerCase().includes(zoekterm)),
+        ) ||
         (c.zoekwoorden ?? []).some((w) => w.toLowerCase().includes(zoekterm))
       : true,
   );
@@ -41,12 +53,13 @@ export default async function ContactenPage({
     <div>
       <h1 className="mb-1 text-2xl font-semibold text-white">Contacten</h1>
       <p className="mb-6 text-white/80">
-        Leveranciers en andere contacten — wie je waarvoor kunt bellen of mailen.
+        Gemeente, scholen, bedrijfsleven, leveranciers en uitvoerders — wie je waarvoor kunt
+        bellen of mailen.
       </p>
 
       <ContactForm />
 
-      <div className="mb-4 inline-flex gap-1 rounded-xl border border-border bg-white p-1">
+      <div className="mb-4 inline-flex flex-wrap gap-1 rounded-xl border border-border bg-white p-1">
         {SOORT_TABS.map((tab) => (
           <Link
             key={tab.value}
@@ -65,7 +78,7 @@ export default async function ContactenPage({
         <Input
           type="search"
           name="q"
-          placeholder="Zoek op naam, categorie, contactpersoon of zoekwoord…"
+          placeholder="Zoek op naam, afdeling, contactpersoon of zoekwoord…"
           defaultValue={q}
         />
         <button
@@ -81,20 +94,22 @@ export default async function ContactenPage({
           <p className="text-muted">Geen contacten gevonden.</p>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
           {contacts.map((c) => (
-            <ContactCard
+            <ContactRow
               key={c.id}
-              id={c.id}
-              naam={c.naam}
-              soort={c.soort}
-              categorie={c.categorie}
-              telefoon={c.telefoon}
-              email={c.email}
-              notities={c.notities}
-              adres={c.adres}
-              zoekwoorden={c.zoekwoorden}
-              magVerwijderen={profile.role === "admin" || c.created_by === userId}
+              contact={{
+                id: c.id,
+                naam: c.naam,
+                soort: c.soort,
+                categorie: c.categorie,
+                telefoon: c.telefoon,
+                email: c.email,
+                adres: c.adres,
+                notities: c.notities,
+                zoekwoorden: c.zoekwoorden,
+              }}
+              magBeheren={profile.role === "admin" || c.created_by === userId}
             />
           ))}
         </div>

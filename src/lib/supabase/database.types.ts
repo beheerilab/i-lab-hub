@@ -17,7 +17,7 @@ export type BoekingCategorie = "les" | "bijeenkomst";
 
 export type OrderItemStatus = "actief" | "besteld" | "binnen";
 
-export type ContactSoort = "leverancier" | "uitvoerder";
+export type ContactSoort = "gemeente" | "school" | "bedrijfsleven" | "leverancier" | "uitvoerder";
 
 export type ContactBijlageType = "visitekaartje" | "contract" | "overig";
 
@@ -175,32 +175,25 @@ export interface Database {
           },
         ];
       };
-      contactpersonen: {
+      afdelingen: {
         Row: {
           id: string;
           contact_id: string;
           naam: string;
-          functie: string | null;
-          telefoon: string | null;
-          email: string | null;
+          created_by: string | null;
           created_at: string;
         };
         Insert: {
           contact_id: string;
           naam: string;
-          functie?: string | null;
-          telefoon?: string | null;
-          email?: string | null;
+          created_by?: string | null;
         };
         Update: {
           naam?: string;
-          functie?: string | null;
-          telefoon?: string | null;
-          email?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: "contactpersonen_contact_id_fkey";
+            foreignKeyName: "afdelingen_contact_id_fkey";
             columns: ["contact_id"];
             isOneToOne: false;
             referencedRelation: "contacts";
@@ -208,17 +201,88 @@ export interface Database {
           },
         ];
       };
+      contactpersonen: {
+        Row: {
+          id: string;
+          afdeling_id: string;
+          naam: string;
+          titel: string | null;
+          telefoon: string | null;
+          email: string | null;
+          geboortedatum: string | null;
+          created_at: string;
+        };
+        Insert: {
+          afdeling_id: string;
+          naam: string;
+          titel?: string | null;
+          telefoon?: string | null;
+          email?: string | null;
+          geboortedatum?: string | null;
+        };
+        Update: {
+          naam?: string;
+          titel?: string | null;
+          telefoon?: string | null;
+          email?: string | null;
+          geboortedatum?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contactpersonen_afdeling_id_fkey";
+            columns: ["afdeling_id"];
+            isOneToOne: false;
+            referencedRelation: "afdelingen";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contactmomenten: {
+        Row: {
+          id: string;
+          contactpersoon_id: string;
+          datum: string;
+          notitie: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          contactpersoon_id: string;
+          datum?: string;
+          notitie: string;
+          created_by?: string | null;
+        };
+        Update: Record<string, never>;
+        Relationships: [
+          {
+            foreignKeyName: "contactmomenten_contactpersoon_id_fkey";
+            columns: ["contactpersoon_id"];
+            isOneToOne: false;
+            referencedRelation: "contactpersonen";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contactmomenten_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       contact_bijlagen: {
         Row: {
           id: string;
-          contact_id: string;
+          contact_id: string | null;
+          contactpersoon_id: string | null;
           file_path: string;
           type: ContactBijlageType;
           created_by: string | null;
           created_at: string;
         };
         Insert: {
-          contact_id: string;
+          contact_id?: string | null;
+          contactpersoon_id?: string | null;
           file_path: string;
           type?: ContactBijlageType;
           created_by?: string | null;
@@ -230,6 +294,13 @@ export interface Database {
             columns: ["contact_id"];
             isOneToOne: false;
             referencedRelation: "contacts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "contact_bijlagen_contactpersoon_id_fkey";
+            columns: ["contactpersoon_id"];
+            isOneToOne: false;
+            referencedRelation: "contactpersonen";
             referencedColumns: ["id"];
           },
           {

@@ -5,6 +5,7 @@ import { requireProfile } from "@/lib/auth";
 import { TopNav } from "./top-nav";
 import { UserMenu } from "./user-menu";
 import { PreviewBanner } from "./preview-banner";
+import { FontSchaalToepasser } from "./font-schaal-toepasser";
 import type { Role } from "@/lib/supabase/database.types";
 
 const ROL_LABELS: Record<Role, string> = { admin: "Beheerder", lid: "Lid", docent: "Docent" };
@@ -14,6 +15,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <FontSchaalToepasser />
       {profile.role !== echteRol && <PreviewBanner rol={profile.role} />}
       <header className="border-b border-white/20">
         <div className="mx-auto max-w-5xl px-4 py-3 sm:px-6">
