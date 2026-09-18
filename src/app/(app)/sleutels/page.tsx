@@ -1,7 +1,7 @@
 import { requireGeenDocent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/field";
+import { GradientSearchInput } from "@/components/ui/field";
 import { SleutelForm } from "./sleutel-form";
 import { SleutelRow } from "./sleutel-row";
 
@@ -35,7 +35,7 @@ export default async function SleutelsPage({
       <SleutelForm />
 
       <form method="GET" className="mb-6 flex max-w-sm gap-2">
-        <Input type="search" name="q" placeholder="Zoek op naam of sleutelnummer…" defaultValue={q} />
+        <GradientSearchInput name="q" placeholder="Zoek op naam of sleutelnummer…" defaultValue={q} />
         <button
           type="submit"
           className="shrink-0 rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-medium hover:bg-black/[.03]"

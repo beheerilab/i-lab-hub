@@ -1,7 +1,7 @@
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/field";
+import { GradientSearchInput } from "@/components/ui/field";
 import { ManualForm } from "./manual-form";
 import { ManualCard } from "./manual-card";
 
@@ -40,8 +40,7 @@ export default async function HandleidingenPage({
       {profile.role !== "docent" && <ManualForm />}
 
       <form method="GET" className="mb-6 flex max-w-sm gap-2">
-        <Input
-          type="search"
+        <GradientSearchInput
           name="q"
           placeholder="Zoek op apparaatnaam…"
           defaultValue={q}

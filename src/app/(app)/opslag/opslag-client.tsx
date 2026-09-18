@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { saveZoneContentAction } from "./actions";
 import type { OpslagContent, OpslagHoofdlijn, OpslagItem, OpslagZone } from "./types";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/field";
+import { GradientSearchInput, Input } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 
 function NaamToevoegen({
@@ -92,7 +92,7 @@ function ItemToevoegen({ onAdd }: { onAdd: (item: OpslagItem) => void }) {
 }
 
 const CEL_INPUT_CLASSES =
-  "w-full rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm hover:border-border focus:border-accent focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/20";
+  "w-full rounded-md border border-muted/50 bg-black/[.035] px-1.5 py-1 text-sm hover:border-accent/50 focus:border-accent focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/20";
 
 function ItemRij({
   item,
@@ -332,8 +332,7 @@ export function OpslagClient({
   return (
     <>
       <div className="relative mx-auto mb-5 w-full max-w-md">
-        <Input
-          type="search"
+        <GradientSearchInput
           value={zoekterm}
           onChange={(e) => setZoekterm(e.target.value)}
           placeholder="Zoek op vaknaam of wat erin ligt, bijv. “pennen”…"

@@ -22,16 +22,24 @@ export function Label({
   );
 }
 
-export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={fieldClasses} {...props} />;
+export function Input({ className = "", ...props }: InputHTMLAttributes<HTMLInputElement>) {
+  return <input className={`${fieldClasses} ${className}`} {...props} />;
 }
 
-export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea className={`${fieldClasses} min-h-24`} {...props} />;
+export function Textarea({ className = "", ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea className={`${fieldClasses} min-h-24 ${className}`} {...props} />;
 }
 
-export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select className={fieldClasses} {...props} />;
+export function Select({ className = "", ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+  return <select className={`${fieldClasses} ${className}`} {...props} />;
+}
+
+const gradientSearchClasses =
+  "w-full rounded-lg border border-white/40 bg-white/10 px-3.5 py-2.5 text-base text-white placeholder:text-white/70 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/30";
+
+/** Zoekveld dat direct op de blauwe achtergrond-gradient staat (niet in een witte kaart) — witte tekst i.p.v. de donkere standaardkleur, anders onleesbaar. */
+export function GradientSearchInput({ className = "", ...props }: InputHTMLAttributes<HTMLInputElement>) {
+  return <input type="search" className={`${gradientSearchClasses} ${className}`} {...props} />;
 }
 
 export function Field({

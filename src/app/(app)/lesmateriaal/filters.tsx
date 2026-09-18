@@ -1,6 +1,6 @@
 "use client";
 
-import { Input, Select } from "@/components/ui/field";
+import { GradientSearchInput, Select } from "@/components/ui/field";
 
 export function MaterialFilters({
   subjects,
@@ -21,8 +21,7 @@ export function MaterialFilters({
 
   return (
     <form method="GET" className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-4">
-      <Input
-        type="search"
+      <GradientSearchInput
         name="q"
         placeholder="Zoek op titel, beschrijving of tag…"
         defaultValue={huidigZoek}

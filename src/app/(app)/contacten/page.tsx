@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireGeenDocent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/field";
+import { GradientSearchInput } from "@/components/ui/field";
 import { ContactForm } from "./contact-form";
 import { ContactRow } from "./contact-row";
 import { SOORT_OPTIES } from "./soort";
@@ -51,13 +51,14 @@ export default async function ContactenPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-white">Contacten</h1>
+      <div className="mb-1 flex items-start justify-between gap-3">
+        <h1 className="text-2xl font-semibold text-white">Contacten</h1>
+        <ContactForm />
+      </div>
       <p className="mb-6 text-white/80">
         Gemeente, scholen, bedrijfsleven, leveranciers en uitvoerders — wie je waarvoor kunt
         bellen of mailen.
       </p>
-
-      <ContactForm />
 
       <div className="mb-4 inline-flex flex-wrap gap-1 rounded-xl border border-border bg-white p-1">
         {SOORT_TABS.map((tab) => (
@@ -75,8 +76,7 @@ export default async function ContactenPage({
 
       <form method="GET" className="mb-6 flex max-w-sm gap-2">
         <input type="hidden" name="soort" value={soort} />
-        <Input
-          type="search"
+        <GradientSearchInput
           name="q"
           placeholder="Zoek op naam, afdeling, contactpersoon of zoekwoord…"
           defaultValue={q}

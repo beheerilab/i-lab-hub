@@ -18,6 +18,7 @@ export function BijlagenBlok({ contactId }: { contactId: string }) {
   const formRef = useRef<HTMLFormElement>(null);
   const submitting = useRef(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   function laad() {
     startLoad(async () => setBijlagen(await getContactBijlagenAction(contactId)));
@@ -31,6 +32,7 @@ export function BijlagenBlok({ contactId }: { contactId: string }) {
   useEffect(() => {
     if (submitting.current && !uploadState.error) {
       formRef.current?.reset();
+      setUploadOpen(false);
       laad();
     }
     submitting.current = false;
@@ -48,7 +50,16 @@ export function BijlagenBlok({ contactId }: { contactId: string }) {
 
   return (
     <div>
-      <h4 className="mb-2 text-sm font-semibold">Contract / overige bijlagen</h4>
+      <div className="mb-2 flex items-center justify-between">
+        <h4 className="text-sm font-semibold">Contract / overige bijlagen</h4>
+        <button
+          type="button"
+          onClick={() => setUploadOpen((o) => !o)}
+          className="text-sm text-accent underline"
+        >
+          {uploadOpen ? "Sluiten" : "+ Contract"}
+        </button>
+      </div>
       {bijlagen && bijlagen.length > 0 && (
         <ul className="mb-2 space-y-1.5">
           {bijlagen.map((b) => (
@@ -68,29 +79,31 @@ export function BijlagenBlok({ contactId }: { contactId: string }) {
           ))}
         </ul>
       )}
-      <form
-        ref={formRef}
-        action={uploadAction}
-        onSubmit={() => (submitting.current = true)}
-        className="flex flex-wrap items-center gap-2"
-      >
-        <input type="hidden" name="contact_id" value={contactId} />
-        <Select name="type" defaultValue="contract" className="w-40 py-1.5 text-sm">
-          <option value="contract">Contract</option>
-          <option value="overig">Overig</option>
-        </Select>
-        <input
-          type="file"
-          name="file"
-          className="text-xs text-muted file:mr-2 file:rounded-lg file:border-0 file:bg-accent file:px-2.5 file:py-1.5 file:text-xs file:text-white"
-        />
-        <button
-          type="submit"
-          className="shrink-0 rounded-lg border border-border px-2.5 py-1.5 text-xs hover:bg-black/[.04]"
+      {uploadOpen && (
+        <form
+          ref={formRef}
+          action={uploadAction}
+          onSubmit={() => (submitting.current = true)}
+          className="flex flex-wrap items-center gap-2"
         >
-          Uploaden
-        </button>
-      </form>
+          <input type="hidden" name="contact_id" value={contactId} />
+          <Select name="type" defaultValue="contract" className="w-40 py-1.5 text-sm">
+            <option value="contract">Contract</option>
+            <option value="overig">Overig</option>
+          </Select>
+          <input
+            type="file"
+            name="file"
+            className="text-xs text-muted file:mr-2 file:rounded-lg file:border-0 file:bg-accent file:px-2.5 file:py-1.5 file:text-xs file:text-white"
+          />
+          <button
+            type="submit"
+            className="shrink-0 rounded-lg border border-border px-2.5 py-1.5 text-xs hover:bg-black/[.04]"
+          >
+            Uploaden
+          </button>
+        </form>
+      )}
       {uploadState.error && <p className="mt-1 text-xs text-danger">{uploadState.error}</p>}
     </div>
   );
