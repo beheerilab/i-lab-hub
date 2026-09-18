@@ -210,6 +210,7 @@ export interface Database {
           telefoon: string | null;
           email: string | null;
           geboortedatum: string | null;
+          tags: string[];
           created_at: string;
         };
         Insert: {
@@ -219,6 +220,7 @@ export interface Database {
           telefoon?: string | null;
           email?: string | null;
           geboortedatum?: string | null;
+          tags?: string[];
         };
         Update: {
           naam?: string;
@@ -226,6 +228,7 @@ export interface Database {
           telefoon?: string | null;
           email?: string | null;
           geboortedatum?: string | null;
+          tags?: string[];
         };
         Relationships: [
           {

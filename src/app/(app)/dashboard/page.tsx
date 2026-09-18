@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MODULES, modulesVoorRol } from "@/lib/modules";
 import { ClaimAdminBanner } from "./claim-admin-banner";
 import { VandaagWidget } from "./vandaag-widget";
+import { VerjaardagenWidget } from "./verjaardagen-widget";
 
 export default async function DashboardPage() {
   const { userId, profile } = await requireProfile();
@@ -28,6 +29,8 @@ export default async function DashboardPage() {
       {showClaimAdminBanner && <ClaimAdminBanner />}
 
       <VandaagWidget userId={userId} isDocent={profile.role === "docent"} />
+
+      {profile.role !== "docent" && <VerjaardagenWidget />}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {modulesVoorRol(profile.role, MODULES).map((mod) => (

@@ -123,6 +123,16 @@ export function PersoonDetailModal({ persoonId, onClose }: { persoonId: string; 
             <Field label="Telefoonnummer" htmlFor="telefoon">
               <Input id="telefoon" name="telefoon" type="tel" defaultValue={details?.telefoon ?? ""} />
             </Field>
+            <div className="col-span-2">
+              <Field label="Tags (komma-gescheiden)" htmlFor="tags">
+                <Input
+                  id="tags"
+                  name="tags"
+                  defaultValue={details?.tags.join(", ") ?? ""}
+                  placeholder="bijv. beslisser, technisch contact"
+                />
+              </Field>
+            </div>
             {saveState.error && <p className="col-span-2 text-sm text-danger">{saveState.error}</p>}
             <div className="col-span-2">
               <SubmitButton className="py-1.5 text-sm">Opslaan</SubmitButton>
@@ -194,6 +204,15 @@ export function PersoonDetailModal({ persoonId, onClose }: { persoonId: string; 
                 <SubmitButton className="py-1.5 text-sm">Toevoegen</SubmitButton>
               </div>
               <Textarea name="notitie" rows={2} placeholder="Waar ging het contact over?" />
+              <div>
+                <Field label="Volg op (optioneel)" htmlFor="volg_op_datum">
+                  <Input id="volg_op_datum" name="volg_op_datum" type="date" className="w-40 py-1.5 text-sm" />
+                </Field>
+                <p className="mt-1 text-xs text-muted">
+                  Vul een datum in om hier een werkzaamheid van te maken die aan jou wordt
+                  toegewezen.
+                </p>
+              </div>
             </form>
             {momentState.error && <p className="mb-2 text-xs text-danger">{momentState.error}</p>}
             {details && details.momenten.length > 0 ? (

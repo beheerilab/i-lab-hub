@@ -82,18 +82,64 @@ export type AfdelingMetPersonen = {
     titel: string | null;
     telefoon: string | null;
     email: string | null;
+    tags: string[];
+    laatsteMoment: string | null;
   }[];
 };
 
-/** Hele boom van een instantie: afdelingen + de contactpersonen erin. */
+/** Hele boom van een instantie: afdelingen + de contactpersonen erin, met laatste contactmoment per persoon. */
 export async function getContactHierarchieAction(contactId: string): Promise<AfdelingMetPersonen[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("afdelingen")
-    .select("id, naam, contactpersonen(id, naam, titel, telefoon, email)")
+    .select("id, naam, contactpersonen(id, naam, titel, telefoon, email, tags, contactmomenten(datum))")
     .eq("contact_id", contactId)
     .order("naam");
-  return data ?? [];
+
+  return (data ?? []).map((a) => ({
+    id: a.id,
+    naam: a.naam,
+    contactpersonen: a.contactpersonen.map((p) => ({
+      id: p.id,
+      naam: p.naam,
+      titel: p.titel,
+      telefoon: p.telefoon,
+      email: p.email,
+      tags: p.tags,
+      laatsteMoment:
+        p.contactmomenten.length > 0
+          ? p.contactmomenten.map((m) => m.datum).sort((x, y) => (x < y ? 1 : -1))[0]
+          : null,
+    })),
+  }));
+}
+
+export type ContactKoppelingen = {
+  taken: { id: string; titel: string; status: string }[];
+  bestellingen: { id: string; itemNaam: string; status: string }[];
+};
+
+/** Openstaande werkzaamheden en bestelitems die aan deze instantie gekoppeld zijn. */
+export async function getContactKoppelingenAction(contactId: string): Promise<ContactKoppelingen> {
+  const supabase = await createClient();
+  const [{ data: taken }, { data: bestellingen }] = await Promise.all([
+    supabase
+      .from("tasks")
+      .select("id, titel, status")
+      .eq("leverancier_id", contactId)
+      .eq("gearchiveerd", false)
+      .order("datum", { ascending: false }),
+    supabase
+      .from("order_items")
+      .select("id, item_naam, status")
+      .eq("leverancier_id", contactId)
+      .eq("gearchiveerd", false)
+      .order("created_at", { ascending: false }),
+  ]);
+  return {
+    taken: taken ?? [],
+    bestellingen: (bestellingen ?? []).map((b) => ({ id: b.id, itemNaam: b.item_naam, status: b.status })),
+  };
 }
 
 export async function addAfdelingAction(contactId: string, naam: string) {
@@ -151,6 +197,7 @@ export type PersoonDetail = {
   telefoon: string | null;
   email: string | null;
   geboortedatum: string | null;
+  tags: string[];
   momenten: { id: string; datum: string; notitie: string; auteur: string }[];
   bijlagen: { id: string; type: string; url: string }[];
 };
@@ -161,7 +208,7 @@ export async function getPersoonDetailAction(persoonId: string): Promise<Persoon
   const [{ data: persoon }, { data: momenten }, { data: bijlagen }] = await Promise.all([
     supabase
       .from("contactpersonen")
-      .select("naam, titel, telefoon, email, geboortedatum")
+      .select("naam, titel, telefoon, email, geboortedatum, tags")
       .eq("id", persoonId)
       .single(),
     supabase
@@ -178,6 +225,7 @@ export async function getPersoonDetailAction(persoonId: string): Promise<Persoon
     telefoon: persoon?.telefoon ?? null,
     email: persoon?.email ?? null,
     geboortedatum: persoon?.geboortedatum ?? null,
+    tags: persoon?.tags ?? [],
     momenten: (momenten ?? []).map((m) => ({
       id: m.id,
       datum: m.datum,
@@ -202,6 +250,10 @@ export async function updatePersoonAction(
   const telefoon = String(formData.get("telefoon") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const geboortedatum = String(formData.get("geboortedatum") ?? "").trim();
+  const tags = String(formData.get("tags") ?? "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
 
   if (!id) return { error: "Ongeldige contactpersoon." };
   if (!naam) return { error: "Vul een naam in." };
@@ -215,6 +267,7 @@ export async function updatePersoonAction(
       telefoon: telefoon || null,
       email: email || null,
       geboortedatum: geboortedatum || null,
+      tags,
     })
     .eq("id", id);
 
@@ -231,6 +284,7 @@ export async function addContactmomentAction(
   const contactpersoonId = String(formData.get("contactpersoon_id") ?? "");
   const datum = String(formData.get("datum") ?? "").trim();
   const notitie = String(formData.get("notitie") ?? "").trim();
+  const volgOpDatum = String(formData.get("volg_op_datum") ?? "").trim();
 
   if (!contactpersoonId) return { error: "Ongeldige contactpersoon." };
   if (!notitie) return { error: "Vul een notitie in." };
@@ -249,6 +303,22 @@ export async function addContactmomentAction(
   });
 
   if (error) return { error: "Opslaan mislukt: " + error.message };
+
+  if (volgOpDatum) {
+    const { data: persoon } = await supabase
+      .from("contactpersonen")
+      .select("naam")
+      .eq("id", contactpersoonId)
+      .single();
+    await supabase.from("tasks").insert({
+      titel: `Follow-up: ${persoon?.naam ?? "contactpersoon"}`,
+      beschrijving: notitie,
+      datum: volgOpDatum,
+      toegewezen_aan: user.id,
+      created_by: user.id,
+    });
+    revalidatePath("/werkzaamheden");
+  }
 
   revalidatePath("/contacten");
   return {};

@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
+import { format } from "date-fns";
+import { nl } from "date-fns/locale";
 import {
   addAfdelingAction,
   deleteAfdelingAction,
@@ -78,13 +80,34 @@ function AfdelingRij({
                   <button
                     type="button"
                     onClick={() => setPersoonId(p.id)}
-                    className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm hover:bg-accent/5"
+                    className="flex w-full items-start justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm hover:bg-accent/5"
                   >
-                    <span className="min-w-0 truncate">
-                      <span className="font-medium">{p.naam}</span>
-                      {p.titel && <span className="text-muted"> — {p.titel}</span>}
+                    <span className="min-w-0">
+                      <span className="block truncate">
+                        <span className="font-medium">{p.naam}</span>
+                        {p.titel && <span className="text-muted"> — {p.titel}</span>}
+                      </span>
+                      {p.tags.length > 0 && (
+                        <span className="mt-1 flex flex-wrap gap-1">
+                          {p.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full bg-accent/10 px-1.5 py-0.5 text-[10px] font-medium text-accent-hover"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </span>
+                      )}
                     </span>
-                    <span className="shrink-0 truncate text-xs text-muted">{p.email || p.telefoon || ""}</span>
+                    <span className="shrink-0 text-right text-xs text-muted">
+                      <span className="block truncate">{p.email || p.telefoon || ""}</span>
+                      <span className="block">
+                        {p.laatsteMoment
+                          ? `laatst: ${format(new Date(`${p.laatsteMoment}T00:00:00`), "d MMM", { locale: nl })}`
+                          : "geen contact gelogd"}
+                      </span>
+                    </span>
                   </button>
                 </li>
               ))}

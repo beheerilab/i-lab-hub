@@ -10,6 +10,7 @@ import {
 } from "./actions";
 import { AfdelingenBlok } from "./afdelingen-blok";
 import { BijlagenBlok } from "./bijlagen-blok";
+import { KoppelingenBlok } from "./koppelingen-blok";
 import { Select, Input } from "@/components/ui/field";
 import { SOORT_LABELS } from "./soort";
 import type { ContactSoort } from "@/lib/supabase/database.types";
@@ -135,6 +136,8 @@ export function ContactRow({ contact, magBeheren }: { contact: Contact; magBeher
               <AfdelingenBlok contactId={contact.id} afdelingen={afdelingen} onRefresh={laadHierarchie} />
             )}
           </div>
+
+          <KoppelingenBlok contactId={contact.id} />
 
           <BijlagenBlok contactId={contact.id} />
 
