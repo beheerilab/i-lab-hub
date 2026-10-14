@@ -53,7 +53,7 @@ export function MarkOrderedControl({
               else setOpen(false);
             })
           }
-          className="rounded-lg bg-accent px-2.5 py-1.5 text-sm text-white hover:bg-accent-hover disabled:opacity-50"
+          className="rounded-lg bg-gradient-to-br from-accent-hover to-accent text-white shadow-knop px-2.5 py-1.5 text-sm hover:brightness-110 disabled:opacity-50"
         >
           Bevestig
         </button>

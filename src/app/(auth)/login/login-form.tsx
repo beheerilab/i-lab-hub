@@ -38,7 +38,7 @@ export function LoginForm() {
           type="button"
           onClick={() => setMode("login")}
           className={`rounded-md py-2 transition-colors ${
-            mode === "login" ? "bg-accent text-white" : "text-muted"
+            mode === "login" ? "bg-gradient-to-br from-accent-hover to-accent text-white shadow-knop" : "text-muted"
           }`}
         >
           Inloggen
@@ -47,7 +47,7 @@ export function LoginForm() {
           type="button"
           onClick={() => setMode("signup")}
           className={`rounded-md py-2 transition-colors ${
-            mode === "signup" ? "bg-accent text-white" : "text-muted"
+            mode === "signup" ? "bg-gradient-to-br from-accent-hover to-accent text-white shadow-knop" : "text-muted"
           }`}
         >
           Account aanmaken

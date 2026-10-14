@@ -7,6 +7,7 @@ import { NavDropdown } from "./nav-dropdown";
 import type { Role } from "@/lib/supabase/database.types";
 
 const DOCUMENTATIE_HREFS = ["/lesmateriaal", "/jaaroverzicht", "/handleidingen"];
+const OVERZICHTEN_HREFS = ["/contacten", "/sleutels", "/opslag"];
 
 export function TopNav({ rol }: { rol: Role }) {
   const pathname = usePathname();
@@ -20,6 +21,10 @@ export function TopNav({ rol }: { rol: Role }) {
           return (
             <NavDropdown key="documentatie" rol={rol} label="Documentatie" icon="📚" hrefs={DOCUMENTATIE_HREFS} />
           );
+        }
+        if (OVERZICHTEN_HREFS.includes(mod.href)) {
+          if (mod.href !== OVERZICHTEN_HREFS[0]) return null;
+          return <NavDropdown key="overzichten" rol={rol} label="Overzichten" icon="🗂️" hrefs={OVERZICHTEN_HREFS} />;
         }
         if (TOOLS_HREFS.includes(mod.href)) {
           if (mod.href !== TOOLS_HREFS[0]) return null;

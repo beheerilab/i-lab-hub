@@ -3,7 +3,7 @@ import Link from "next/link";
 export function BestellijstTabs({ active }: { active: "nieuw" | "actief" | "historie" }) {
   const tabClasses = (isActive: boolean) =>
     `rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-      isActive ? "bg-accent text-white" : "text-muted hover:bg-black/[.03]"
+      isActive ? "bg-gradient-to-br from-accent-hover to-accent text-white shadow-knop" : "text-muted hover:bg-black/[.03]"
     }`;
 
   return (

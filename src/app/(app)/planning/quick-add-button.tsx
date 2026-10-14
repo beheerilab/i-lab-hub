@@ -33,7 +33,7 @@ export function QuickAddButton({
             vrijeKeuze: true,
           })
         }
-        className="shrink-0 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-50"
+        className="shrink-0 rounded-lg bg-gradient-to-br from-accent-hover to-accent text-white shadow-knop px-3 py-2 text-sm font-medium hover:brightness-110 disabled:opacity-50"
         title="Nieuwe boeking inplannen"
       >
         + Nieuwe boeking

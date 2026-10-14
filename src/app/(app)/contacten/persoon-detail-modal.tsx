@@ -173,7 +173,7 @@ export function PersoonDetailModal({ persoonId, onClose }: { persoonId: string; 
                 type="file"
                 name="file"
                 accept="image/*"
-                className="text-xs text-muted file:mr-2 file:rounded-lg file:border-0 file:bg-accent file:px-2.5 file:py-1.5 file:text-xs file:text-white"
+                className="text-xs text-muted file:mr-2 file:rounded-lg file:border-0 file:bg-gradient-to-br file:from-accent-hover file:to-accent file:px-2.5 file:py-1.5 file:text-xs file:text-white"
               />
               <button
                 type="submit"

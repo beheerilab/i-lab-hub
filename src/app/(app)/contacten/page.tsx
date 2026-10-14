@@ -66,7 +66,7 @@ export default async function ContactenPage({
             key={tab.value}
             href={`/contacten?${tab.value ? `soort=${tab.value}&` : ""}q=${encodeURIComponent(q)}`}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              soort === tab.value ? "bg-accent text-white" : "text-muted hover:bg-black/[.03]"
+              soort === tab.value ? "bg-gradient-to-br from-accent-hover to-accent text-white shadow-knop" : "text-muted hover:bg-black/[.03]"
             }`}
           >
             {tab.label}

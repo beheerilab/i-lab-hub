@@ -49,7 +49,7 @@ export function ManualForm() {
             name="file"
             type="file"
             accept="application/pdf"
-            className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-accent file:px-3 file:py-2 file:text-white"
+            className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-gradient-to-br file:from-accent-hover file:to-accent file:px-3 file:py-2 file:text-white"
           />
         </Field>
 

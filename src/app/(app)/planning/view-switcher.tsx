@@ -34,7 +34,7 @@ export function ViewSwitcher({ modus, datum }: { modus: Modus; datum: Date }) {
             key={m}
             href={`/planning?modus=${m}&datum=${format(datum, "yyyy-MM-dd")}`}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
-              modus === m ? "bg-accent text-white" : "text-muted hover:bg-black/[.03]"
+              modus === m ? "bg-gradient-to-br from-accent-hover to-accent text-white shadow-knop" : "text-muted hover:bg-black/[.03]"
             }`}
           >
             {m}

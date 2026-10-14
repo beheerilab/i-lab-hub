@@ -9,6 +9,11 @@ const TOOLS: Record<string, string> = {
   facturatie: "facturatie.html",
 };
 
+const BARLOW_HEAD =
+  '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+  '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">' +
+  '<style>html,body,button,input,select,textarea{font-family:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}</style>';
+
 /**
  * Serveert een losse HTML-tool, maar alleen aan ingelogde crew (geen docent) —
  * vandaar niet in public/. De pagina's /prijscalculator, /reiskosten en
@@ -21,7 +26,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ naa
   const bestand = TOOLS[naam];
   if (!bestand) return new Response("Niet gevonden", { status: 404 });
 
-  const html = await readFile(path.join(process.cwd(), "src", "tools-html", bestand), "utf8");
+  let html = await readFile(path.join(process.cwd(), "src", "tools-html", bestand), "utf8");
+  // Zelfde lettertype als de hub (prijscalculator heeft Barlow al ingebouwd).
+  if (!html.includes('font-family:"Barlow"')) {
+    html = html.replace("</head>", `${BARLOW_HEAD}</head>`);
+  }
   return new Response(html, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",

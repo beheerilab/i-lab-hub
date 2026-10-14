@@ -76,7 +76,7 @@ export function ContactForm() {
                       onClick={() => setSoort(optie)}
                       className={`rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
                         soort === optie
-                          ? "border-accent bg-accent text-white"
+                          ? "border-accent bg-gradient-to-br from-accent-hover to-accent text-white shadow-knop"
                           : "border-border text-muted hover:bg-black/[.03]"
                       }`}
                     >

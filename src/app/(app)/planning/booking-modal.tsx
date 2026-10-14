@@ -123,7 +123,7 @@ export function BookingModal({
                 : undefined
             }
             className={`rounded-md py-2 transition-colors ${
-              isLes ? "bg-accent text-white" : "text-muted"
+              isLes ? "bg-gradient-to-br from-accent-hover to-accent text-white shadow-knop" : "text-muted"
             } ${!roomToegestaanVoorLes ? "cursor-not-allowed opacity-40" : ""}`}
           >
             Les
@@ -132,7 +132,7 @@ export function BookingModal({
             type="button"
             onClick={() => wijzigCategorie("bijeenkomst")}
             className={`rounded-md py-2 transition-colors ${
-              !isLes ? "bg-accent text-white" : "text-muted"
+              !isLes ? "bg-gradient-to-br from-accent-hover to-accent text-white shadow-knop" : "text-muted"
             }`}
           >
             Vergadering/evenement
