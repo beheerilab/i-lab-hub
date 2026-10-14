@@ -35,9 +35,9 @@ export function Select({ className = "", ...props }: SelectHTMLAttributes<HTMLSe
 }
 
 const gradientSearchClasses =
-  "w-full rounded-lg border border-white/40 bg-white/10 px-3.5 py-2.5 text-base text-white placeholder:text-white/70 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/30";
+  "w-full rounded-lg border border-muted/50 bg-white px-3.5 py-2.5 text-base text-foreground placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20";
 
-/** Zoekveld dat direct op de blauwe achtergrond-gradient staat (niet in een witte kaart) — witte tekst i.p.v. de donkere standaardkleur, anders onleesbaar. */
+/** Zoekveld dat direct op de pagina-achtergrond staat (niet in een kaart): wit veld zodat het goed afsteekt tegen het grijze verloop. */
 export function GradientSearchInput({ className = "", ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input type="search" className={`${gradientSearchClasses} ${className}`} {...props} />;
 }

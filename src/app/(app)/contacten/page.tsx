@@ -52,10 +52,10 @@ export default async function ContactenPage({
   return (
     <div>
       <div className="mb-1 flex items-start justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-white">Contacten</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Contacten</h1>
         <ContactForm />
       </div>
-      <p className="mb-6 text-white/80">
+      <p className="mb-6 text-muted">
         Gemeente, scholen, bedrijfsleven, leveranciers en uitvoerders — wie je waarvoor kunt
         bellen of mailen.
       </p>

@@ -17,12 +17,12 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen flex-col">
       <FontSchaalToepasser />
       {profile.role !== echteRol && <PreviewBanner rol={profile.role} />}
-      <header className="border-b border-white/20">
+      <header className="sticky top-0 z-30 border-b border-border bg-white/90 backdrop-blur">
         <div className="mx-auto max-w-5xl px-4 py-3 sm:px-6">
           <div className="flex items-center justify-between gap-3">
             <Link href="/dashboard" className="shrink-0">
               <Image
-                src="/brand/logo-wit.png"
+                src="/brand/logo-kleur.png"
                 alt="i_lab"
                 width={110}
                 height={44}

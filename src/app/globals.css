@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/*
+ * Huisstijl overgenomen uit de i-lab-tools (prijscalculator, reiskosten,
+ * ruimtegebruik-facturatie): licht wit→grijs verloop op de achtergrond,
+ * witte kaarten met zachte schaduw, blauwe verloop-knoppen.
+ */
 :root {
   --background: #e3e9ec;
   --foreground: #0c1c49;
@@ -7,13 +12,13 @@
   --accent-hover: #0075bf;
   --accent-dark: #0c1c49;
   --accent-light: #a1daf8;
+  --accent-soft: #eaf4fb;
   --card: #ffffff;
-  --border: #b6c0c6;
-  --muted: #8a959c;
+  --border: #dfe6ec;
+  --muted: #5c6a8c;
   --danger: #b3261e;
-  --gradient-start: #009fe3;
-  --gradient-mid: #a1daf8;
-  --gradient-end: #0075bf;
+  --page-start: #ffffff;
+  --page-end: #e3e9ec;
 }
 
 @theme inline {
@@ -23,16 +28,18 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-dark: var(--accent-dark);
   --color-accent-light: var(--accent-light);
+  --color-accent-soft: var(--accent-soft);
   --color-card: var(--card);
   --color-border: var(--border);
   --color-muted: var(--muted);
   --color-danger: var(--danger);
   --font-sans: var(--font-barlow);
+  --shadow-card: 0 1px 2px rgba(12, 28, 73, 0.05), 0 10px 28px -14px rgba(12, 28, 73, 0.22);
+  --shadow-knop: 0 8px 20px -8px rgba(0, 117, 191, 0.55);
 }
 
 body {
-  background: linear-gradient(150deg, var(--gradient-start) 0%, var(--gradient-mid) 60%, var(--gradient-end) 100%)
-    fixed;
+  background: linear-gradient(165deg, var(--page-start) 0%, var(--page-end) 100%) fixed;
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }

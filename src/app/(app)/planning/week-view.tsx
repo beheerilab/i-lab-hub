@@ -50,7 +50,7 @@ export function WeekView({
         <button
           type="button"
           onClick={() => window.print()}
-          className="shrink-0 rounded-lg border border-white/40 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/15 print:hidden"
+          className="shrink-0 rounded-lg border border-border bg-white px-3 py-1.5 text-sm font-medium text-foreground hover:border-accent hover:text-accent-hover print:hidden"
         >
           🖨️ Printen
         </button>

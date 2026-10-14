@@ -43,12 +43,12 @@ export function UserMenu({
 
   return (
     <div ref={ref} className="relative flex items-center gap-3 text-sm">
-      <span className="text-white">{naam}</span>
+      <span className="font-medium text-foreground">{naam}</span>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label="Menu"
-        className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/40 text-white transition-colors hover:bg-white/15"
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-white text-foreground transition-colors hover:border-accent hover:text-accent-hover"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5">
           <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />

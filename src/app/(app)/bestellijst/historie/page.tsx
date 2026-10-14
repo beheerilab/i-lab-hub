@@ -17,8 +17,8 @@ export default async function BestellijstHistoriePage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-white">Bestellijst</h1>
-      <p className="mb-6 text-white/80">Eerder bestelde items, per stuk bijgehouden.</p>
+      <h1 className="mb-1 text-2xl font-semibold text-foreground">Bestellijst</h1>
+      <p className="mb-6 text-muted">Eerder bestelde items, per stuk bijgehouden.</p>
 
       <BestellijstTabs active="historie" />
 

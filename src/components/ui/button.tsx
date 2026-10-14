@@ -2,7 +2,7 @@ import { type ButtonHTMLAttributes, type AnchorHTMLAttributes } from "react";
 import Link from "next/link";
 
 const VARIANT_CLASSES = {
-  primary: "bg-accent text-white hover:bg-accent-hover",
+  primary: "bg-gradient-to-br from-accent-hover to-accent text-white shadow-knop hover:brightness-110",
   secondary: "bg-white text-foreground border border-border hover:bg-black/[.03]",
   danger: "bg-white text-danger border border-danger/40 hover:bg-danger/5",
 } as const;

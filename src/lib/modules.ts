@@ -53,7 +53,28 @@ export const MODULES = [
     title: "Opslagoverzicht",
     description: "Plattegrond met wat waar ligt opgeslagen",
   },
+  {
+    href: "/prijscalculator",
+    icon: "🧮",
+    title: "Prijscalculator",
+    description: "Offertes voor lessen en ruimteverhuur",
+  },
+  {
+    href: "/facturatie",
+    icon: "🧾",
+    title: "Ruimtegebruik facturatie",
+    description: "Reserveringen inlezen en facturen maken",
+  },
+  {
+    href: "/reiskosten",
+    icon: "🚗",
+    title: "Reiskosten",
+    description: "Woon-werk kilometers per maand, als PDF",
+  },
 ] as const;
+
+/** Modules die in de navigatiebalk onder het menu "Tools" vallen. */
+export const TOOLS_HREFS: string[] = ["/prijscalculator", "/facturatie", "/reiskosten"];
 
 /**
  * Een docent mag alleen bij Planning en de leesbare documentatie (Lesmateriaal/

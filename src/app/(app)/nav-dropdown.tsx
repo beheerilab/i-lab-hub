@@ -7,16 +7,25 @@ import { usePathname } from "next/navigation";
 import { MODULES, modulesVoorRol } from "@/lib/modules";
 import type { Role } from "@/lib/supabase/database.types";
 
-const DOCUMENTATIE_HREFS = ["/lesmateriaal", "/jaaroverzicht", "/handleidingen"];
-
-export function DocumentatieDropdown({ rol }: { rol: Role }) {
+/** Uitklapmenu in de navigatiebalk voor een groep modules (bijv. Documentatie of Tools). */
+export function NavDropdown({
+  rol,
+  label,
+  icon,
+  hrefs,
+}: {
+  rol: Role;
+  label: string;
+  icon: string;
+  hrefs: string[];
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const items = modulesVoorRol(rol, MODULES.filter((mod) => DOCUMENTATIE_HREFS.includes(mod.href)));
+  const items = modulesVoorRol(rol, MODULES.filter((mod) => hrefs.includes(mod.href)));
   const isActive = items.some((mod) => pathname.startsWith(mod.href));
 
   useEffect(() => {
@@ -49,11 +58,11 @@ export function DocumentatieDropdown({ rol }: { rol: Role }) {
         type="button"
         onClick={toggleOpen}
         className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-          isActive ? "bg-white text-accent-dark" : "text-white/90 hover:bg-white/15"
+          isActive ? "bg-accent-soft font-bold text-accent-hover" : "text-muted hover:bg-black/[.04] hover:text-accent-hover"
         }`}
       >
-        <span>📚</span>
-        Documentatie
+        <span>{icon}</span>
+        {label}
         <span className="text-xs">{open ? "▲" : "▼"}</span>
       </button>
 

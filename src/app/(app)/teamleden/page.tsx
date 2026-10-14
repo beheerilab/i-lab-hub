@@ -14,8 +14,8 @@ export default async function TeamledenPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-white">Teamleden</h1>
-      <p className="mb-6 text-white/80">
+      <h1 className="mb-1 text-2xl font-semibold text-foreground">Teamleden</h1>
+      <p className="mb-6 text-muted">
         Beheer wie toegang heeft tot i-lab Hub en wie beheerder is.
       </p>
       <Card>
@@ -35,7 +35,7 @@ export default async function TeamledenPage() {
           </ul>
         )}
       </Card>
-      <p className="mt-3 text-sm text-white/70">
+      <p className="mt-3 text-sm text-muted">
         &ldquo;Toegang intrekken&rdquo; verwijdert het profiel uit i-lab Hub. Het bijbehorende account in
         Supabase blijft daarna nog bestaan (te verwijderen via Supabase → Authentication).
       </p>

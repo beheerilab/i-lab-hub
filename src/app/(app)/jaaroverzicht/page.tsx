@@ -37,8 +37,8 @@ export default async function JaaroverzichtPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-white">Jaaroverzicht</h1>
-      <p className="mb-6 text-white/80">
+      <h1 className="mb-1 text-2xl font-semibold text-foreground">Jaaroverzicht</h1>
+      <p className="mb-6 text-muted">
         Lessen en leerlingaantallen uit de planning, voor verantwoording aan schoolleiding.
       </p>
 

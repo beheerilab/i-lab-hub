@@ -16,8 +16,8 @@ export default async function OpslagPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-white">Opslagoverzicht</h1>
-      <p className="mb-6 text-white/80">
+      <h1 className="mb-1 text-2xl font-semibold text-foreground">Opslagoverzicht</h1>
+      <p className="mb-6 text-muted">
         Waar staat wat — klik op een vak in de plattegrond of zoek op naam.
       </p>
       <OpslagClient zones={OPSLAG_ZONES} initialContent={content} />

@@ -96,7 +96,7 @@ export default async function PlanningPage({
   return (
     <div>
       <div className="mb-1 flex flex-wrap items-start justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-white">Planning</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Planning</h1>
         <div className="flex flex-wrap items-center gap-2">
           {!isDocent && (
             <SnelleReserveringButton rooms={actieveRooms} datum={format(datum, "yyyy-MM-dd")} />
@@ -109,12 +109,12 @@ export default async function PlanningPage({
           />
         </div>
       </div>
-      <p className="mb-6 text-white/80">Ruimtegebruik inplannen — dag, week of maand.</p>
+      <p className="mb-6 text-muted">Ruimtegebruik inplannen — dag, week of maand.</p>
 
       <ViewSwitcher modus={modus} datum={datum} />
 
       {actieveRooms.length === 0 ? (
-        <p className="text-white">Er zijn nog geen actieve ruimtes ingesteld.</p>
+        <p className="text-foreground">Er zijn nog geen actieve ruimtes ingesteld.</p>
       ) : (
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           <RuimteSidebar rooms={actieveRooms} tellingenVandaag={tellingenVandaag} />

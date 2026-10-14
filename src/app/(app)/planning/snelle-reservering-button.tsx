@@ -13,7 +13,7 @@ export function SnelleReserveringButton({ rooms, datum }: { rooms: Room[]; datum
         type="button"
         disabled={rooms.length === 0}
         onClick={() => setOpen(true)}
-        className="shrink-0 rounded-lg border border-white/40 px-3 py-2 text-sm font-medium text-white hover:bg-white/15 disabled:opacity-50"
+        className="shrink-0 rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-foreground hover:border-accent hover:text-accent-hover disabled:opacity-50"
         title="Snel een gast/bezoeker inplannen"
       >
         + Snelle reservering

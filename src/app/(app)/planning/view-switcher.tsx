@@ -63,7 +63,7 @@ export function ViewSwitcher({ modus, datum }: { modus: Modus; datum: Date }) {
         </Link>
       </div>
 
-      <span className="font-medium capitalize text-white">{titel}</span>
+      <span className="font-medium capitalize text-foreground">{titel}</span>
     </div>
   );
 }

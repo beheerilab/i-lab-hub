@@ -116,8 +116,8 @@ export default async function WerkzaamhedenPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-white">Werkzaamheden</h1>
-      <p className="mb-6 text-white/80">Openstaande en afgevinkte werkzaamheden per week.</p>
+      <h1 className="mb-1 text-2xl font-semibold text-foreground">Werkzaamheden</h1>
+      <p className="mb-6 text-muted">Openstaande en afgevinkte werkzaamheden per week.</p>
 
       <TaskForm members={members ?? []} huidigeGebruikerId={userId} />
 

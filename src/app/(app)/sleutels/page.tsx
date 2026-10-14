@@ -29,8 +29,8 @@ export default async function SleutelsPage({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-white">Sleuteloverzicht</h1>
-      <p className="mb-6 text-white/80">Wie heeft welke sleutel en tag.</p>
+      <h1 className="mb-1 text-2xl font-semibold text-foreground">Sleuteloverzicht</h1>
+      <p className="mb-6 text-muted">Wie heeft welke sleutel en tag.</p>
 
       <SleutelForm />
 
