@@ -1,6 +1,20 @@
 -- Bestellijst V2 (vervangt de oude order_items/order_batches in de interface).
 -- De oude tabellen blijven bestaan als archief, maar worden niet meer gebruikt.
 
+-- Helper: is de ingelogde gebruiker crew (admin of lid) i.p.v. docent?
+-- Staat ook in 0017; hier opnieuw (create or replace) zodat deze migratie
+-- ook werkt als 0017 destijds niet is uitgevoerd.
+create or replace function public.is_crew()
+returns boolean
+language sql
+stable
+security definer set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles where id = auth.uid() and role in ('admin', 'lid')
+  );
+$$;
+
 create table if not exists public.bestel_items (
   id text primary key,
   status text not null default 'aangevraagd'
@@ -64,3 +78,34 @@ create policy "alleen admin beheert bestel_namen"
   on public.bestel_namen for all to authenticated
   using (public.is_admin())
   with check (public.is_admin());
+
+-- Foto's verlopen 30 dagen nadat een aanvraag in het archief staat (binnen of
+-- geannuleerd). Wordt bij het openen van de bestellijst aangeroepen; de rest
+-- van de aanvraag blijft bewaard.
+create or replace function public.bestel_fotos_opruimen()
+returns integer
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  aantal integer;
+begin
+  if not public.is_crew() then
+    return 0;
+  end if;
+
+  update public.bestel_items
+  set data = data - 'foto'
+  where status in ('binnen', 'geannuleerd')
+    and coalesce(data->>'foto', '') <> ''
+    and (
+      case
+        when data->>'binnenOp' ~ '^\d{4}-\d{2}-\d{2}$' then (data->>'binnenOp')::date
+        else updated_at::date
+      end
+    ) < current_date - 30;
+
+  get diagnostics aantal = row_count;
+  return aantal;
+end;
+$$;

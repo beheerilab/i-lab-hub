@@ -852,6 +852,10 @@ export interface Database {
         Args: { p_task_id: string };
         Returns: boolean;
       };
+      bestel_fotos_opruimen: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       is_taak_eigenaar: {
         Args: { p_task_id: string };
         Returns: boolean;

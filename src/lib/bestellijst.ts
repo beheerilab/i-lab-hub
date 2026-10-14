@@ -18,6 +18,8 @@ export type BestellijstWijziging = {
 const STATUSSEN = ["aangevraagd", "besteld", "binnen", "geannuleerd"];
 
 export async function laadBestellijst(supabase: SupabaseClient<Database>): Promise<BestellijstData> {
+  // Foto's van aanvragen die al 30+ dagen in het archief staan worden opgeruimd.
+  await supabase.rpc("bestel_fotos_opruimen");
   const [{ data: rijen }, { data: namen }] = await Promise.all([
     supabase.from("bestel_items").select("id, status, data").order("created_at", { ascending: true }),
     supabase.from("bestel_namen").select("sleutel, naam"),
