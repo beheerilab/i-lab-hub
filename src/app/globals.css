@@ -39,6 +39,7 @@
 }
 
 body {
+  overflow-x: clip; /* tools lopen over de volle breedte (100vw) zonder horizontale scrollbalk */
   background: linear-gradient(165deg, var(--page-start) 0%, var(--page-end) 100%) fixed;
   color: var(--foreground);
   font-family: var(--font-barlow), Arial, Helvetica, sans-serif;

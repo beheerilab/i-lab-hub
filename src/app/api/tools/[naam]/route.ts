@@ -12,6 +12,14 @@ const TOOLS: Record<string, string> = {
   bestellijst: "bestellijst.html",
 };
 
+/** Per tool: dubbele elementen weg (de hub heeft al logo en titel) en meer ruimte. */
+const EXTRA_CSS: Record<string, string> = {
+  prijscalculator: "header.top img{display:none!important}",
+  reiskosten: ".ov-logo{display:none!important}",
+  facturatie: "header .brand img{display:none!important} header{background:transparent!important;border-bottom:0!important;backdrop-filter:none!important}",
+  bestellijst: ".top-in,.wrap,.sticky .in{max-width:1180px!important}",
+};
+
 const BARLOW_HEAD =
   '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
   '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">' +
@@ -43,6 +51,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ naa
     };
     const json = JSON.stringify(hub).replace(/</g, "\\u003c").replace(/\u2028|\u2029/g, " ");
     html = html.replace('<meta charset="utf-8">', `<meta charset="utf-8"><script>window.__HUB__=${json};</script>`);
+  }
+
+  const extra = EXTRA_CSS[naam];
+  if (extra) {
+    // Aan het eind van het document (een eerste "</body>" kan in een scriptstring staan).
+    const i = html.lastIndexOf("</body>");
+    const stijl = `<style>${extra}</style>`;
+    html = i >= 0 ? html.slice(0, i) + stijl + html.slice(i) : html + stijl;
   }
 
   // Zelfde lettertype als de hub (prijscalculator heeft Barlow al ingebouwd).

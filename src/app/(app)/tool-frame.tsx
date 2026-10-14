@@ -11,7 +11,7 @@ const HEADER_HOOGTE = 96;
  * van op de hele (hoge) pagina.
  */
 const TOOL_CSS = `
-  html, body { min-height: 0 !important; overflow-y: hidden !important; }
+  html, body { min-height: 0 !important; overflow-y: hidden !important; background: transparent !important; }
   .modal, #overlay, .overlay, .lightbox {
     inset: auto !important;
     top: var(--vy, 0px) !important;
@@ -34,9 +34,9 @@ const TOOL_CSS = `
 
 /**
  * Toont een losse HTML-tool (zie /api/tools/[naam]) als onderdeel van de pagina:
- * het kader groeit mee met de inhoud, dus alleen de hub-pagina scrolt.
- * Breekt bewust uit de smalle paginabreedte (de facturatie-tabellen hebben
- * meer ruimte nodig).
+ * geen kader, over de volle breedte, met doorzichtige achtergrond (de hub-
+ * achtergrond loopt door) en een hoogte die meegroeit, zodat alleen de
+ * pagina zelf scrolt en de tool voelt als een gewone hub-pagina.
  */
 export function ToolFrame({ naam, titel }: { naam: string; titel: string }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
@@ -89,15 +89,15 @@ export function ToolFrame({ naam, titel }: { naam: string; titel: string }) {
   }, [werkBij]);
 
   return (
-    <div className="relative left-1/2 w-[min(100vw-2rem,1300px)] -translate-x-1/2">
+    <div className="relative left-1/2 -mt-6 w-screen -translate-x-1/2 sm:-mt-8">
       <iframe
         ref={frameRef}
         src={`/api/tools/${naam}`}
         title={titel}
         scrolling="no"
         onLoad={bijLaden}
-        style={{ height: hoogte }}
-        className="block w-full rounded-2xl border border-border bg-white shadow-card"
+        style={{ height: hoogte, colorScheme: "light" }}
+        className="block w-full border-0 bg-transparent"
       />
     </div>
   );
