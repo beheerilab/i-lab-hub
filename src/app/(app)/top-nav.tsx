@@ -15,6 +15,17 @@ export function TopNav({ rol }: { rol: Role }) {
 
   return (
     <nav className="flex flex-nowrap items-center gap-1.5 overflow-x-auto">
+      <Link
+        href="/dashboard"
+        className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+          pathname.startsWith("/dashboard")
+            ? "bg-accent-soft font-bold text-accent-hover"
+            : "text-muted hover:bg-black/[.04] hover:text-accent-hover"
+        }`}
+      >
+        <span>🏠</span>
+        Dashboard
+      </Link>
       {zichtbareModules.map((mod) => {
         if (DOCUMENTATIE_HREFS.includes(mod.href)) {
           if (mod.href !== DOCUMENTATIE_HREFS[0]) return null;
