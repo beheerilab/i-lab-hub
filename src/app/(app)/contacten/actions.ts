@@ -122,6 +122,7 @@ export type ContactKoppelingen = {
 /** Openstaande werkzaamheden en bestelitems die aan deze instantie gekoppeld zijn. */
 export async function getContactKoppelingenAction(contactId: string): Promise<ContactKoppelingen> {
   const supabase = await createClient();
+  const { data: contact } = await supabase.from("contacts").select("naam").eq("id", contactId).single();
   const [{ data: taken }, { data: bestellingen }] = await Promise.all([
     supabase
       .from("tasks")
@@ -129,16 +130,23 @@ export async function getContactKoppelingenAction(contactId: string): Promise<Co
       .eq("leverancier_id", contactId)
       .eq("gearchiveerd", false)
       .order("datum", { ascending: false }),
-    supabase
-      .from("order_items")
-      .select("id, item_naam, status")
-      .eq("leverancier_id", contactId)
-      .eq("gearchiveerd", false)
-      .order("created_at", { ascending: false }),
+    // De bestellijst kent leveranciers als vrije tekst: koppel op naam.
+    contact
+      ? supabase
+          .from("bestel_items")
+          .select("id, status, data")
+          .in("status", ["aangevraagd", "besteld"])
+          .ilike("data->>leverancier", contact.naam)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] as { id: string; status: string; data: { [key: string]: unknown } }[] }),
   ]);
   return {
     taken: taken ?? [],
-    bestellingen: (bestellingen ?? []).map((b) => ({ id: b.id, itemNaam: b.item_naam, status: b.status })),
+    bestellingen: (bestellingen ?? []).map((b) => ({
+      id: b.id,
+      itemNaam: String(b.data.omschrijving ?? "Bestelling"),
+      status: b.status,
+    })),
   };
 }
 

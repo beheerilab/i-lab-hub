@@ -45,6 +45,38 @@ export interface Database {
         };
         Relationships: [];
       };
+      bestel_items: {
+        Row: {
+          id: string;
+          status: string;
+          aanvrager_id: string | null;
+          data: { [key: string]: unknown };
+          created_at: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id: string;
+          status?: string;
+          aanvrager_id?: string | null;
+          data?: { [key: string]: unknown };
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          status?: string;
+          data?: { [key: string]: unknown };
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      bestel_namen: {
+        Row: { sleutel: string; naam: string; updated_at: string };
+        Insert: { sleutel: string; naam: string; updated_at?: string };
+        Update: { naam?: string; updated_at?: string };
+        Relationships: [];
+      };
       order_batches: {
         Row: {
           id: string;

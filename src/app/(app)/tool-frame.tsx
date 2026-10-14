@@ -12,12 +12,22 @@ const HEADER_HOOGTE = 96;
  */
 const TOOL_CSS = `
   html, body { min-height: 0 !important; overflow-y: hidden !important; }
-  .modal, #overlay {
+  .modal, #overlay, .overlay, .lightbox {
     inset: auto !important;
     top: var(--vy, 0px) !important;
     left: 0 !important;
     right: 0 !important;
     height: var(--vh, 100vh) !important;
+  }
+  .sticky {
+    bottom: auto !important;
+    top: calc(var(--vy, 0px) + var(--vh, 100vh)) !important;
+    transform: translateY(-100%) !important;
+  }
+  .toast {
+    bottom: auto !important;
+    top: calc(var(--vy, 0px) + var(--vh, 100vh) - 84px) !important;
+    transform: translate(-50%, -100%) !important;
   }
   .tablewrap { max-height: calc(var(--pvh, 800px) * .65) !important; }
 `;
