@@ -188,7 +188,7 @@ let state = Store.load();
 if (!state || !Array.isArray(state.items)) state = { items: [], settings: { naam: HUB.me.naam, rol: HUB.me.rol }, seeded: true, bestelNamen: {} };
 if (!state.bestelNamen) state.bestelNamen = {};
 if (!state.seeded) { state.items = voorbeelden(); state.seeded = true; Store.save(state); }
-const ui = { tab: 'open', q: '', fStatus: 'alle', mine: false, sel: new Set(), rondeDatum: today(), justOrdered: [], aq: '', ajaar: 'alle', aStatus: 'alle' };
+const ui = { tab: 'open', q: '', fStatus: 'alle', fUrgent: '', mine: false, sel: new Set(), rondeDatum: today(), justOrdered: [], aq: '', ajaar: 'alle', aStatus: 'alle' };
 function save() { Store.save(state); }
 
 /* ---------- 5. WEERGAVE ---------- */
@@ -226,7 +226,11 @@ function renderOpen() {
   const u = getCurrentUser();
   let items = state.items.filter(i => OPEN_STATUSES.includes(i.status));
   const all = items;
+  const isLate = i => (deadline(i) || {}).cls === 'late';
+  const isSoon = i => (deadline(i) || {}).cls === 'soon' || (i.spoed && i.status === 'aangevraagd');
   if (ui.fStatus !== 'alle') items = items.filter(i => i.status === ui.fStatus);
+  if (ui.fUrgent === 'late') items = items.filter(isLate);
+  if (ui.fUrgent === 'soon') items = items.filter(isSoon);
   if (ui.mine) items = items.filter(i => i.aanvrager === u.naam);
   if (ui.q) { const q = ui.q.toLowerCase(); items = items.filter(i => [i.omschrijving, i.leverancier, i.aanvrager, i.notitie].join(' ').toLowerCase().includes(q)); }
   const rank = i => { const d = deadline(i); return (i.status === 'aangevraagd' ? 0 : 1) * 10 + (d && d.cls === 'late' ? 0 : i.spoed ? 1 : d && d.cls === 'soon' ? 2 : 3); };
@@ -235,10 +239,10 @@ function renderOpen() {
   const late = all.filter(i => (deadline(i) || {}).cls === 'late').length;
   const soon = all.filter(i => (deadline(i) || {}).cls === 'soon' || (i.spoed && i.status === 'aangevraagd')).length;
   const summary = `<div class="summary">
-    <div class="sum"><b>${all.filter(i => i.status === 'aangevraagd').length}</b><span>Nog te bestellen</span></div>
-    <div class="sum"><b>${all.filter(i => i.status === 'besteld').length}</b><span>Onderweg</span></div>
-    <div class="sum ${soon ? 'warn' : ''}"><b>${soon}</b><span>Spoed / binnenkort</span></div>
-    <div class="sum ${late ? 'alert' : ''}"><b>${late}</b><span>Te laat</span></div></div>`;
+    <button type="button" class="sum" aria-pressed="${ui.fStatus === 'aangevraagd' && !ui.fUrgent}" data-action="sumfilter" data-v="aangevraagd"><b>${all.filter(i => i.status === 'aangevraagd').length}</b><span>Nog te bestellen</span></button>
+    <button type="button" class="sum" aria-pressed="${ui.fStatus === 'besteld' && !ui.fUrgent}" data-action="sumfilter" data-v="besteld"><b>${all.filter(i => i.status === 'besteld').length}</b><span>Onderweg</span></button>
+    <button type="button" class="sum ${soon ? 'warn' : ''}" aria-pressed="${ui.fUrgent === 'soon'}" data-action="sumfilter" data-v="soon"><b>${soon}</b><span>Spoed / binnenkort</span></button>
+    <button type="button" class="sum ${late ? 'alert' : ''}" aria-pressed="${ui.fUrgent === 'late'}" data-action="sumfilter" data-v="late"><b>${late}</b><span>Te laat</span></button></div>`;
 
   const filters = `<div class="filters">
     <input class="search" id="q" type="search" placeholder="Zoek op product, leverancier of naam" value="${esc(ui.q)}">
@@ -517,7 +521,15 @@ root.addEventListener('click', e => {
       if (!armedDelete) { armedDelete = true; el.classList.add('armed'); el.textContent = 'Zeker weten? Klik nogmaals'; setTimeout(() => { armedDelete = false; if (el.isConnected) { el.classList.remove('armed'); el.textContent = 'Verwijderen'; } }, 3500); return; }
       armedDelete = false; state.items = state.items.filter(i => i.id !== editing.id); save(); closeEditor(); render(); toast('Verwijderd'); break;
     case 'copy': copyText(el.dataset.text); break;
-    case 'fstatus': ui.fStatus = el.dataset.v; render(); break;
+    case 'fstatus': ui.fStatus = el.dataset.v; ui.fUrgent = ''; render(); break;
+    case 'sumfilter': {
+      const v = el.dataset.v;
+      const actief = (v === 'soon' || v === 'late') ? ui.fUrgent === v : (ui.fStatus === v && !ui.fUrgent);
+      if (actief) { ui.fStatus = 'alle'; ui.fUrgent = ''; }          // nogmaals klikken zet het filter weer uit
+      else if (v === 'soon' || v === 'late') { ui.fStatus = 'alle'; ui.fUrgent = v; }
+      else { ui.fStatus = v; ui.fUrgent = ''; }
+      ui.tab = 'open'; render(); break;
+    }
     case 'mine': ui.mine = !ui.mine; render(); break;
     case 'photo': if (item && item.foto) showPhoto(item.foto); break;
     case 'photo-draft': if (editing && editing.foto) showPhoto(editing.foto); break;

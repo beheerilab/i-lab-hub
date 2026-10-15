@@ -208,12 +208,12 @@ function renderStats(){
     const open=act.filter(b=>b.status==='pending');
     const soon=open.filter(b=>workdaysUntil(t,deadline(b))<=1);
     tiles.push({label:'Open aanvragen', value:groupSeries(open).length, sub:open.length?'Wachten op bevestiging':'Alles is afgehandeld', act:`data-act="view" data-view="aanvragen"`});
-    tiles.push({label:'Labs nu vrij', value:free, sub:freeSub});
+    tiles.push({label:'Labs nu vrij', value:free, sub:freeSub, act:`data-act="goToday"`});
     tiles.push({label:'Vervalt binnenkort', value:groupSeries(soon).length, sub:'Binnen 1 werkdag vrijgegeven', act:`data-act="view" data-view="aanvragen"`, alert:soon.length>0});
   }else{
     const mine=state.bookings.filter(isMine);
     tiles.push({label:'Mijn open aanvragen', value:groupSeries(mine.filter(b=>b.status==='pending')).length, sub:'Wachten op i-lab', act:`data-act="view" data-view="mijn"`});
-    tiles.push({label:'Labs nu vrij', value:free, sub:freeSub});
+    tiles.push({label:'Labs nu vrij', value:free, sub:freeSub, act:`data-act="goToday"`});
     tiles.push({label:'Mijn komende lessen', value:mine.filter(b=>b.status==='confirmed' && b.date>=t).length, sub:'Bevestigd', act:`data-act="view" data-view="mijn"`});
   }
   $('#stats').innerHTML = tiles.map(x=>{

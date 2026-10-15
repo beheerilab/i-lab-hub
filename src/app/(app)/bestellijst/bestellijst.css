@@ -210,3 +210,8 @@
 }
 @media (max-width:400px){ .bl .c3,.bl .c2{grid-column:span 2} .bl .who input{width:110px} }
 
+
+/* Samenvattingstegels zijn knoppen (filter) */
+.bl button.sum{appearance:none;font:inherit;color:inherit;text-align:left;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.bl button.sum:hover{border-color:var(--accent)}
+.bl button.sum[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,117,191,.18)}

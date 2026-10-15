@@ -35,7 +35,9 @@
   h3{color:var(--navy);margin:24px 0 10px;font-size:19px}
   .demo{background:#fff5e6;border:1px solid #f3cf95;color:#7a4b00;border-radius:10px;padding:10px 14px;font-size:15px;margin-bottom:16px}
   .tegels{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
-  .tegel{background:var(--grijs);border-radius:16px;padding:14px 16px}
+  .tegel{background:var(--grijs);border-radius:16px;padding:14px 16px;border:2px solid transparent;font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+  .tegel:hover{border-color:var(--licht)}
+  .tegel.aan{border-color:var(--blauw);box-shadow:0 0 0 3px rgba(0,117,191,.15)}
   .tegel b{display:block;font-size:34px;color:var(--navy);line-height:1.1}
   .tegel span{color:var(--zacht);font-size:15px}
   .tegel.rood b{color:var(--rood)} .tegel.oranje b{color:var(--oranje)} .tegel.groen b{color:var(--groen)}
@@ -329,7 +331,7 @@ const api = {
 /* ================= STATUS & NAVIGATIE ================= */
 let M = [], S = [], bekend = null;
 let huidig = { view:'overzicht', id:null };
-let filter = 'open', zoekterm = '', scanner = null;
+let filter = 'open', ernstFilter = '', zoekterm = '', scanner = null;
 let selectie = null;   // null = geen selectiemodus, anders Set met id's
 const mach = code => M.find(m => m.code === code) || { code, naam: code, aantal: 1 };
 const meldUrl = () => CONFIG.MELD_URL || new URL('storing-melden.html', location.href).href;
@@ -411,7 +413,13 @@ function kaart(s){
   </div>`;
 }
 function huidigeLijst(){
-  return filter === 'open' ? S.filter(isOpen) : filter === 'dicht' ? S.filter(s => !isOpen(s)) : S;
+  const begin = new Date(); begin.setDate(1); begin.setHours(0,0,0,0);
+  let l = filter === 'open' ? S.filter(isOpen)
+        : filter === 'dicht' ? S.filter(s => !isOpen(s))
+        : filter === 'opgelost' ? S.filter(s => s.status === 'gerepareerd' && s.opgelost_op && new Date(s.opgelost_op) >= begin)
+        : S;
+  if (ernstFilter) l = l.filter(s => s.ernst === ernstFilter);
+  return l;
 }
 function vOverzicht(){
   const open = S.filter(isOpen);
@@ -420,10 +428,10 @@ function vOverzicht(){
   const lijst = huidigeLijst();
   return `
     <div class="tegels">
-      <div class="tegel"><b>${open.length}</b><span>Open storingen</span></div>
-      <div class="tegel rood"><b>${open.filter(s => s.ernst === 'defect').length}</b><span>Werkt helemaal niet</span></div>
-      <div class="tegel oranje"><b>${open.filter(s => s.ernst === 'gedeeltelijk').length}</b><span>Werkt gedeeltelijk</span></div>
-      <div class="tegel groen"><b>${opgelost}</b><span>Gerepareerd deze maand</span></div>
+      <button type="button" class="tegel ${filter==='open'&&!ernstFilter?'aan':''}" data-tegel="open"><b>${open.length}</b><span>Open storingen</span></button>
+      <button type="button" class="tegel rood ${filter==='open'&&ernstFilter==='defect'?'aan':''}" data-tegel="defect"><b>${open.filter(s => s.ernst === 'defect').length}</b><span>Werkt helemaal niet</span></button>
+      <button type="button" class="tegel oranje ${filter==='open'&&ernstFilter==='gedeeltelijk'?'aan':''}" data-tegel="gedeeltelijk"><b>${open.filter(s => s.ernst === 'gedeeltelijk').length}</b><span>Werkt gedeeltelijk</span></button>
+      <button type="button" class="tegel groen ${filter==='opgelost'?'aan':''}" data-tegel="opgelost"><b>${opgelost}</b><span>Gerepareerd deze maand</span></button>
     </div>
     <div class="werkbalk">
       <div class="chips">
@@ -448,7 +456,14 @@ function vOverzicht(){
       : `<div class="leeg">${filter === 'open' ? 'Geen open storingen. Alles werkt! 🎉' : 'Nog niets om te tonen.'}</div>`}`;
 }
 function koppelOverzicht(){
-  document.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { filter = b.dataset.filter; render(); });
+  document.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { filter = b.dataset.filter; ernstFilter = ''; render(); });
+  document.querySelectorAll('[data-tegel]').forEach(b => b.onclick = () => {
+    const v = b.dataset.tegel;
+    if (v === 'open') { filter = 'open'; ernstFilter = ''; }
+    else if (v === 'opgelost') { filter = 'opgelost'; ernstFilter = ''; }
+    else { filter = 'open'; ernstFilter = v; }
+    render();
+  });
   if ($('selAan')) $('selAan').onclick = () => { selectie = new Set(); render(); };
   if (!selectie) return;
   document.querySelectorAll('[data-kies]').forEach(k => k.onclick = () => {
