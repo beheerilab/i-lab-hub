@@ -1,13 +1,25 @@
 import { requireGeenDocent } from "@/lib/auth";
-import { ToolFrame } from "../tool-frame";
+import { createClient } from "@/lib/supabase/server";
+import { laadBestellijst } from "@/lib/bestellijst";
+import { BestellijstApp } from "./bestellijst-app";
 
-export default async function Page() {
-  await requireGeenDocent();
+export default async function BestellijstPage() {
+  const { profile, email } = await requireGeenDocent();
+  const supabase = await createClient();
+  const data = await laadBestellijst(supabase);
 
   return (
     <>
       <h1 className="sr-only">Bestellijst</h1>
-      <ToolFrame naam="bestellijst" titel="Bestellijst" />
+      <BestellijstApp
+        initial={{
+          ...data,
+          me: {
+            naam: profile.full_name || email || "collega",
+            rol: profile.role === "admin" ? "beheerder" : "collega",
+          },
+        }}
+      />
     </>
   );
 }

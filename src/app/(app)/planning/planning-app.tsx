@@ -24,5 +24,6 @@ export function PlanningApp({ initial }: { initial: PlanningData }) {
     };
   }, [initial]);
 
-  return <div ref={ref} className="relative left-1/2 -mt-6 w-screen -translate-x-1/2 sm:-mt-8" />;
+  // Volle schermbreedte zonder transform, zodat position:fixed (toast) aan het scherm vast blijft.
+  return <div ref={ref} className="-mt-6 sm:-mt-8" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }} />;
 }
