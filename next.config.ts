@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   // /api/tools/[naam]; zonder deze regel neemt de deploy ze niet mee.
   outputFileTracingIncludes: {
     "/api/tools/[naam]": ["./src/tools-html/**/*"],
+    "/melden": ["./src/tools-html/**/*"],
   },
 };
 

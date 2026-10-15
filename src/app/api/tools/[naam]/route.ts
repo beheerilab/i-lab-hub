@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { requireGeenDocent } from "@/lib/auth";
+import { requireAdmin, requireGeenDocent } from "@/lib/auth";
+import { huidigeSessie, hubPrelude, injecteerScript } from "@/lib/storingen";
 import { TOOL_OPSLAG, laadToolOpslag, opslagShim } from "@/lib/tool-opslag";
 import { createClient } from "@/lib/supabase/server";
 import { laadFacturatie } from "@/lib/facturatie";
@@ -10,6 +11,7 @@ const TOOLS: Record<string, string> = {
   prijscalculator: "prijscalculator.html",
   reiskosten: "reiskosten.html",
   facturatie: "facturatie.html",
+  storingen: "storingen.html",
 };
 
 /** Per tool: dubbele elementen weg (de hub heeft al logo en titel) en meer ruimte. */
@@ -29,10 +31,10 @@ const BARLOW_HEAD =
  * vandaar niet in public/. De pagina's /prijscalculator, /reiskosten en
  * /facturatie tonen deze route in een kader binnen de hub.
  */
-export async function GET(_request: Request, { params }: { params: Promise<{ naam: string }> }) {
-  const { userId } = await requireGeenDocent();
-
+export async function GET(request: Request, { params }: { params: Promise<{ naam: string }> }) {
   const { naam } = await params;
+  // Storingen is alleen voor de beheerder; de rest voor crew.
+  const { userId } = naam === "storingen" ? await requireAdmin() : await requireGeenDocent();
   const bestand = TOOLS[naam];
   if (!bestand) return new Response("Niet gevonden", { status: 404 });
 
@@ -64,6 +66,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ naa
     } else {
       html = shim + html;
     }
+  }
+
+  // Storingen: Supabase-gegevens, je huidige inlog en het openbare meldadres (voor de QR-codes).
+  if (naam === "storingen") {
+    const supabase = await createClient();
+    const sessie = await huidigeSessie(supabase);
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+    html = injecteerScript(html, hubPrelude({ melden: `${origin}/melden`, ...sessie }));
   }
 
   const extra = EXTRA_CSS[naam];

@@ -102,6 +102,59 @@ export interface Database {
         Update: { data?: { [key: string]: unknown }; updated_at?: string; updated_by?: string | null };
         Relationships: [];
       };
+      machines: {
+        Row: {
+          id: string;
+          code: string;
+          naam: string;
+          categorie: string | null;
+          merk: string | null;
+          model: string | null;
+          locatie: string | null;
+          aanschafdatum: string | null;
+          aantal: number;
+          melden_aan: boolean;
+          actief: boolean;
+          notities: string | null;
+          created_at: string;
+        };
+        Insert: { code: string; naam: string; [key: string]: unknown };
+        Update: { [key: string]: unknown };
+        Relationships: [];
+      };
+      storingen: {
+        Row: {
+          id: string;
+          machine_code: string;
+          item_nr: number | null;
+          ernst: string;
+          omschrijving: string;
+          datum: string;
+          gemeld_door: string | null;
+          gemeld_door_id: string | null;
+          bron: string;
+          foto_pad: string | null;
+          status: string;
+          gemeld_op: string;
+          opgelost_op: string | null;
+          oorzaak: string | null;
+          reparatie: string | null;
+          gerepareerd_door: string | null;
+          kosten: number | null;
+          onderdelen: string | null;
+        };
+        Insert: { machine_code: string; ernst: string; omschrijving: string; [key: string]: unknown };
+        Update: { [key: string]: unknown };
+        Relationships: [
+          {
+            foreignKeyName: "storingen_machine_code_fkey";
+            columns: ["machine_code"];
+            isOneToOne: false;
+            referencedRelation: "machines";
+            referencedColumns: ["code"];
+          },
+        ];
+      };
       bestel_items: {
         Row: {
           id: string;

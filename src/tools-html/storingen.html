@@ -1,0 +1,939 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storingen · i-lab hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --navy:#0c1c49; --blauw:#0075bf; --cyaan:#009fe3; --licht:#a1daf8; --grijs:#e3e9ec;
+    --rood:#d93a3a; --oranje:#e8890c; --groen:#2e9e5b; --tekst:#1d2433; --zacht:#5d6b82;
+    --grad:linear-gradient(135deg,var(--blauw),var(--cyaan));
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#fff;color:var(--tekst);font-family:'Barlow',system-ui,sans-serif;font-size:17px}
+  button{font:inherit;cursor:pointer}
+  header{background:linear-gradient(135deg,var(--navy),var(--blauw));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header img{height:34px}
+  .tekstlogo{font-weight:700;font-size:24px;letter-spacing:.5px}
+  header h1{margin:0;font-size:20px;font-weight:600;opacity:.95}
+  header .rechts{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .live{display:inline-flex;align-items:center;gap:6px;font-size:14px;opacity:.9}
+  .live i{width:9px;height:9px;border-radius:50%;background:#5be38f;box-shadow:0 0 0 3px rgba(91,227,143,.3)}
+  .kopknop{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:10px;padding:8px 12px;font-size:14px}
+  nav{display:flex;gap:6px;padding:12px 20px;border-bottom:1px solid var(--grijs);flex-wrap:wrap;background:#fff}
+  nav button{border:0;background:transparent;padding:10px 16px;border-radius:12px;font-weight:600;color:var(--zacht);font-size:17px;display:inline-flex;align-items:center;gap:8px}
+  nav button.actief{background:var(--grad);color:#fff}
+  .badge{background:var(--rood);color:#fff;border-radius:20px;padding:1px 8px;font-size:13px;font-weight:700}
+  nav button.actief .badge{background:#fff;color:var(--rood)}
+  main{max-width:1100px;margin:0 auto;padding:20px 20px 60px}
+  h2{color:var(--navy);margin:0 0 14px;font-size:24px}
+  h3{color:var(--navy);margin:24px 0 10px;font-size:19px}
+  .demo{background:#fff5e6;border:1px solid #f3cf95;color:#7a4b00;border-radius:10px;padding:10px 14px;font-size:15px;margin-bottom:16px}
+  .tegels{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+  .tegel{background:var(--grijs);border-radius:16px;padding:14px 16px}
+  .tegel b{display:block;font-size:34px;color:var(--navy);line-height:1.1}
+  .tegel span{color:var(--zacht);font-size:15px}
+  .tegel.rood b{color:var(--rood)} .tegel.oranje b{color:var(--oranje)} .tegel.groen b{color:var(--groen)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .chip{border:2px solid var(--grijs);background:#fff;border-radius:30px;padding:7px 16px;font-weight:600;color:var(--zacht)}
+  .chip.actief{border-color:var(--blauw);color:var(--blauw);background:#eef7fd}
+  .werkbalk{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .selectiebalk{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#fdeeee;border:1px solid #f3c4c4;border-radius:12px;padding:10px 14px;margin-bottom:14px}
+  .kaarten{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+  .kaart{text-align:left;border:1px solid var(--grijs);border-left:7px solid var(--licht);background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 2px 8px rgba(12,28,73,.05);display:flex;flex-direction:column;gap:6px;width:100%;cursor:pointer;position:relative;font:inherit;color:inherit}
+  .kaart.defect{border-left-color:var(--rood)} .kaart.gedeeltelijk{border-left-color:var(--oranje)}
+  .kaart.dicht{border-left-color:var(--groen);opacity:.85}
+  .kaart.gekozen{outline:3px solid var(--rood);background:#fff8f8}
+  .kaart .kop{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+  .kaart .kop b{font-size:19px;color:var(--navy)}
+  .kaart p{margin:0;color:var(--tekst)}
+  .kaart small{color:var(--zacht)}
+  .kaart .vink{position:absolute;top:12px;right:12px;width:26px;height:26px}
+  .label{display:inline-block;border-radius:20px;padding:2px 10px;font-size:13px;font-weight:700;white-space:nowrap}
+  .l-defect{background:#fdeeee;color:var(--rood)} .l-gedeeltelijk{background:#fff1dc;color:#a35f05}
+  .l-nieuw{background:#e8f4fc;color:var(--blauw)} .l-in_behandeling{background:#efeafc;color:#5b3fb5}
+  .l-gerepareerd{background:#e6f5ec;color:var(--groen)} .l-afgeschreven{background:#eceff3;color:#59606b}
+  .l-item{background:var(--navy);color:#fff} .l-grijs{background:var(--grijs);color:var(--zacht)}
+  .leeg{color:var(--zacht);padding:30px;text-align:center;border:2px dashed var(--grijs);border-radius:14px}
+  .terug{border:0;background:none;color:var(--blauw);font-weight:600;padding:6px 0;margin-bottom:10px}
+  .blok{border:1px solid var(--grijs);border-radius:16px;padding:18px;margin-bottom:16px}
+  .info{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 20px;margin:0}
+  .info dt{color:var(--zacht);font-size:14px} .info dd{margin:0 0 4px;font-weight:600}
+  .foto{max-width:100%;max-height:480px;border-radius:12px;display:block;margin-top:12px;cursor:zoom-in}
+  .seg{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .seg button{border:2px solid var(--grijs);background:#fff;border-radius:12px;padding:10px 16px;font-weight:600;color:var(--zacht)}
+  .seg button.actief{border-color:var(--blauw);background:#eef7fd;color:var(--blauw)}
+  .seg.ernst button[data-v=defect].actief{border-color:var(--rood);background:#fdeeee;color:var(--rood)}
+  .seg.ernst button[data-v=gedeeltelijk].actief{border-color:var(--oranje);background:#fff5e6;color:#a35f05}
+  .rij{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  label.v{display:block;font-weight:600;color:var(--navy);font-size:15px;margin-bottom:12px}
+  label.v input,label.v textarea,label.v select,.zoek{display:block;width:100%;margin-top:5px;font:inherit;font-weight:400;border:2px solid var(--grijs);border-radius:10px;padding:10px 12px;outline:none;background:#fff;color:inherit}
+  label.v input:focus,label.v textarea:focus,label.v select:focus,.zoek:focus{border-color:var(--cyaan)}
+  label.v input[readonly]{background:var(--grijs)}
+  .verplicht{color:var(--rood)}
+  .check{display:flex;gap:8px;align-items:center;font-weight:600;color:var(--navy);margin-bottom:12px}
+  .check input{width:22px;height:22px}
+  .btn{border:0;border-radius:12px;padding:12px 22px;font-weight:700;color:#fff;background:var(--grad);box-shadow:0 4px 14px rgba(0,117,191,.22);font-size:17px}
+  .btn.donker{background:linear-gradient(135deg,var(--navy),var(--blauw))}
+  .btn.wit{background:#fff;color:var(--blauw);border:2px solid var(--licht);box-shadow:none}
+  .btn.rood{background:linear-gradient(135deg,#b72c2c,var(--rood));box-shadow:0 4px 14px rgba(217,58,58,.22)}
+  .btn.rood-wit{background:#fff;color:var(--rood);border:2px solid #f3c4c4;box-shadow:none}
+  .btn:disabled{opacity:.5}
+  .knoppen{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .balk{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .balk .zoek{flex:1;min-width:220px;margin:0}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;color:var(--zacht);font-size:14px;font-weight:600;padding:8px 10px;border-bottom:2px solid var(--grijs)}
+  td{padding:12px 10px;border-bottom:1px solid var(--grijs);vertical-align:middle}
+  tr.klik{cursor:pointer} tr.klik:hover td{background:#f6fbfe}
+  .code{font-family:ui-monospace,Menlo,monospace;font-weight:700;color:var(--blauw)}
+  .tabelwrap{overflow-x:auto}
+  .staaf{height:10px;border-radius:10px;background:var(--grad);min-width:4px}
+  .aandacht{background:#fdeeee;color:var(--rood);border-radius:20px;padding:2px 10px;font-size:13px;font-weight:700}
+  .tijdlijn{list-style:none;padding:0;margin:0}
+  .tijdlijn li{border-left:3px solid var(--licht);padding:4px 0 14px 16px;position:relative}
+  .tijdlijn li::before{content:'';position:absolute;left:-8px;top:8px;width:13px;height:13px;border-radius:50%;background:#fff;border:3px solid var(--cyaan)}
+  .tijdlijn li.klik{cursor:pointer}
+  .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+  .itemvak{border:2px solid var(--grijs);border-radius:12px;padding:10px;text-align:center}
+  .itemvak b{display:block;font-size:20px;color:var(--navy)}
+  .itemvak small{color:var(--zacht)}
+  .itemvak.open{border-color:var(--rood);background:#fdeeee}
+  .itemvak.veel{border-color:var(--oranje)}
+  .qrlijst{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-bottom:16px}
+  .qrlijst label{display:flex;gap:10px;align-items:center;border:1px solid var(--grijs);border-radius:10px;padding:10px 12px}
+  .qrlijst input{width:20px;height:20px}
+  #lezer{max-width:520px;border-radius:14px;overflow:hidden;background:#000}
+  #toasts{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:10px;z-index:50;align-items:flex-end}
+  .toast{background:var(--navy);color:#fff;border-radius:14px;padding:14px 18px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:380px;z-index:50;border-left:6px solid var(--rood);cursor:pointer}
+  .toast.ok{border-left-color:var(--groen)}
+  .toast b{display:block;margin-bottom:2px}
+  .groot{position:fixed;inset:0;background:rgba(12,28,73,.9);display:flex;align-items:center;justify-content:center;z-index:60;cursor:zoom-out}
+  .groot img{max-width:94vw;max-height:94vh;border-radius:8px}
+  .melduit{background:#fff5e6;border:1px solid #f3cf95;color:#7a4b00;border-radius:10px;padding:8px 12px;font-weight:600;font-size:15px;display:inline-block}
+  [hidden]{display:none!important}
+
+  /* ---------- Labels ---------- */
+  .lbl-qr img,.lbl-qr canvas{width:100%!important;height:100%!important;display:block}
+  .lbl{display:flex;align-items:center;overflow:hidden;font-family:'Barlow',sans-serif;background:#fff;color:#000}
+  .lbl .t{display:flex;flex-direction:column;min-width:0}
+  .lbl .merk{font-weight:700}
+  .lbl .scan{font-weight:700;line-height:1.05}
+  .lbl .nm{font-weight:700;line-height:1.05;overflow:hidden;text-overflow:ellipsis}
+  .lbl .c{font-family:ui-monospace,Menlo,monospace;font-weight:700}
+  .lbl .set{font-size:7pt;line-height:1.1}
+  /* Dymo 99012 · 89 × 36 mm */
+  .fmt-d89 .lbl{width:89mm;height:36mm;padding:2mm 3mm;gap:3mm}
+  .fmt-d89 .lbl-qr{width:31mm;height:31mm;flex:none}
+  .fmt-d89 .merk{font-size:9pt;color:#0075bf} .fmt-d89 .scan{font-size:9pt}
+  .fmt-d89 .nm{font-size:15pt;margin:1mm 0 .5mm;max-height:12.5mm} .fmt-d89 .c{font-size:11pt}
+  /* Dymo 11354 · 57 × 32 mm */
+  .fmt-d57 .lbl{width:57mm;height:32mm;padding:1.5mm 2mm;gap:2mm}
+  .fmt-d57 .lbl-qr{width:27mm;height:27mm;flex:none}
+  .fmt-d57 .merk{font-size:7pt;color:#0075bf} .fmt-d57 .scan{font-size:7.5pt}
+  .fmt-d57 .nm{font-size:10pt;margin:.8mm 0 .3mm;max-height:11mm} .fmt-d57 .c{font-size:9pt}
+  /* A4 stickervel Avery L7160 · 3 × 7 · 63,5 × 38,1 mm */
+  .fmt-a4{display:grid;grid-template-columns:repeat(3,63.5mm);grid-auto-rows:38.1mm;column-gap:2.5mm}
+  .fmt-a4 .lbl{width:63.5mm;height:38.1mm;padding:2.5mm 3mm;gap:2.5mm;break-inside:avoid}
+  .fmt-a4 .lbl-qr{width:30mm;height:30mm;flex:none}
+  .fmt-a4 .merk{font-size:8pt;color:#0075bf} .fmt-a4 .scan{font-size:8.5pt}
+  .fmt-a4 .nm{font-size:10.5pt;margin:.8mm 0 .3mm;max-height:13mm} .fmt-a4 .c{font-size:9.5pt}
+  .voorbeeld{background:var(--grijs);padding:14px;border-radius:14px;overflow-x:auto}
+  .voorbeeld #printvel{display:flex;flex-wrap:wrap;gap:10px}
+  .voorbeeld #printvel.fmt-a4{display:grid;background:#fff;width:max-content;padding:4mm;gap:0 2.5mm}
+  .voorbeeld .lbl{outline:1px dashed #b9c3ce;border-radius:2mm}
+  @media print{
+    /* alles behalve de labels écht weghalen, anders print de Dymo lege labels mee */
+    body > *:not(main), main > *:not(#view), #view > *:not(.voorbeeld){display:none!important}
+    html,body,main{margin:0!important;padding:0!important;background:#fff!important}
+    #printvel{padding:0!important;display:block!important;background:none!important;width:auto!important}
+    #printvel.fmt-a4{display:grid!important;gap:0 2.5mm!important}
+    .voorbeeld{background:none;padding:0}
+    .voorbeeld .lbl{outline:none;border-radius:0}
+    .fmt-d89 .lbl,.fmt-d57 .lbl{break-after:page;page-break-after:always}
+    .fmt-d89 .lbl:last-child,.fmt-d57 .lbl:last-child{break-after:auto;page-break-after:auto}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+<style id="paginaformaat"></style>
+</head>
+<body>
+<header>
+  <span id="logo"></span>
+  <h1>Storingen &amp; reparaties</h1>
+  <div class="rechts">
+    <span class="live" id="live" hidden><i></i> Live</span>
+    <button class="kopknop" id="meldAan" hidden>🔔 Meldingen aanzetten</button>
+  </div>
+</header>
+<nav id="nav" hidden>
+  <button data-tab="overzicht">Storingen <span class="badge" id="badge" hidden>0</span></button>
+  <button data-tab="machines">Machines</button>
+  <button data-tab="qr">Labels</button>
+  <button data-tab="inzicht">Inzicht</button>
+  <button data-tab="scan">📷 Scannen</button>
+</nav>
+<main>
+  <div id="demoBalk" class="demo" hidden>
+    Demomodus: gegevens staan alleen in deze browser. Open <a href="storing-melden.html" target="_blank">de meldpagina</a> in een ander tabblad om een melding te testen; die verschijnt hier direct.
+    <button class="chip" id="demoReset" style="margin-left:8px">Demo resetten</button>
+  </div>
+  <div id="view"><p>Laden…</p></div>
+</main>
+<div id="toasts"></div>
+
+<script>
+/* ================= INSTELLINGEN =================
+   Zolang SUPABASE_URL niet begint met https:// draait de pagina in demomodus. */
+const CONFIG = window.__HUB_CFG__;
+/* ================================================= */
+
+const DEMO = !/^https:\/\//.test(CONFIG.SUPABASE_URL);
+const sb = DEMO ? null : supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, {
+  auth: { persistSession:false, autoRefreshToken:false, detectSessionInUrl:false },
+  global: { fetch: (u, o) => window.__hubFetch(u, o) }
+});
+if (sb && window.__HUB_TOKEN__) sb.realtime.setAuth(window.__HUB_TOKEN__);
+window.__hubTokenVerversd = t => { if (sb) sb.realtime.setAuth(t); };
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ST = {nieuw:'Nieuw', in_behandeling:'In behandeling', gerepareerd:'Gerepareerd', afgeschreven:'Afgeschreven'};
+const ER = {defect:'Werkt niet', gedeeltelijk:'Werkt gedeeltelijk'};
+const isOpen = s => s.status === 'nieuw' || s.status === 'in_behandeling';
+const datum = (iso, tijd) => iso ? new Date(iso).toLocaleString('nl-NL', tijd===false ? {day:'numeric',month:'short',year:'numeric'} : {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '–';
+const euro = n => n == null || n === '' ? '–' : Number(n).toLocaleString('nl-NL',{style:'currency',currency:'EUR'});
+const dagen = (a,b) => (new Date(b) - new Date(a)) / 864e5;
+const vandaag = (plus = 0) => { const d = new Date(); d.setDate(d.getDate() + plus); return d.toLocaleDateString('sv-SE'); };
+const itemTekst = s => s.item_nr == null ? '' : s.item_nr === 0 ? 'Nr. onbekend' : `Nr. ${s.item_nr}`;
+function uuid(){
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c==='x' ? r : (r&3|8)).toString(16); });
+}
+function geleden(iso){
+  const m = (Date.now() - new Date(iso)) / 6e4;
+  if (m < 1) return 'zojuist'; if (m < 60) return `${Math.round(m)} min geleden`;
+  if (m < 1440) return `${Math.round(m/60)} uur geleden`;
+  const d = Math.round(m/1440); return d === 1 ? 'gisteren' : `${d} dagen geleden`;
+}
+function melding(tekst, ok = true){
+  const t = document.createElement('div'); t.className = 'toast' + (ok ? ' ok' : ''); t.innerHTML = tekst;
+  t.onclick = () => t.remove(); $('toasts').appendChild(t); setTimeout(() => t.remove(), 4000);
+}
+
+$('logo').innerHTML = CONFIG.LOGO_URL ? `<img src="${CONFIG.LOGO_URL}" alt="i-lab">` : `<span class="tekstlogo">i-lab</span>`;
+
+/* ================= DEMO-OPSLAG (zelfde als meldpagina) ================= */
+const DEMO_KEY = 'ilab-storingen-demo-v2';
+function demoSeed(){
+  const d = n => new Date(Date.now() - n*864e5).toISOString();
+  const dd = n => d(n).slice(0,10);
+  const m = (id,code,naam,categorie,merk,model,locatie,aanschafdatum,aantal=1) => ({id,code,naam,categorie,merk,model,locatie,aanschafdatum,aantal,melden_aan:true,actief:true,notities:''});
+  const s = (id,machine_code,item_nr,ernst,omschrijving,gemeld_door,status,dagen,extra={}) => ({id,machine_code,item_nr,ernst,omschrijving,datum:dd(dagen),gemeld_door,gemeld_door_id:null,bron:'qr',foto_pad:null,status,gemeld_op:d(dagen),opgelost_op:null,oorzaak:'',reparatie:'',gerepareerd_door:'',kosten:null,onderdelen:'',...extra});
+  return {
+    machines: [
+      m('m1','LS-01','Lasersnijder','Lasersnijder','Epilog','Fusion Edge 24','Lab 3 – Maakplaats','2021-09-01'),
+      m('m2','3D-01','3D-printer 1','3D-printer','Ultimaker','S5','Lab 2','2022-02-15'),
+      m('m3','3D-02','3D-printer 2','3D-printer','Bambu Lab','X1 Carbon','Lab 2','2024-01-10'),
+      m('m4','SP-01','Vinylsnijder','Snijplotter','Silhouette','Cameo 4','Lab 3 – Maakplaats','2023-03-01'),
+      m('m5','DR-01','Drones (set)','Drones','DJI','Tello EDU','Opslag A','2023-09-01',12),
+      m('m6','BM-01','Beamer Lab 1','Audiovisueel','Epson','EB-695Wi','Lab 1','2020-05-12')
+    ],
+    storingen: [
+      s('s1','3D-01',null,'gedeeltelijk','Printkop verstopt, print laat los na de eerste laag.','Joris','gerepareerd',120,{opgelost_op:d(116),oorzaak:'Verstopte nozzle',reparatie:'Printcore vervangen',gerepareerd_door:'Daan',kosten:24.95,onderdelen:'AA 0.4 printcore'}),
+      s('s2','3D-01',null,'gedeeltelijk','Weer verstopt, filament komt er nauwelijks uit.','Sanne','gerepareerd',60,{opgelost_op:d(55),oorzaak:'Verstopte nozzle',reparatie:'Printcore vervangen, filament gedroogd',gerepareerd_door:'Daan',kosten:24.95,onderdelen:'AA 0.4 printcore'}),
+      s('s3','BM-01',null,'defect','Beamer gaat niet meer aan, lampje knippert oranje.','Mark','gerepareerd',200,{opgelost_op:d(190),oorzaak:'Lamp op',reparatie:'Nieuwe lamp geplaatst',gerepareerd_door:'Daan',kosten:89,onderdelen:'ELPLP97 lamp'}),
+      s('s4','DR-01',7,'defect','Propeller afgebroken na botsing tegen de muur.','Sanne','gerepareerd',30,{opgelost_op:d(29),oorzaak:'Propeller gebroken',reparatie:'Propellerset vervangen',gerepareerd_door:'Daan',kosten:9.95,onderdelen:'Tello propellers'}),
+      s('s5','LS-01',null,'gedeeltelijk','Laser snijdt niet meer door 4 mm multiplex, alleen graveren lukt.','Joris','in_behandeling',3),
+      s('s6','DR-01',3,'gedeeltelijk','Drone 3 drijft steeds naar links weg.','Mark','nieuw',1),
+      s('s7','3D-01',null,'defect','Printbed wordt niet meer warm, foutmelding op het scherm.','Fatima','nieuw',0.04)
+    ]
+  };
+}
+function demoLoad(){
+  try { const d = JSON.parse(localStorage.getItem(DEMO_KEY)); if (d && d.machines) return d; } catch(e){}
+  const d = demoSeed(); demoSave(d); return d;
+}
+function demoSave(d){ try { localStorage.setItem(DEMO_KEY, JSON.stringify(d)); } catch(e){ alert('Opslaan in de browser is mislukt.'); } }
+
+/* ================= DATA ================= */
+let sessie = null;
+const api = {
+  async isBeheerder(){
+    if (DEMO) return true;
+    const { data, error } = await sb.rpc('is_storing_beheerder'); return !error && data === true;
+  },
+  async machines(){
+    if (DEMO) return demoLoad().machines;
+    const { data, error } = await sb.from('machines').select('*').order('code'); if (error) throw error; return data;
+  },
+  async storingen(){
+    if (DEMO) return demoLoad().storingen.slice().sort((a,b) => b.gemeld_op.localeCompare(a.gemeld_op));
+    const { data, error } = await sb.from('storingen').select('*').order('gemeld_op', { ascending:false }); if (error) throw error; return data;
+  },
+  async bewaarMachine(m){
+    if (DEMO){
+      const d = demoLoad();
+      if (m.id){ const i = d.machines.findIndex(x => x.id === m.id); d.machines[i] = {...d.machines[i], ...m}; }
+      else { if (d.machines.some(x => x.code === m.code)) throw new Error('Deze code bestaat al.'); d.machines.push({...m, id:'m'+Date.now()}); }
+      demoSave(d); return;
+    }
+    const { id, ...velden } = m;
+    const { error } = id ? await sb.from('machines').update(velden).eq('id', id) : await sb.from('machines').insert(velden);
+    if (error) throw new Error(error.code === '23505' ? 'Deze code bestaat al.' : error.message);
+  },
+  async bewaarStoring(id, patch){
+    if (DEMO){ const d = demoLoad(); Object.assign(d.storingen.find(x => x.id === id), patch); demoSave(d); return; }
+    const { error } = await sb.from('storingen').update(patch).eq('id', id); if (error) throw error;
+  },
+  async nieuweStoring(s, fotoBlob){
+    if (DEMO){
+      const d = demoLoad();
+      const foto = fotoBlob ? await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(fotoBlob); }) : null;
+      d.storingen.unshift({ id: uuid(), gemeld_op: new Date().toISOString(), opgelost_op: null, oorzaak:'', reparatie:'', gerepareerd_door:'', kosten:null, onderdelen:'', gemeld_door_id:null, ...s, foto_pad: foto });
+      demoSave(d); return;
+    }
+    let pad = null;
+    if (fotoBlob){
+      pad = `${s.machine_code}/${uuid()}.jpg`;
+      const { error } = await sb.storage.from('storing-fotos').upload(pad, fotoBlob, { contentType:'image/jpeg', upsert:false });
+      if (error) pad = null;
+    }
+    const { error } = await sb.from('storingen').insert({ ...s, foto_pad: pad, gemeld_door_id: sessie?.user?.id || null });
+    if (error) throw error;
+  },
+  async verwijder(ids){
+    if (DEMO){ const d = demoLoad(); d.storingen = d.storingen.filter(s => !ids.includes(s.id)); demoSave(d); return; }
+    const paden = S.filter(s => ids.includes(s.id) && s.foto_pad).map(s => s.foto_pad);
+    if (paden.length) await sb.storage.from('storing-fotos').remove(paden);
+    const { error } = await sb.from('storingen').delete().in('id', ids); if (error) throw error;
+  },
+  async fotoUrl(s){
+    if (!s.foto_pad) return null;
+    if (DEMO) return s.foto_pad;
+    const { data, error } = await sb.storage.from('storing-fotos').createSignedUrl(s.foto_pad, 3600);
+    return error ? null : data.signedUrl;
+  },
+  luister(cb){
+    if (DEMO){ window.addEventListener('storage', e => { if (e.key === DEMO_KEY) cb(); }); return; }
+    sb.channel('storingen-live')
+      .on('postgres_changes', { event:'*', schema:'public', table:'storingen' }, () => cb())
+      .subscribe(st => { $('live').hidden = st !== 'SUBSCRIBED'; });
+  }
+};
+
+/* ================= STATUS & NAVIGATIE ================= */
+let M = [], S = [], bekend = null;
+let huidig = { view:'overzicht', id:null };
+let filter = 'open', zoekterm = '', scanner = null;
+let selectie = null;   // null = geen selectiemodus, anders Set met id's
+const mach = code => M.find(m => m.code === code) || { code, naam: code, aantal: 1 };
+const meldUrl = () => CONFIG.MELD_URL || new URL('storing-melden.html', location.href).href;
+
+async function laad(){
+  [M, S] = await Promise.all([api.machines(), api.storingen()]);
+  const nieuw = bekend ? S.filter(s => !bekend.has(s.id) && s.bron !== 'hub') : [];
+  bekend = new Set(S.map(s => s.id));
+  const open = S.filter(isOpen).length;
+  $('badge').textContent = open; $('badge').hidden = !open;
+  if (selectie) selectie.forEach(id => { if (!bekend.has(id)) selectie.delete(id); });
+  nieuw.forEach(meldNieuw);
+}
+
+function go(view, id = null){
+  if (scanner){ scanner.stop().catch(()=>{}); scanner = null; }
+  if (view !== 'overzicht') selectie = null;
+  huidig = { view, id };
+  const tab = { detail:'overzicht', nieuw:'overzicht', machine:'machines', machineForm:'machines' }[view] || view;
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('actief', b.dataset.tab === tab));
+  render(); window.scrollTo(0, 0);
+}
+async function render(){
+  const v = huidig.view, el = $('view');
+  try {
+    if (v === 'overzicht') { el.innerHTML = vOverzicht(); koppelOverzicht(); }
+    else if (v === 'detail') { el.innerHTML = await vDetail(huidig.id); koppelDetail(huidig.id); }
+    else if (v === 'nieuw') { el.innerHTML = vNieuw(huidig.id); koppelNieuw(); }
+    else if (v === 'machines') { el.innerHTML = vMachines(); koppelZoek(); }
+    else if (v === 'machine') { el.innerHTML = vMachine(huidig.id); koppelMachine(huidig.id); }
+    else if (v === 'machineForm') { el.innerHTML = vMachineForm(huidig.id); koppelMachineForm(); }
+    else if (v === 'qr') { el.innerHTML = vQr(); tekenLabels(); }
+    else if (v === 'inzicht') el.innerHTML = vInzicht();
+    else if (v === 'scan') { el.innerHTML = vScan(); startScanner(); }
+  } catch(e){ el.innerHTML = `<div class="leeg">Er ging iets mis: ${esc(e.message)}</div>`; console.error(e); }
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-go]'); if (t){ e.preventDefault(); go(t.dataset.go, t.dataset.id || null); return; }
+  const n = e.target.closest('[data-tab]'); if (n){ go(n.dataset.tab); return; }
+  const img = e.target.closest('.foto'); if (img){ const g = document.createElement('div'); g.className='groot'; g.innerHTML=`<img src="${img.src}">`; g.onclick=()=>g.remove(); document.body.appendChild(g); }
+});
+
+/* ================= MELDINGEN ================= */
+function meldNieuw(s){
+  const m = mach(s.machine_code);
+  if (s.status !== 'nieuw') return;
+  const t = document.createElement('div'); t.className = 'toast';
+  t.innerHTML = `<b>Nieuwe storing: ${esc(m.naam)}${s.item_nr ? ' · nr. ' + s.item_nr : ''}</b>${esc(ER[s.ernst])} · ${esc(s.omschrijving.slice(0,80))}<br><small>${esc(s.gemeld_door || '')}</small>`;
+  t.onclick = () => { t.remove(); go('detail', s.id); };
+  $('toasts').appendChild(t); setTimeout(() => t.remove(), 12000);
+  piep();
+  if ('Notification' in window && Notification.permission === 'granted'){
+    try { new Notification(`Storing: ${m.naam}`, { body: `${ER[s.ernst]} – ${s.omschrijving.slice(0,100)}` }); } catch(e){}
+  }
+}
+function piep(){
+  try {
+    const a = new (window.AudioContext || window.webkitAudioContext)();
+    [0, .18].forEach(t => { const o = a.createOscillator(), g = a.createGain(); o.frequency.value = 880; o.connect(g); g.connect(a.destination);
+      g.gain.setValueAtTime(.15, a.currentTime+t); g.gain.exponentialRampToValueAtTime(.001, a.currentTime+t+.15); o.start(a.currentTime+t); o.stop(a.currentTime+t+.16); });
+  } catch(e){}
+}
+if ('Notification' in window && Notification.permission === 'default'){
+  $('meldAan').hidden = false;
+  $('meldAan').onclick = () => Notification.requestPermission().then(() => $('meldAan').hidden = true);
+}
+
+/* ================= VIEW: OVERZICHT ================= */
+function kaart(s){
+  const m = mach(s.machine_code), open = isOpen(s), gekozen = selectie && selectie.has(s.id);
+  const attr = selectie ? `data-kies="${esc(s.id)}"` : `data-go="detail" data-id="${esc(s.id)}"`;
+  return `<div class="kaart ${open ? s.ernst : 'dicht'} ${gekozen ? 'gekozen' : ''}" ${attr} role="button" tabindex="0">
+    ${selectie ? `<input type="checkbox" class="vink" ${gekozen ? 'checked' : ''} tabindex="-1">` : ''}
+    <div class="kop"><b>${esc(m.naam)}</b>${selectie ? '' : `<span class="label l-${s.status}">${ST[s.status]}</span>`}</div>
+    <div><span class="label l-${s.ernst}">${ER[s.ernst]}</span> ${itemTekst(s) ? `<span class="label l-item">${itemTekst(s)}</span>` : ''} ${s.bron === 'hub' ? '<span class="label l-grijs">via hub</span>' : ''} ${s.foto_pad ? '📷' : ''}</div>
+    <p>${esc(s.omschrijving)}</p>
+    <small>${esc(m.code)}${m.locatie ? ' · ' + esc(m.locatie) : ''} · ${geleden(s.gemeld_op)} · ${esc(s.gemeld_door || 'onbekend')}${s.gemeld_door_id ? ' ✓' : ''}</small>
+  </div>`;
+}
+function huidigeLijst(){
+  return filter === 'open' ? S.filter(isOpen) : filter === 'dicht' ? S.filter(s => !isOpen(s)) : S;
+}
+function vOverzicht(){
+  const open = S.filter(isOpen);
+  const begin = new Date(); begin.setDate(1); begin.setHours(0,0,0,0);
+  const opgelost = S.filter(s => s.status === 'gerepareerd' && s.opgelost_op && new Date(s.opgelost_op) >= begin).length;
+  const lijst = huidigeLijst();
+  return `
+    <div class="tegels">
+      <div class="tegel"><b>${open.length}</b><span>Open storingen</span></div>
+      <div class="tegel rood"><b>${open.filter(s => s.ernst === 'defect').length}</b><span>Werkt helemaal niet</span></div>
+      <div class="tegel oranje"><b>${open.filter(s => s.ernst === 'gedeeltelijk').length}</b><span>Werkt gedeeltelijk</span></div>
+      <div class="tegel groen"><b>${opgelost}</b><span>Gerepareerd deze maand</span></div>
+    </div>
+    <div class="werkbalk">
+      <div class="chips">
+        <button class="chip ${filter==='open'?'actief':''}" data-filter="open">Open</button>
+        <button class="chip ${filter==='dicht'?'actief':''}" data-filter="dicht">Afgehandeld</button>
+        <button class="chip ${filter==='alle'?'actief':''}" data-filter="alle">Alles</button>
+      </div>
+      <div class="knoppen">
+        ${selectie ? '' : '<button class="btn rood-wit" id="selAan">🗑 Opruimen</button>'}
+        <button class="btn" data-go="nieuw">+ Storing melden</button>
+      </div>
+    </div>
+    ${selectie ? `<div class="selectiebalk">
+        <b>${selectie.size} geselecteerd</b>
+        <button class="chip" id="selAlles">Alles in deze lijst</button>
+        <button class="chip" id="selVandaag">Alle nieuwe van vandaag</button>
+        <span style="flex:1"></span>
+        <button class="btn rood" id="selWeg" ${selectie.size ? '' : 'disabled'}>Verwijderen</button>
+        <button class="btn wit" id="selUit">Klaar</button>
+      </div>` : ''}
+    ${lijst.length ? `<div class="kaarten">${lijst.map(kaart).join('')}</div>`
+      : `<div class="leeg">${filter === 'open' ? 'Geen open storingen. Alles werkt! 🎉' : 'Nog niets om te tonen.'}</div>`}`;
+}
+function koppelOverzicht(){
+  document.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { filter = b.dataset.filter; render(); });
+  if ($('selAan')) $('selAan').onclick = () => { selectie = new Set(); render(); };
+  if (!selectie) return;
+  document.querySelectorAll('[data-kies]').forEach(k => k.onclick = () => {
+    const id = k.dataset.kies; selectie.has(id) ? selectie.delete(id) : selectie.add(id); render();
+  });
+  $('selAlles').onclick = () => { huidigeLijst().forEach(s => selectie.add(s.id)); render(); };
+  $('selVandaag').onclick = () => { const v = vandaag(); S.filter(s => s.status === 'nieuw' && new Date(s.gemeld_op).toLocaleDateString('sv-SE') === v).forEach(s => selectie.add(s.id)); render(); };
+  $('selUit').onclick = () => { selectie = null; render(); };
+  $('selWeg').onclick = () => verwijderStoringen([...selectie], () => { selectie = null; render(); });
+}
+async function verwijderStoringen(ids, daarna){
+  if (!ids.length) return;
+  if (!confirm(`${ids.length === 1 ? 'Deze melding' : ids.length + ' meldingen'} definitief verwijderen? Dit kan niet ongedaan worden gemaakt.`)) return;
+  try { await api.verwijder(ids); await laad(); melding(`<b>✓ ${ids.length} ${ids.length === 1 ? 'melding' : 'meldingen'} verwijderd</b>`); daarna && daarna(); }
+  catch(e){ alert('Verwijderen mislukt: ' + e.message); }
+}
+
+/* ================= VIEW: STORING DETAIL ================= */
+async function vDetail(id){
+  const s = S.find(x => x.id === id); if (!s) return `<button class="terug" data-go="overzicht">← Terug naar storingen</button><div class="leeg">Storing niet gevonden (misschien verwijderd).</div>`;
+  const m = mach(s.machine_code);
+  const eerder = S.filter(x => x.machine_code === s.machine_code && x.id !== id && (s.item_nr == null || x.item_nr === s.item_nr || !s.item_nr));
+  const zelfdeOorzaak = s.oorzaak ? eerder.filter(x => (x.oorzaak||'').toLowerCase() === s.oorzaak.toLowerCase()).length : 0;
+  const foto = await api.fotoUrl(s);
+  return `
+    <button class="terug" data-go="overzicht">← Terug naar storingen</button>
+    <div class="blok">
+      <div class="balk" style="justify-content:space-between">
+        <h2 style="margin:0">${esc(m.naam)}${itemTekst(s) ? ` <span class="label l-item" style="font-size:16px;vertical-align:middle">${itemTekst(s)}</span>` : ''}</h2>
+        <div><span class="label l-${s.ernst}">${ER[s.ernst]}</span> <span class="label l-${s.status}">${ST[s.status]}</span></div>
+      </div>
+      <p style="font-size:19px;margin:6px 0 14px">${esc(s.omschrijving)}</p>
+      <dl class="info">
+        <div><dt>Machine</dt><dd><a href="#" data-go="machine" data-id="${esc(m.code)}" class="code">${esc(m.code)}</a></dd></div>
+        <div><dt>Locatie</dt><dd>${esc(m.locatie || '–')}</dd></div>
+        <div><dt>Gemeld door</dt><dd>${esc(s.gemeld_door || 'Onbekend')} ${s.gemeld_door_id ? '<span class="label l-gerepareerd" title="Was ingelogd">✓ ingelogd</span>' : ''}</dd></div>
+        <div><dt>Datum storing</dt><dd>${s.datum ? datum(s.datum, false) : '–'}</dd></div>
+        <div><dt>Ingestuurd</dt><dd>${datum(s.gemeld_op)} · ${s.bron === 'hub' ? 'via hub' : 'via QR'}</dd></div>
+        <div><dt>Eerdere storingen${s.item_nr ? ' (dit nummer)' : ''}</dt><dd>${eerder.length}</dd></div>
+      </dl>
+      ${foto ? `<img class="foto" src="${esc(foto)}" alt="Foto van de storing">` : ''}
+    </div>
+
+    <div class="blok">
+      <h3 style="margin-top:0">Afhandeling</h3>
+      <div class="seg" id="seg">
+        ${Object.keys(ST).map(k => `<button type="button" data-st="${k}" class="${s.status===k?'actief':''}">${ST[k]}</button>`).join('')}
+      </div>
+      <div class="rij">
+        <label class="v">Oorzaak<input id="f_oorzaak" list="oorzaken" value="${esc(s.oorzaak)}" placeholder="Bijv. verstopte nozzle"></label>
+        <label class="v">Gerepareerd door<input id="f_door" value="${esc(s.gerepareerd_door)}"></label>
+        <label class="v">Kosten (€)<input id="f_kosten" type="number" step="0.01" min="0" inputmode="decimal" value="${s.kosten ?? ''}"></label>
+      </div>
+      <datalist id="oorzaken">${[...new Set(S.map(x => x.oorzaak).filter(Boolean))].map(o => `<option value="${esc(o)}">`).join('')}</datalist>
+      <label class="v">Wat is er gedaan?<textarea id="f_reparatie" rows="3">${esc(s.reparatie)}</textarea></label>
+      <label class="v">Gebruikte / te bestellen onderdelen<input id="f_onderdelen" value="${esc(s.onderdelen)}"></label>
+      ${zelfdeOorzaak ? `<p class="aandacht" style="display:inline-block">Let op: deze oorzaak kwam al ${zelfdeOorzaak}× eerder voor</p>` : ''}
+      <div class="knoppen" style="margin-top:8px">
+        <button class="btn" id="bewaar">Opslaan</button>
+        <span style="flex:1"></span>
+        <button class="btn rood-wit" id="weg">🗑 Onterechte melding verwijderen</button>
+      </div>
+    </div>
+
+    <h3>Geschiedenis${s.item_nr ? ` van nummer ${s.item_nr}` : ' van dit apparaat'}</h3>
+    ${tijdlijn(eerder)}`;
+}
+function koppelDetail(id){
+  const s = S.find(x => x.id === id); if (!s) return;
+  let status = s.status;
+  $('seg').onclick = e => { const b = e.target.closest('[data-st]'); if (!b) return; status = b.dataset.st;
+    $('seg').querySelectorAll('button').forEach(x => x.classList.toggle('actief', x === b)); };
+  $('bewaar').onclick = async () => {
+    const dicht = status === 'gerepareerd' || status === 'afgeschreven';
+    const k = $('f_kosten').value;
+    try {
+      await api.bewaarStoring(s.id, {
+        status,
+        oorzaak: $('f_oorzaak').value.trim(),
+        reparatie: $('f_reparatie').value.trim(),
+        gerepareerd_door: $('f_door').value.trim(),
+        kosten: k === '' ? null : Number(k),
+        onderdelen: $('f_onderdelen').value.trim(),
+        opgelost_op: dicht ? (s.opgelost_op || new Date().toISOString()) : null
+      });
+      await laad(); await render(); melding('<b>✓ Opgeslagen</b>');
+    } catch(e){ alert('Opslaan mislukt: ' + e.message); }
+  };
+  $('weg').onclick = () => verwijderStoringen([s.id], () => go('overzicht'));
+}
+function tijdlijn(lijst){
+  if (!lijst.length) return `<div class="leeg">Geen eerdere storingen bekend.</div>`;
+  return `<ul class="tijdlijn">${lijst.map(x => `
+    <li class="klik" data-go="detail" data-id="${esc(x.id)}">
+      <b>${datum(x.datum || x.gemeld_op, false)}</b> ${itemTekst(x) ? `<span class="label l-item">${itemTekst(x)}</span>` : ''} <span class="label l-${x.ernst}">${ER[x.ernst]}</span> <span class="label l-${x.status}">${ST[x.status]}</span><br>
+      ${esc(x.omschrijving)} <small style="color:var(--zacht)">· ${esc(x.gemeld_door || '')}</small>
+      ${x.oorzaak || x.reparatie ? `<br><small style="color:var(--zacht)">${esc([x.oorzaak, x.reparatie].filter(Boolean).join(' → '))}${x.kosten ? ' · ' + euro(x.kosten) : ''}</small>` : ''}
+    </li>`).join('')}</ul>`;
+}
+
+/* ================= VIEW: NIEUWE STORING (vanuit de hub) ================= */
+let nieuwFoto = null;
+function vNieuw(code){
+  nieuwFoto = null;
+  const actief = M.filter(m => m.actief);
+  let mijnNaam = ''; try { mijnNaam = localStorage.getItem('ilab-beheernaam') || ''; } catch(e){}
+  if (!mijnNaam && sessie) mijnNaam = sessie.user.user_metadata?.full_name || sessie.user.user_metadata?.naam || sessie.user.email || '';
+  return `
+    <button class="terug" data-go="${code ? 'machine' : 'overzicht'}" ${code ? `data-id="${esc(code)}"` : ''}>← Terug</button>
+    <div class="blok">
+      <h2>Storing melden</h2>
+      <div class="rij">
+        <label class="v">Machine <span class="verplicht">*</span>
+          <select id="n_machine"><option value="">Kies machine…</option>
+          ${actief.map(m => `<option value="${esc(m.code)}" ${m.code === code ? 'selected' : ''}>${esc(m.naam)} (${esc(m.code)})</option>`).join('')}</select></label>
+        <label class="v" id="n_itemVak" hidden>Exemplaar <span class="verplicht">*</span><select id="n_item"></select></label>
+        <label class="v">Datum <span class="verplicht">*</span><input id="n_datum" type="date" value="${vandaag()}" max="${vandaag()}"></label>
+        <label class="v">Gemeld door <span class="verplicht">*</span><input id="n_door" value="${esc(mijnNaam)}"></label>
+      </div>
+      <span style="font-weight:600;color:var(--navy);font-size:15px">Werkt het apparaat nog? <span class="verplicht">*</span></span>
+      <div class="seg ernst" id="n_ernst" style="margin-top:6px">
+        <button type="button" data-v="defect">Werkt helemaal niet</button>
+        <button type="button" data-v="gedeeltelijk">Werkt gedeeltelijk</button>
+      </div>
+      <label class="v">Wat is er aan de hand? <span class="verplicht">*</span><textarea id="n_oms" rows="3" maxlength="1000"></textarea></label>
+      <div class="rij">
+        <label class="v">Status<select id="n_status"><option value="nieuw">Nieuw</option><option value="in_behandeling">Direct in behandeling</option></select></label>
+        <label class="v">Foto (optioneel)<input id="n_foto" type="file" accept="image/*"></label>
+      </div>
+      <div class="knoppen"><button class="btn" id="n_bewaar">Storing opslaan</button></div>
+    </div>`;
+}
+async function verklein(file, max){
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth*s); c.height = Math.round(img.naturalHeight*s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return await new Promise(res => c.toBlob(res, 'image/jpeg', 0.8));
+  } finally { URL.revokeObjectURL(url); }
+}
+function koppelNieuw(){
+  let ernst = null;
+  const zetItems = () => {
+    const m = mach($('n_machine').value);
+    $('n_itemVak').hidden = !(m.aantal > 1);
+    $('n_item').innerHTML = `<option value="">Kies nummer…</option>` + Array.from({ length: m.aantal || 1 }, (_, i) => `<option value="${i+1}">Nummer ${i+1}</option>`).join('') + `<option value="0">Onbekend</option>`;
+  };
+  $('n_machine').onchange = zetItems; zetItems();
+  $('n_ernst').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; ernst = b.dataset.v;
+    $('n_ernst').querySelectorAll('button').forEach(x => x.classList.toggle('actief', x === b)); };
+  $('n_foto').onchange = async e => { const f = e.target.files[0]; nieuwFoto = f ? await verklein(f, DEMO ? 900 : 1600) : null; };
+  $('n_bewaar').onclick = async () => {
+    const code = $('n_machine').value, m = mach(code);
+    const item = m.aantal > 1 ? $('n_item').value : null;
+    const door = $('n_door').value.trim(), oms = $('n_oms').value.trim(), dat = $('n_datum').value;
+    if (!code) return alert('Kies een machine.');
+    if (m.aantal > 1 && item === '') return alert('Kies welk exemplaar het is.');
+    if (!ernst) return alert('Kies of het apparaat nog werkt.');
+    if (oms.length < 3) return alert('Beschrijf kort wat er aan de hand is.');
+    if (door.length < 2) return alert('Vul in wie de storing meldt.');
+    if (!dat) return alert('Kies een datum.');
+    try {
+      try { localStorage.setItem('ilab-beheernaam', door); } catch(e){}
+      await api.nieuweStoring({ machine_code: code, item_nr: item === null ? null : Number(item), ernst, omschrijving: oms,
+        datum: dat, gemeld_door: door, bron: 'hub', status: $('n_status').value }, nieuwFoto);
+      await laad(); melding('<b>✓ Storing opgeslagen</b>'); go('overzicht');
+    } catch(e){ alert('Opslaan mislukt: ' + e.message); }
+  };
+}
+
+/* ================= VIEW: MACHINES ================= */
+function vMachines(){
+  return `
+    <div class="balk">
+      <input class="zoek" id="zoek" placeholder="Zoek op naam, code, merk of locatie…" value="${esc(zoekterm)}">
+      <button class="btn" data-go="machineForm">+ Machine toevoegen</button>
+    </div>
+    <div class="tabelwrap"><table>
+      <thead><tr><th>Code</th><th>Naam</th><th>Merk / model</th><th>Locatie</th><th>Open</th><th>Totaal</th></tr></thead>
+      <tbody id="mrijen">${machineRijen()}</tbody>
+    </table></div>`;
+}
+function machineRijen(){
+  const q = zoekterm.toLowerCase();
+  const lijst = M.filter(m => !q || [m.code, m.naam, m.merk, m.model, m.locatie, m.categorie].join(' ').toLowerCase().includes(q));
+  if (!lijst.length) return `<tr><td colspan="6" class="leeg">Geen machines gevonden.</td></tr>`;
+  return lijst.map(m => {
+    const st = S.filter(s => s.machine_code === m.code), open = st.filter(isOpen);
+    const erg = open.some(s => s.ernst === 'defect') ? 'defect' : open.length ? 'gedeeltelijk' : '';
+    return `<tr class="klik" data-go="machine" data-id="${esc(m.code)}" style="${m.actief ? '' : 'opacity:.5'}">
+      <td class="code">${esc(m.code)}</td>
+      <td><b>${esc(m.naam)}</b>${m.aantal > 1 ? ` <span class="label l-grijs">${m.aantal} st.</span>` : ''}${m.actief ? '' : ' <small>(niet actief)</small>'}${m.melden_aan === false ? ' <span class="label l-gedeeltelijk">melden uit</span>' : ''}</td>
+      <td>${esc([m.merk, m.model].filter(Boolean).join(' '))}</td><td>${esc(m.locatie)}</td>
+      <td>${open.length ? `<span class="label l-${erg}">${open.length}</span>` : '–'}</td><td>${st.length}</td></tr>`;
+  }).join('');
+}
+function koppelZoek(){ $('zoek').oninput = e => { zoekterm = e.target.value; $('mrijen').innerHTML = machineRijen(); }; }
+
+function vMachine(code){
+  const m = M.find(x => x.code === code); if (!m) return `<div class="leeg">Machine ${esc(code)} niet gevonden.</div>`;
+  const st = S.filter(s => s.machine_code === code);
+  const klaar = st.filter(s => s.opgelost_op);
+  const gem = klaar.length ? klaar.reduce((t,s) => t + dagen(s.gemeld_op, s.opgelost_op), 0) / klaar.length : null;
+  const kosten = st.reduce((t,s) => t + (Number(s.kosten) || 0), 0);
+  let items = '';
+  if (m.aantal > 1){
+    items = `<h3>Per exemplaar</h3><div class="items">${Array.from({ length: m.aantal }, (_, i) => {
+      const n = i + 1, s = st.filter(x => x.item_nr === n), o = s.filter(isOpen).length;
+      return `<div class="itemvak ${o ? 'open' : s.length >= 3 ? 'veel' : ''}"><b>${n}</b><small>${s.length}× storing${o ? ` · ${o} open` : ''}</small></div>`;
+    }).join('')}</div>`;
+  }
+  return `
+    <button class="terug" data-go="machines">← Terug naar machines</button>
+    <div class="blok">
+      <div class="balk" style="justify-content:space-between">
+        <h2 style="margin:0">${esc(m.naam)} <span class="code" style="font-size:18px">${esc(m.code)}</span></h2>
+        <div class="knoppen">
+          <button class="btn" data-go="nieuw" data-id="${esc(m.code)}">+ Storing</button>
+          <button class="btn wit" data-go="qr" data-id="${esc(m.code)}">Label</button>
+          <button class="btn donker" data-go="machineForm" data-id="${esc(m.code)}">Bewerken</button>
+        </div>
+      </div>
+      <dl class="info" style="margin-top:12px">
+        <div><dt>Categorie</dt><dd>${esc(m.categorie || '–')}</dd></div>
+        <div><dt>Merk / model</dt><dd>${esc([m.merk, m.model].filter(Boolean).join(' ') || '–')}</dd></div>
+        <div><dt>Locatie</dt><dd>${esc(m.locatie || '–')}</dd></div>
+        <div><dt>Aantal</dt><dd>${m.aantal > 1 ? m.aantal + ' stuks (set)' : '1'}</dd></div>
+        <div><dt>Aanschafdatum</dt><dd>${m.aanschafdatum ? datum(m.aanschafdatum, false) : '–'}</dd></div>
+      </dl>
+      ${m.notities ? `<p style="color:var(--zacht)">${esc(m.notities)}</p>` : ''}
+      <div class="balk" style="margin:14px 0 0">
+        ${m.melden_aan === false ? '<span class="melduit">⏸ Melden via QR staat uit</span>' : '<span style="color:var(--zacht)">Melden via QR staat aan</span>'}
+        <button class="chip" id="meldToggle">${m.melden_aan === false ? 'Weer aanzetten' : 'Tijdelijk uitzetten'}</button>
+      </div>
+    </div>
+    <div class="tegels">
+      <div class="tegel"><b>${st.length}</b><span>Storingen totaal</span></div>
+      <div class="tegel ${st.filter(isOpen).length ? 'rood' : 'groen'}"><b>${st.filter(isOpen).length}</b><span>Nu open</span></div>
+      <div class="tegel"><b>${gem == null ? '–' : gem.toFixed(1)}</b><span>Gem. dagen tot reparatie</span></div>
+      <div class="tegel"><b style="font-size:26px">${euro(kosten)}</b><span>Reparatiekosten totaal</span></div>
+    </div>
+    ${items}
+    <h3>Storingen</h3>
+    ${tijdlijn(st)}`;
+}
+function koppelMachine(code){
+  const m = M.find(x => x.code === code); if (!m || !$('meldToggle')) return;
+  $('meldToggle').onclick = async () => {
+    try { await api.bewaarMachine({ id: m.id, melden_aan: m.melden_aan === false }); await laad(); render(); }
+    catch(e){ alert('Opslaan mislukt: ' + e.message); }
+  };
+}
+
+function vMachineForm(code){
+  const m = code ? M.find(x => x.code === code) : { actief:true, melden_aan:true, aantal:1 };
+  const cats = [...new Set(M.map(x => x.categorie).filter(Boolean))];
+  const locs = [...new Set(M.map(x => x.locatie).filter(Boolean))];
+  return `
+    <button class="terug" data-go="${code ? 'machine' : 'machines'}" ${code ? `data-id="${esc(code)}"` : ''}>← Terug</button>
+    <div class="blok">
+      <h2>${code ? 'Machine bewerken' : 'Nieuwe machine'}</h2>
+      <div class="rij">
+        <label class="v">Categorie<input id="m_cat" list="cats" value="${esc(m.categorie)}" placeholder="Bijv. 3D-printer"></label>
+        <label class="v">Code (komt in de QR-code)<input id="m_code" value="${esc(m.code)}" ${code ? 'readonly' : ''} placeholder="Bijv. 3D-03" style="text-transform:uppercase"></label>
+        <label class="v">Naam (komt groot op het label)<input id="m_naam" value="${esc(m.naam)}" placeholder="Bijv. 3D-printer 3"></label>
+        <label class="v">Merk<input id="m_merk" value="${esc(m.merk)}"></label>
+        <label class="v">Model<input id="m_model" value="${esc(m.model)}"></label>
+        <label class="v">Locatie<input id="m_loc" list="locs" value="${esc(m.locatie)}"></label>
+        <label class="v">Aantal stuks<input id="m_aantal" type="number" min="1" max="200" value="${m.aantal || 1}">
+          <small style="font-weight:400;color:var(--zacht)">Meer dan 1 = set met één label (bijv. 12 drones). De docent kiest dan het nummer.</small></label>
+        <label class="v">Aanschafdatum<input id="m_datum" type="date" value="${esc(m.aanschafdatum)}"></label>
+      </div>
+      <datalist id="cats">${cats.map(c => `<option value="${esc(c)}">`).join('')}</datalist>
+      <datalist id="locs">${locs.map(c => `<option value="${esc(c)}">`).join('')}</datalist>
+      <label class="v">Notities<textarea id="m_not" rows="2">${esc(m.notities)}</textarea></label>
+      <label class="check"><input type="checkbox" id="m_melden" ${m.melden_aan !== false ? 'checked' : ''}> Melden via QR-code toegestaan</label>
+      <label class="check"><input type="checkbox" id="m_actief" ${m.actief ? 'checked' : ''}> Actief (uitzetten als een apparaat is afgeschreven)</label>
+      ${code ? '<p style="color:var(--zacht);font-size:15px">De code kan niet meer veranderd worden, anders werken de geplakte labels niet meer.</p>' : ''}
+      <div class="knoppen"><button class="btn" id="m_bewaar">Opslaan</button></div>
+    </div>`;
+}
+function koppelMachineForm(){
+  const codeVeld = $('m_code'); let handmatig = !!codeVeld.value;
+  codeVeld.addEventListener('input', () => { handmatig = true; });
+  $('m_cat').addEventListener('input', e => {
+    if (codeVeld.readOnly || handmatig) return;
+    const pre = (e.target.value.replace(/[^a-z0-9]/gi, '').slice(0, 2) || 'XX').toUpperCase();
+    let n = 1; while (M.some(x => x.code === `${pre}-${String(n).padStart(2,'0')}`)) n++;
+    codeVeld.value = `${pre}-${String(n).padStart(2,'0')}`;
+  });
+  $('m_bewaar').onclick = async () => {
+    const bestaand = huidig.id ? M.find(x => x.code === huidig.id) : null;
+    const m = {
+      code: $('m_code').value.trim().toUpperCase(),
+      naam: $('m_naam').value.trim(),
+      categorie: $('m_cat').value.trim() || null,
+      merk: $('m_merk').value.trim() || null,
+      model: $('m_model').value.trim() || null,
+      locatie: $('m_loc').value.trim() || null,
+      aantal: Math.max(1, Math.min(200, parseInt($('m_aantal').value, 10) || 1)),
+      aanschafdatum: $('m_datum').value || null,
+      notities: $('m_not').value.trim() || null,
+      melden_aan: $('m_melden').checked,
+      actief: $('m_actief').checked
+    };
+    if (bestaand) m.id = bestaand.id;
+    if (!/^[A-Z0-9-]{2,20}$/.test(m.code)) return alert('De code mag alleen letters, cijfers en streepjes bevatten (2–20 tekens).');
+    if (!m.naam) return alert('Vul een naam in.');
+    try { await api.bewaarMachine(m); await laad(); go('machine', m.code); }
+    catch(e){ alert('Opslaan mislukt: ' + e.message); }
+  };
+}
+
+/* ================= VIEW: LABELS (Dymo + A4) ================= */
+const FORMATEN = {
+  d89: { naam:'Dymo 99012 · 89 × 36 mm', page:'@page{size:89mm 36mm;margin:0}', uitleg:'Groot adreslabel. Kies in het printvenster de Dymo LabelWriter en papierformaat 99012 (Large Address). Staat het label gedraaid? Zet dan de stand op <b>liggend</b>.' },
+  d57: { naam:'Dymo 11354 · 57 × 32 mm', page:'@page{size:57mm 32mm;margin:0}', uitleg:'Kleiner multifunctioneel label voor kleinere apparaten. Kies papierformaat 11354 en zo nodig stand <b>liggend</b>.' },
+  a4:  { naam:'A4 stickervel · 3 × 7 (Avery L7160)', page:'@page{size:A4;margin:15.15mm 7.25mm 0 7.25mm}', uitleg:'Voor een gewone printer. Print eerst een proefvel op gewoon papier en zet de schaal op <b>100% / werkelijke grootte</b>.' }
+};
+let qrKeuze = null, labelFormaat = null;
+function vQr(){
+  if (!labelFormaat){ try { labelFormaat = localStorage.getItem('ilab-labelformaat') || 'd89'; } catch(e){ labelFormaat = 'd89'; } }
+  if (huidig.id) qrKeuze = new Set([huidig.id]);
+  if (!qrKeuze) qrKeuze = new Set(M.filter(m => m.actief).map(m => m.code));
+  return `
+    <h2>Labels printen</h2>
+    <div class="seg" id="fmt">${Object.entries(FORMATEN).map(([k,f]) => `<button type="button" data-f="${k}" class="${k===labelFormaat?'actief':''}">${f.naam}</button>`).join('')}</div>
+    <p style="color:var(--zacht);margin-top:-6px" id="fmtUitleg">${FORMATEN[labelFormaat].uitleg}</p>
+    <label class="v">Adres van de meldpagina (komt in de QR-code)<input id="qr_url" value="${esc(meldUrl())}"></label>
+    ${DEMO ? '<p class="demo">Demo: dit adres werkt alleen op deze computer. Na het koppelen staat hier het echte adres van de hub (CONFIG.MELD_URL).</p>' : ''}
+    <div class="balk"><button class="chip" id="qr_alle">Alles selecteren</button><button class="chip" id="qr_geen">Niets selecteren</button>
+      <span style="color:var(--zacht)" id="qr_tel"></span></div>
+    <div class="qrlijst">${M.map(m => `<label><input type="checkbox" value="${esc(m.code)}" ${qrKeuze.has(m.code) ? 'checked' : ''}>
+      <span><b>${esc(m.naam)}</b><br><small class="code">${esc(m.code)}</small></span></label>`).join('')}</div>
+    <div class="knoppen" style="margin-bottom:16px"><button class="btn" id="printKnop">🖨️ Labels printen</button></div>
+    <div class="voorbeeld"><div id="printvel"></div></div>`;
+}
+function tekenLabels(){
+  const vel = $('printvel'); vel.innerHTML = ''; vel.className = 'fmt-' + labelFormaat;
+  $('paginaformaat').textContent = '@media print{' + FORMATEN[labelFormaat].page + '}';
+  const basis = $('qr_url').value.trim();
+  const lijst = M.filter(m => qrKeuze.has(m.code));
+  $('qr_tel').textContent = `${lijst.length} label${lijst.length === 1 ? '' : 's'}` + (labelFormaat === 'a4' ? ` · ${Math.max(1, Math.ceil(lijst.length / 21))} vel` : '');
+  lijst.forEach(m => {
+    const l = document.createElement('div'); l.className = 'lbl';
+    l.innerHTML = `<div class="lbl-qr"></div><div class="t">
+      <span class="merk">i-lab · storing? scan mij</span>
+      <span class="nm">${esc(m.naam)}</span>
+      <span class="c">${esc(m.code)}</span>
+      ${m.aantal > 1 ? `<span class="set">Set van ${m.aantal} · noem het nummer</span>` : ''}</div>`;
+    vel.appendChild(l);
+    const url = basis + (basis.includes('?') ? '&' : '?') + 'm=' + encodeURIComponent(m.code);
+    new QRCode(l.querySelector('.lbl-qr'), { text:url, width:256, height:256, colorDark:'#000000', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M });
+  });
+  $('fmt').onclick = e => { const b = e.target.closest('[data-f]'); if (!b) return; labelFormaat = b.dataset.f;
+    try { localStorage.setItem('ilab-labelformaat', labelFormaat); } catch(e){}
+    $('fmt').querySelectorAll('button').forEach(x => x.classList.toggle('actief', x === b));
+    $('fmtUitleg').innerHTML = FORMATEN[labelFormaat].uitleg; tekenLabels(); };
+  $('qr_url').oninput = tekenLabels;
+  $('printKnop').onclick = () => window.print();
+  document.querySelectorAll('.qrlijst input').forEach(cb => cb.onchange = () => { cb.checked ? qrKeuze.add(cb.value) : qrKeuze.delete(cb.value); tekenLabels(); });
+  $('qr_alle').onclick = () => { qrKeuze = new Set(M.map(m => m.code)); render(); };
+  $('qr_geen').onclick = () => { qrKeuze = new Set(); render(); };
+  huidig.id = null;
+}
+
+/* ================= VIEW: INZICHT ================= */
+function groepeer(sleutel){
+  const g = {};
+  M.forEach(m => { const k = m[sleutel] || 'Onbekend'; (g[k] ||= { naam:k, machines:0, storingen:0, kosten:0 }).machines += (m.aantal || 1); });
+  S.forEach(s => { const m = mach(s.machine_code); const k = m[sleutel] || 'Onbekend'; const r = (g[k] ||= { naam:k, machines:0, storingen:0, kosten:0 }); r.storingen++; r.kosten += Number(s.kosten) || 0; });
+  return Object.values(g).map(r => ({ ...r, per: r.machines ? r.storingen / r.machines : r.storingen })).sort((a,b) => b.per - a.per);
+}
+function groepTabel(titel, rijen){
+  const max = Math.max(1, ...rijen.map(r => r.per));
+  return `<h3>${titel}</h3><div class="tabelwrap"><table>
+    <thead><tr><th>${titel.replace('Per ', '')}</th><th>Apparaten</th><th>Storingen</th><th>Per apparaat</th><th style="width:30%"></th><th>Kosten</th></tr></thead>
+    <tbody>${rijen.map(r => `<tr><td><b>${esc(r.naam)}</b></td><td>${r.machines}</td><td>${r.storingen}</td><td>${r.per.toFixed(1)}</td>
+      <td><div class="staaf" style="width:${(r.per / max * 100).toFixed(0)}%"></div></td><td>${euro(r.kosten)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function vInzicht(){
+  const jaar = Date.now() - 365 * 864e5;
+  const perMachine = M.map(m => {
+    const st = S.filter(s => s.machine_code === m.code);
+    const recent = st.filter(s => new Date(s.gemeld_op) >= jaar).length;
+    const klaar = st.filter(s => s.opgelost_op);
+    const perStuk = recent / (m.aantal || 1);
+    return { m, totaal: st.length, recent, perStuk, kosten: st.reduce((t,s) => t + (Number(s.kosten) || 0), 0),
+      gem: klaar.length ? klaar.reduce((t,s) => t + dagen(s.gemeld_op, s.opgelost_op), 0) / klaar.length : null };
+  }).filter(r => r.totaal).sort((a,b) => b.perStuk - a.perStuk || b.totaal - a.totaal);
+  const max = Math.max(1, ...perMachine.map(r => r.recent));
+  const oorzaken = {};
+  S.forEach(s => { if (s.oorzaak){ const k = s.oorzaak.trim().toLowerCase(); (oorzaken[k] ||= { naam:s.oorzaak.trim(), n:0 }).n++; } });
+  const top = Object.values(oorzaken).sort((a,b) => b.n - a.n).slice(0, 8);
+  const melders = {};
+  S.filter(s => new Date(s.gemeld_op) >= jaar && s.gemeld_door).forEach(s => { const k = s.gemeld_door.trim(); melders[k] = (melders[k] || 0) + 1; });
+  const topMelders = Object.entries(melders).sort((a,b) => b[1] - a[1]).slice(0, 8);
+  const totaalKosten = S.reduce((t,s) => t + (Number(s.kosten) || 0), 0);
+  const aandacht = r => r.perStuk >= 3;
+  return `
+    <h2>Inzicht</h2>
+    <div class="tegels">
+      <div class="tegel"><b>${S.length}</b><span>Storingen totaal</span></div>
+      <div class="tegel"><b>${S.filter(s => new Date(s.gemeld_op) >= jaar).length}</b><span>Laatste 12 maanden</span></div>
+      <div class="tegel"><b style="font-size:26px">${euro(totaalKosten)}</b><span>Reparatiekosten totaal</span></div>
+      <div class="tegel rood"><b>${perMachine.filter(aandacht).length}</b><span>Machines met aandacht</span></div>
+    </div>
+    <h3>Per machine (laatste 12 maanden)</h3>
+    <p style="color:var(--zacht);margin-top:-4px">Een machine krijgt het label <span class="aandacht">Aandacht</span> bij 3 of meer storingen per apparaat in een jaar: mogelijk versleten of van slechte kwaliteit. Bij sets wordt gerekend per stuk.</p>
+    ${perMachine.length ? `<div class="tabelwrap"><table>
+      <thead><tr><th>Machine</th><th>Merk</th><th>12 mnd</th><th style="width:25%"></th><th>Totaal</th><th>Gem. dagen</th><th>Kosten</th></tr></thead>
+      <tbody>${perMachine.map(r => `<tr class="klik" data-go="machine" data-id="${esc(r.m.code)}">
+        <td><b>${esc(r.m.naam)}</b> <small class="code">${esc(r.m.code)}</small> ${aandacht(r) ? '<span class="aandacht">Aandacht</span>' : ''}</td>
+        <td>${esc(r.m.merk || '–')}</td><td>${r.recent}</td><td><div class="staaf" style="width:${(r.recent / max * 100).toFixed(0)}%"></div></td>
+        <td>${r.totaal}</td><td>${r.gem == null ? '–' : r.gem.toFixed(1)}</td><td>${euro(r.kosten)}</td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="leeg">Nog geen storingen geregistreerd.</div>'}
+    ${groepTabel('Per merk', groepeer('merk'))}
+    ${groepTabel('Per categorie', groepeer('categorie'))}
+    <div class="rij" style="align-items:start">
+      <div><h3>Meest voorkomende oorzaken</h3>
+      ${top.length ? `<div class="tabelwrap"><table><tbody>${top.map(o => `<tr><td>${esc(o.naam)}</td><td style="width:60px"><b>${o.n}×</b></td></tr>`).join('')}</tbody></table></div>`
+        : '<div class="leeg">Vul bij het afhandelen een oorzaak in, dan verschijnt hier wat het vaakst terugkomt.</div>'}</div>
+      <div><h3>Meldingen per persoon (12 mnd)</h3>
+      ${topMelders.length ? `<div class="tabelwrap"><table><tbody>${topMelders.map(([n,c]) => `<tr><td>${esc(n)}</td><td style="width:60px"><b>${c}×</b></td></tr>`).join('')}</tbody></table></div>`
+        : '<div class="leeg">Nog geen meldingen.</div>'}</div>
+    </div>`;
+}
+
+/* ================= VIEW: SCANNEN ================= */
+function vScan(){
+  return `
+    <h2>Machine scannen</h2>
+    <p style="color:var(--zacht);margin-top:-6px">Richt de camera op een label om direct de gegevens en storingsgeschiedenis van dat apparaat te zien.</p>
+    <div id="lezer"></div>
+    <p id="scanFout" style="color:var(--rood);font-weight:600"></p>
+    <div class="balk" style="max-width:520px">
+      <input class="zoek" id="scanCode" placeholder="Of typ een code, bijv. LS-01" style="text-transform:uppercase">
+      <button class="btn" id="scanZoek">Openen</button>
+    </div>`;
+}
+function codeUit(tekst){
+  try { const u = new URL(tekst); return (u.searchParams.get('m') || '').toUpperCase(); }
+  catch(e){ return tekst.trim().toUpperCase(); }
+}
+function openCode(code){
+  if (M.some(m => m.code === code)) go('machine', code);
+  else $('scanFout').textContent = `Code "${code}" is niet gevonden in het machineregister.`;
+}
+function laadScript(src){ return new Promise((res, rej) => { if (window.Html5Qrcode) return res(); const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+async function startScanner(){
+  $('scanZoek').onclick = () => openCode($('scanCode').value.trim().toUpperCase());
+  $('scanCode').onkeydown = e => { if (e.key === 'Enter') $('scanZoek').click(); };
+  try {
+    await laadScript('https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js');
+    if (huidig.view !== 'scan') return;
+    const sc = new Html5Qrcode('lezer'); scanner = sc;
+    await sc.start({ facingMode:'environment' }, { fps:10, qrbox:{ width:250, height:250 } }, tekst => {
+      sc.stop().catch(()=>{}); scanner = null; openCode(codeUit(tekst));
+    }, () => {});
+  } catch(e){
+    $('scanFout').textContent = 'De camera kon niet gestart worden. Geef toestemming voor de camera, en let op: dit werkt alleen via een https-adres.';
+  }
+}
+
+/* ================= START ================= */
+async function start(){
+  $('demoBalk').hidden = !DEMO;
+  $('demoReset').onclick = () => { if (confirm('Alle demogegevens terugzetten?')) { localStorage.removeItem(DEMO_KEY); location.reload(); } };
+  if (!DEMO){
+    sessie = (window.__HUB_CFG__ && window.__HUB_CFG__.userId) ? { user: { id: window.__HUB_CFG__.userId, email: window.__HUB_CFG__.email, user_metadata: { full_name: window.__HUB_CFG__.naam } } } : null;
+    if (!sessie){ $('view').innerHTML = '<div class="leeg">Je bent niet ingelogd. Log eerst in via de i-lab hub.</div>'; return; }
+  }
+  if (!(await api.isBeheerder())){ $('view').innerHTML = '<div class="leeg">Deze module is alleen beschikbaar voor de beheerder.</div>'; return; }
+  $('nav').hidden = false;
+  try { await laad(); } catch(e){ $('view').innerHTML = `<div class="leeg">Kon de gegevens niet laden: ${esc(e.message)}</div>`; return; }
+  api.luister(async () => {
+    await laad();
+    if (['overzicht','inzicht'].includes(huidig.view)) render();
+  });
+  if (DEMO) $('live').hidden = false;
+  go('overzicht');
+}
+start();
+</script>
+</body>
+</html>

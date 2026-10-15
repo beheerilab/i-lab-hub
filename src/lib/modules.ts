@@ -54,6 +54,12 @@ export const MODULES = [
     description: "Plattegrond met wat waar ligt opgeslagen",
   },
   {
+    href: "/storingen",
+    icon: "🚨",
+    title: "Storingen",
+    description: "Gemelde storingen, machines en QR-labels",
+  },
+  {
     href: "/prijscalculator",
     icon: "🧮",
     title: "Prijscalculator",
@@ -84,7 +90,11 @@ export const TOOLS_HREFS: string[] = ["/prijscalculator", "/facturatie", "/reisk
  */
 export const DOCENT_TOEGANKELIJKE_HREFS: string[] = ["/planning", "/lesmateriaal", "/handleidingen"];
 
+/** Modules die alleen de beheerder ziet. */
+export const ADMIN_ALLEEN_HREFS: string[] = ["/storingen"];
+
 export function modulesVoorRol<T extends { href: string }>(rol: string, modules: readonly T[]): T[] {
-  if (rol !== "docent") return [...modules];
-  return modules.filter((mod) => DOCENT_TOEGANKELIJKE_HREFS.includes(mod.href));
+  const zichtbaar = rol === "admin" ? [...modules] : modules.filter((mod) => !ADMIN_ALLEEN_HREFS.includes(mod.href));
+  if (rol !== "docent") return zichtbaar;
+  return zichtbaar.filter((mod) => DOCENT_TOEGANKELIJKE_HREFS.includes(mod.href));
 }

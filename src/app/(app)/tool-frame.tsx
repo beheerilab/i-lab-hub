@@ -95,6 +95,7 @@ export function ToolFrame({ naam, titel }: { naam: string; titel: string }) {
         src={`/api/tools/${naam}`}
         title={titel}
         scrolling="no"
+        allow="camera; clipboard-write"
         onLoad={bijLaden}
         style={{ height: hoogte, colorScheme: "light" }}
         className="block w-full border-0 bg-transparent"

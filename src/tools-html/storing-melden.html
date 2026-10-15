@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storing melden · i-lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --navy:#0c1c49; --blauw:#0075bf; --cyaan:#009fe3; --licht:#a1daf8; --grijs:#e3e9ec;
+    --rood:#d93a3a; --oranje:#e8890c; --groen:#2e9e5b; --tekst:#1d2433; --zacht:#5d6b82;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#fff;color:var(--tekst);font-family:'Barlow',system-ui,sans-serif;font-size:17px}
+  header{background:linear-gradient(135deg,var(--navy),var(--blauw));color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px}
+  header img{height:30px}
+  header .tekstlogo{font-weight:700;font-size:22px;letter-spacing:.5px}
+  header .sub{opacity:.85;font-size:15px}
+  main{max-width:560px;margin:0 auto;padding:18px 16px 40px}
+  .machine{background:var(--grijs);border-radius:14px;padding:14px 16px;margin-bottom:16px;border-left:6px solid var(--cyaan)}
+  .machine small{color:var(--zacht);text-transform:uppercase;font-size:12px;letter-spacing:.6px;font-weight:600}
+  .machine h1{margin:2px 0 2px;font-size:24px;color:var(--navy)}
+  .machine p{margin:0;color:var(--zacht)}
+  .bestaand{background:#fff5e6;border:1px solid #f3cf95;border-radius:12px;padding:12px 14px;margin-bottom:18px;color:#6b4300;font-size:16px}
+  .bestaand b{display:block;color:#7a4b00;margin-bottom:2px}
+  fieldset{border:0;padding:0;margin:0 0 18px}
+  legend,.lbl{font-weight:700;color:var(--navy);margin-bottom:8px;display:block;font-size:17px}
+  .verplicht{color:var(--rood)}
+  .optie{font-weight:400;color:var(--zacht)}
+  .keuzes{display:grid;gap:10px}
+  .keuze{display:block;cursor:pointer}
+  .keuze input{position:absolute;opacity:0;pointer-events:none}
+  .keuze span{display:flex;flex-direction:column;border:2px solid var(--grijs);border-radius:14px;padding:14px 16px;transition:.15s}
+  .keuze b{font-size:18px}
+  .keuze small{color:var(--zacht);font-size:15px}
+  .keuze.defect input:checked+span{border-color:var(--rood);background:#fdeeee}
+  .keuze.defect input:checked+span b{color:var(--rood)}
+  .keuze.gedeeltelijk input:checked+span{border-color:var(--oranje);background:#fff5e6}
+  .keuze.gedeeltelijk input:checked+span b{color:#b56a06}
+  .veld{margin-bottom:18px}
+  .twee{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  textarea,input[type=text],input[type=date],select{width:100%;font:inherit;border:2px solid var(--grijs);border-radius:12px;padding:12px 14px;outline:none;background:#fff;color:inherit}
+  textarea:focus,input:focus,select:focus{border-color:var(--cyaan)}
+  input[readonly]{background:var(--grijs)}
+  .fout-veld{border-color:var(--rood)!important}
+  .teller{text-align:right;font-size:13px;color:var(--zacht);margin-top:4px}
+  .hint{font-size:14px;color:var(--zacht);margin-top:4px}
+  .fotoknop{display:flex;align-items:center;justify-content:center;gap:8px;border:2px dashed var(--licht);border-radius:12px;padding:16px;color:var(--blauw);font-weight:600;cursor:pointer;background:#f6fbfe}
+  .fotoknop input{display:none}
+  .preview{position:relative;margin-top:10px}
+  .preview img{width:100%;border-radius:12px;display:block}
+  .preview button{position:absolute;top:8px;right:8px;border:0;border-radius:20px;background:rgba(12,28,73,.8);color:#fff;padding:6px 12px;font:inherit;font-size:14px}
+  .btn{width:100%;border:0;border-radius:14px;padding:16px;font:inherit;font-size:19px;font-weight:700;color:#fff;cursor:pointer;
+       background:linear-gradient(135deg,var(--blauw),var(--cyaan));box-shadow:0 6px 18px rgba(0,117,191,.25)}
+  .btn:disabled{opacity:.6}
+  .btn.licht{background:linear-gradient(135deg,var(--navy),var(--blauw))}
+  .fout{color:var(--rood);font-weight:600;min-height:1.2em;margin-top:10px}
+  .hp{position:absolute;left:-9999px;height:0;width:0;opacity:0}
+  .bericht{text-align:center;padding:30px 10px}
+  .bericht .icoon{width:76px;height:76px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;background:linear-gradient(135deg,var(--groen),#49c27e)}
+  .bericht h2{color:var(--navy);margin:0 0 6px}
+  .bericht p{color:var(--zacht);margin:0 0 22px}
+  .demo{background:#fff5e6;border:1px solid #f3cf95;color:#7a4b00;border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:16px}
+  .demolijst a{display:block;padding:12px 14px;border:2px solid var(--grijs);border-radius:12px;margin-bottom:8px;color:var(--navy);text-decoration:none;font-weight:600}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <span id="logo"></span>
+  <span class="sub">Storing melden</span>
+</header>
+
+<main>
+  <div id="demoBalk" class="demo" hidden>Demomodus: meldingen worden alleen in deze browser opgeslagen.</div>
+  <p id="laden">Laden…</p>
+
+  <section id="onbekend" class="bericht" hidden>
+    <h2 id="onbekendTitel">Apparaat niet gevonden</h2>
+    <p id="onbekendTekst">Scan de QR-code op het apparaat met de camera van je telefoon.</p>
+    <div id="demolijst" class="demolijst"></div>
+  </section>
+
+  <form id="form" hidden novalidate>
+    <div class="machine">
+      <small>Storing melden voor</small>
+      <h1 id="mNaam"></h1>
+      <p id="mInfo"></p>
+    </div>
+
+    <div class="bestaand" id="bestaand" hidden></div>
+
+    <div class="veld" id="itemVeld" hidden>
+      <label class="lbl" for="item">Welk exemplaar? <span class="verplicht">*</span></label>
+      <select id="item"></select>
+      <div class="hint">Kijk naar het nummer op het apparaat zelf.</div>
+    </div>
+
+    <fieldset id="ernstVeld">
+      <legend>Werkt het apparaat nog? <span class="verplicht">*</span></legend>
+      <div class="keuzes">
+        <label class="keuze defect"><input type="radio" name="ernst" value="defect">
+          <span><b>Werkt helemaal niet</b><small>Het apparaat is niet meer te gebruiken</small></span></label>
+        <label class="keuze gedeeltelijk"><input type="radio" name="ernst" value="gedeeltelijk">
+          <span><b>Werkt gedeeltelijk</b><small>Het doet het nog, maar niet goed</small></span></label>
+      </div>
+    </fieldset>
+
+    <div class="veld">
+      <label class="lbl" for="omschrijving">Wat is er aan de hand? <span class="verplicht">*</span></label>
+      <textarea id="omschrijving" rows="4" maxlength="1000" placeholder="Bijv. laser snijdt niet meer door, foutcode E12 in het scherm"></textarea>
+      <div class="teller"><span id="teller">0</span>/1000</div>
+    </div>
+
+    <div class="twee">
+      <div class="veld">
+        <label class="lbl" for="naam">Je naam <span class="verplicht">*</span></label>
+        <input type="text" id="naam" maxlength="80" autocomplete="name">
+      </div>
+      <div class="veld">
+        <label class="lbl" for="datum">Datum <span class="verplicht">*</span></label>
+        <input type="date" id="datum">
+      </div>
+    </div>
+
+    <div class="veld">
+      <span class="lbl">Foto <span class="optie">(optioneel)</span></span>
+      <label class="fotoknop" id="fotoKnop">📷 Foto maken of kiezen
+        <input type="file" id="foto" accept="image/*">
+      </label>
+      <div class="preview" id="preview" hidden>
+        <img id="previewImg" alt="Gekozen foto">
+        <button type="button" id="fotoWeg">Verwijderen</button>
+      </div>
+    </div>
+
+    <input type="text" name="website" id="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+    <button type="submit" class="btn" id="verzend">Melding versturen</button>
+    <p class="fout" id="fout"></p>
+  </form>
+
+  <section id="klaar" class="bericht" hidden>
+    <div class="icoon">✓</div>
+    <h2>Bedankt voor je melding!</h2>
+    <p>De storing aan <b id="klaarNaam"></b> is doorgegeven aan het i-lab team.</p>
+    <button class="btn licht" id="nogEen" type="button">Nog een melding voor dit apparaat</button>
+  </section>
+</main>
+
+<script>
+/* ================= INSTELLINGEN =================
+   Vul hier dezelfde gegevens in als in de rest van de hub.
+   Zolang SUPABASE_URL niet begint met https:// draait de pagina in demomodus. */
+const CONFIG = window.__HUB_CFG__;
+/* ================================================= */
+
+const DEMO = !/^https:\/\//.test(CONFIG.SUPABASE_URL);
+const sb = DEMO ? null : supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, {
+  auth: { persistSession:false, autoRefreshToken:false, detectSessionInUrl:false },
+  global: { fetch: (u, o) => window.__hubFetch(u, o) }
+});
+if (sb && window.__HUB_TOKEN__) sb.realtime.setAuth(window.__HUB_TOKEN__);
+window.__hubTokenVerversd = t => { if (sb) sb.realtime.setAuth(t); };
+const $ = id => document.getElementById(id);
+const code = (new URLSearchParams(location.search).get('m') || '').trim().toUpperCase();
+let fotoBlob = null, machine = null, ingelogdeNaam = null;
+
+$('logo').innerHTML = CONFIG.LOGO_URL
+  ? `<img src="${CONFIG.LOGO_URL}" alt="i-lab">`
+  : `<span class="tekstlogo">i-lab</span>`;
+
+/* ---------- Demo-opslag (zelfde als beheerpagina) ---------- */
+const DEMO_KEY = 'ilab-storingen-demo-v2';
+function demoSeed(){
+  const d = n => new Date(Date.now() - n*864e5).toISOString();
+  const dd = n => d(n).slice(0,10);
+  const m = (id,code,naam,categorie,merk,model,locatie,aanschafdatum,aantal=1) => ({id,code,naam,categorie,merk,model,locatie,aanschafdatum,aantal,melden_aan:true,actief:true,notities:''});
+  const s = (id,machine_code,item_nr,ernst,omschrijving,gemeld_door,status,dagen,extra={}) => ({id,machine_code,item_nr,ernst,omschrijving,datum:dd(dagen),gemeld_door,gemeld_door_id:null,bron:'qr',foto_pad:null,status,gemeld_op:d(dagen),opgelost_op:null,oorzaak:'',reparatie:'',gerepareerd_door:'',kosten:null,onderdelen:'',...extra});
+  return {
+    machines: [
+      m('m1','LS-01','Lasersnijder','Lasersnijder','Epilog','Fusion Edge 24','Lab 3 – Maakplaats','2021-09-01'),
+      m('m2','3D-01','3D-printer 1','3D-printer','Ultimaker','S5','Lab 2','2022-02-15'),
+      m('m3','3D-02','3D-printer 2','3D-printer','Bambu Lab','X1 Carbon','Lab 2','2024-01-10'),
+      m('m4','SP-01','Vinylsnijder','Snijplotter','Silhouette','Cameo 4','Lab 3 – Maakplaats','2023-03-01'),
+      m('m5','DR-01','Drones (set)','Drones','DJI','Tello EDU','Opslag A','2023-09-01',12),
+      m('m6','BM-01','Beamer Lab 1','Audiovisueel','Epson','EB-695Wi','Lab 1','2020-05-12')
+    ],
+    storingen: [
+      s('s1','3D-01',null,'gedeeltelijk','Printkop verstopt, print laat los na de eerste laag.','Joris','gerepareerd',120,{opgelost_op:d(116),oorzaak:'Verstopte nozzle',reparatie:'Printcore vervangen',gerepareerd_door:'Daan',kosten:24.95,onderdelen:'AA 0.4 printcore'}),
+      s('s2','3D-01',null,'gedeeltelijk','Weer verstopt, filament komt er nauwelijks uit.','Sanne','gerepareerd',60,{opgelost_op:d(55),oorzaak:'Verstopte nozzle',reparatie:'Printcore vervangen, filament gedroogd',gerepareerd_door:'Daan',kosten:24.95,onderdelen:'AA 0.4 printcore'}),
+      s('s3','BM-01',null,'defect','Beamer gaat niet meer aan, lampje knippert oranje.','Mark','gerepareerd',200,{opgelost_op:d(190),oorzaak:'Lamp op',reparatie:'Nieuwe lamp geplaatst',gerepareerd_door:'Daan',kosten:89,onderdelen:'ELPLP97 lamp'}),
+      s('s4','DR-01',7,'defect','Propeller afgebroken na botsing tegen de muur.','Sanne','gerepareerd',30,{opgelost_op:d(29),oorzaak:'Propeller gebroken',reparatie:'Propellerset vervangen',gerepareerd_door:'Daan',kosten:9.95,onderdelen:'Tello propellers'}),
+      s('s5','LS-01',null,'gedeeltelijk','Laser snijdt niet meer door 4 mm multiplex, alleen graveren lukt.','Joris','in_behandeling',3),
+      s('s6','DR-01',3,'gedeeltelijk','Drone 3 drijft steeds naar links weg.','Mark','nieuw',1),
+      s('s7','3D-01',null,'defect','Printbed wordt niet meer warm, foutmelding op het scherm.','Fatima','nieuw',0.04)
+    ]
+  };
+}
+function demoLoad(){
+  try { const d = JSON.parse(localStorage.getItem(DEMO_KEY)); if (d && d.machines) return d; } catch(e){}
+  const d = demoSeed(); demoSave(d); return d;
+}
+function demoSave(d){ try { localStorage.setItem(DEMO_KEY, JSON.stringify(d)); } catch(e){ throw new Error('Opslaan in de browser lukt niet (foto te groot?).'); } }
+
+/* ---------- Hulpjes ---------- */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const vandaag = (plus = 0) => { const d = new Date(); d.setDate(d.getDate() + plus); return d.toLocaleDateString('sv-SE'); };
+function uuid(){
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0; return (c==='x' ? r : (r&3|8)).toString(16);
+  });
+}
+function geleden(iso){
+  const m = (Date.now() - new Date(iso)) / 6e4;
+  if (m < 60) return `${Math.max(1, Math.round(m))} min geleden`;
+  if (m < 1440) return `${Math.round(m/60)} uur geleden`;
+  const d = Math.round(m/1440); return d === 1 ? 'gisteren' : `${d} dagen geleden`;
+}
+async function verklein(file, max){
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth*s); c.height = Math.round(img.naturalHeight*s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return await new Promise(res => c.toBlob(res, 'image/jpeg', 0.8));
+  } finally { URL.revokeObjectURL(url); }
+}
+const naarDataUrl = blob => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
+function toon(id){ ['laden','onbekend','form','klaar'].forEach(x => $(x).hidden = (x !== id)); window.scrollTo(0,0); }
+function fout(t, veld){
+  $('fout').textContent = t || '';
+  document.querySelectorAll('.fout-veld').forEach(x => x.classList.remove('fout-veld'));
+  if (veld){ veld.classList.add('fout-veld'); veld.scrollIntoView({ behavior:'smooth', block:'center' }); }
+}
+
+/* ---------- Machine ophalen ---------- */
+async function haalMachine(){
+  if (!code) return null;
+  if (DEMO){
+    const d = demoLoad(); const m = d.machines.find(x => x.code === code && x.actief); if (!m) return null;
+    const open = d.storingen.filter(s => s.machine_code === code && ['nieuw','in_behandeling'].includes(s.status))
+                            .sort((a,b) => b.gemeld_op.localeCompare(a.gemeld_op));
+    return { ...m, open_aantal: open.length, laatste_open: open[0]?.omschrijving, laatste_open_item: open[0]?.item_nr, laatste_open_op: open[0]?.gemeld_op };
+  }
+  const { data, error } = await sb.rpc('machine_info', { p_code: code });
+  if (error) throw error;
+  return (data && data[0]) || null;
+}
+
+/* Als de docent al ingelogd is in de hub: naam automatisch invullen */
+async function ingelogdeGebruiker(){ return (window.__HUB_CFG__ && window.__HUB_CFG__.naam) || null; }
+
+async function start(){
+  $('demoBalk').hidden = !DEMO;
+  try { machine = await haalMachine(); }
+  catch(e){ $('onbekendTekst').textContent = 'Er ging iets mis met de verbinding. Probeer het opnieuw.'; toon('onbekend'); return; }
+
+  if (!machine){
+    if (DEMO){
+      $('onbekendTekst').textContent = 'Demo: kies hieronder een apparaat, alsof je de QR-code scant.';
+      $('demolijst').innerHTML = demoLoad().machines.map(m =>
+        `<a href="?m=${encodeURIComponent(m.code)}">${esc(m.naam)} <span style="color:var(--zacht);font-weight:400">· ${esc(m.code)}</span></a>`).join('');
+    }
+    toon('onbekend'); return;
+  }
+  if (machine.melden_aan === false){
+    $('onbekendTitel').textContent = machine.naam;
+    $('onbekendTekst').textContent = 'Melden via de QR-code staat voor dit apparaat tijdelijk uit. Meld het probleem direct bij de beheerder.';
+    toon('onbekend'); return;
+  }
+
+  $('mNaam').textContent = machine.naam;
+  $('mInfo').textContent = [machine.code, machine.locatie].filter(Boolean).join(' · ');
+  $('klaarNaam').textContent = machine.naam;
+  document.title = `Storing melden · ${machine.naam}`;
+
+  // Set met meerdere exemplaren → itemnummer verplicht
+  if (machine.aantal > 1){
+    $('itemVeld').hidden = false;
+    $('item').innerHTML = `<option value="">Kies nummer…</option>` +
+      Array.from({ length: machine.aantal }, (_, i) => `<option value="${i+1}">Nummer ${i+1}</option>`).join('') +
+      `<option value="0">Weet ik niet</option>`;
+  }
+
+  // Er staat al een open melding → voorkom dubbele meldingen
+  if (machine.open_aantal > 0){
+    const item = machine.laatste_open_item ? ` (nummer ${machine.laatste_open_item})` : '';
+    $('bestaand').innerHTML = `<b>Er ${machine.open_aantal === 1 ? 'staat al een melding' : `staan al ${machine.open_aantal} meldingen`} open voor dit apparaat</b>
+      Laatste${item}: “${esc(machine.laatste_open)}” · ${geleden(machine.laatste_open_op)}<br>
+      Gaat het om hetzelfde probleem? Dan hoef je niets te doen. Iets anders? Meld het hieronder.`;
+    $('bestaand').hidden = false;
+  }
+
+  $('datum').value = vandaag(); $('datum').max = vandaag(); $('datum').min = vandaag(-30);
+  ingelogdeNaam = await ingelogdeGebruiker();
+  if (ingelogdeNaam){ $('naam').value = ingelogdeNaam; $('naam').readOnly = true; }
+  else { try { $('naam').value = localStorage.getItem('ilab-meldnaam') || ''; } catch(e){} }
+  toon('form');
+}
+
+/* ---------- Formulier ---------- */
+$('omschrijving').addEventListener('input', e => $('teller').textContent = e.target.value.length);
+
+$('foto').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    fotoBlob = await verklein(f, DEMO ? 900 : 1600);
+    $('previewImg').src = URL.createObjectURL(fotoBlob);
+    $('preview').hidden = false; $('fotoKnop').hidden = true;
+  } catch(err){ fout('Deze foto kon niet worden geladen. Probeer een andere.'); }
+});
+$('fotoWeg').onclick = () => { fotoBlob = null; $('foto').value = ''; $('preview').hidden = true; $('fotoKnop').hidden = false; };
+
+$('form').addEventListener('submit', async e => {
+  e.preventDefault(); fout('');
+  if ($('website').value) return;                       // spam-valletje
+  const ernst = document.querySelector('input[name=ernst]:checked')?.value;
+  const oms = $('omschrijving').value.trim();
+  const naam = $('naam').value.trim();
+  const datum = $('datum').value;
+  const item = machine.aantal > 1 ? $('item').value : null;
+
+  if (machine.aantal > 1 && item === '') return fout('Kies welk exemplaar het is.', $('item'));
+  if (!ernst) return fout('Kies of het apparaat nog (gedeeltelijk) werkt.', $('ernstVeld'));
+  if (oms.length < 3) return fout('Beschrijf kort wat er aan de hand is.', $('omschrijving'));
+  if (naam.length < 2) return fout('Vul je naam in.', $('naam'));
+  if (!datum || datum > vandaag() || datum < vandaag(-30)) return fout('Kies een datum binnen de afgelopen 30 dagen.', $('datum'));
+
+  const knop = $('verzend'); knop.disabled = true; knop.textContent = 'Versturen…';
+  try {
+    if (!ingelogdeNaam) try { localStorage.setItem('ilab-meldnaam', naam); } catch(e){}
+    const itemNr = item === null ? null : Number(item);
+    if (DEMO){
+      const d = demoLoad();
+      d.storingen.unshift({
+        id: uuid(), machine_code: code, item_nr: itemNr, ernst, omschrijving: oms, datum,
+        gemeld_door: naam, gemeld_door_id: null, bron: 'qr',
+        foto_pad: fotoBlob ? await naarDataUrl(fotoBlob) : null,
+        status: 'nieuw', gemeld_op: new Date().toISOString(), opgelost_op: null,
+        oorzaak:'', reparatie:'', gerepareerd_door:'', kosten:null, onderdelen:''
+      });
+      demoSave(d);
+    } else {
+      let pad = null;
+      if (fotoBlob){
+        pad = `${code}/${uuid()}.jpg`;
+        const { error } = await sb.storage.from('storing-fotos').upload(pad, fotoBlob, { contentType: 'image/jpeg', upsert: false });
+        if (error){ console.warn('Foto upload mislukt', error); pad = null; }
+      }
+      const { error } = await sb.rpc('meld_storing', {
+        p_code: code, p_ernst: ernst, p_omschrijving: oms, p_naam: naam,
+        p_datum: datum, p_item: itemNr, p_foto_pad: pad
+      });
+      if (error) throw error;
+    }
+    toon('klaar');
+  } catch(err){
+    fout(err.message || 'Versturen is mislukt. Probeer het opnieuw.');
+  } finally {
+    knop.disabled = false; knop.textContent = 'Melding versturen';
+  }
+});
+
+$('nogEen').onclick = () => location.reload();
+
+start();
+</script>
+</body>
+</html>
