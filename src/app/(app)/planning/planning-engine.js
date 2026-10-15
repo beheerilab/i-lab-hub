@@ -626,6 +626,19 @@ async function deleteBooking(id){
 
 /* ---------- Formulier: aanvraag / boeking ---------- */
 let editing=null;
+let lastStart=null, lastEnd=null;
+/* Zoals in Outlook: de eindtijd volgt de begintijd en ligt er minimaal een uur na. */
+function syncTimes(which){
+  const s=$('#fStart').value, e=$('#fEnd').value; if(!s) return;
+  const sm=mins(s), cap=E();
+  if(which==='start'){
+    const dur = (lastStart && lastEnd && mins(lastEnd)>mins(lastStart)) ? Math.max(60, mins(lastEnd)-mins(lastStart)) : 60;
+    $('#fEnd').value = hm(Math.min(sm+dur, cap));
+  } else if(e && mins(e)-sm<60){
+    $('#fEnd').value = hm(Math.min(sm+60, cap));
+  }
+  lastStart=$('#fStart').value; lastEnd=$('#fEnd').value;
+}
 function openForm(p={}){
   closeDialog('detailDlg');
   const admin=Auth.isAdmin(), u=Auth.user(), f=$('#bookForm');
@@ -639,6 +652,7 @@ function openForm(p={}){
   const slot = (p.start && p.end) ? {start:p.start,end:p.end} : (src.start ? {start:src.start,end:src.end} : firstFree(room,date));
   $('#fRoom').value=room; $('#fDate').value=date; $('#fStart').value=slot.start; $('#fEnd').value=slot.end;
   for(const id of ['fStart','fEnd']){ $('#'+id).min=state.settings.openFrom; $('#'+id).max=state.settings.openTo; }
+  lastStart=$('#fStart').value; lastEnd=$('#fEnd').value;
   $('#fDate').min = can('past') ? '' : today();
   $('#fCat').value=src.categorie||'les'; fillTypes(src.activiteit, src.activiteitAnders); $('#fTitle').value=src.title||''; $('#fSchool').value=src.school||''; $('#fLevel').value=src.level||'';
   $('#fStudents').value=src.students||''; $('#fNotes').value=src.notes||'';
@@ -883,6 +897,8 @@ function bind(){
   for(const id of ['detailDlg','formDlg']) byId(id).addEventListener('mousedown', e=>{ if(e.target.id===id) closeDialog(id); });
   $('#bookForm').addEventListener('submit', submitForm);
   $('#bookForm').addEventListener('input', updateFormCheck);
+  $('#fStart').addEventListener('change', ()=>syncTimes('start'));
+  $('#fEnd').addEventListener('change', ()=>syncTimes('end'));
   $('#fCat').addEventListener('change', ()=>{ fillTypes(); });
   $('#fType').addEventListener('change', ()=>{ $('#fTypeAndersWrap').hidden = $('#fType').value!=='anders'; });
   $('#bookForm').addEventListener('change', updateFormCheck);
