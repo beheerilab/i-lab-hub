@@ -40,7 +40,11 @@ export async function StoringenWidget() {
       </div>
       <ul className="space-y-1.5">
         {gesorteerd.slice(0, 6).map((s) => (
-          <li key={s.id} className="flex items-center justify-between gap-3 text-sm">
+          <li key={s.id}>
+            <Link
+              href={`/storingen?machine=${encodeURIComponent(s.machine_code)}`}
+              className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-1 text-sm transition-colors hover:bg-black/[.04]"
+            >
             <span className="min-w-0 truncate">
               <span className="font-medium">{s.machines?.naam ?? s.machine_code}</span>
               {s.item_nr ? <span className="text-muted"> · nr. {s.item_nr}</span> : null}
@@ -53,6 +57,7 @@ export async function StoringenWidget() {
             >
               {s.ernst === "defect" ? "Werkt niet" : "Gedeeltelijk"}
             </span>
+            </Link>
           </li>
         ))}
       </ul>

@@ -20,9 +20,9 @@ const SOORT_TABS = [
 export default async function ContactenPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; soort?: string }>;
+  searchParams: Promise<{ q?: string; soort?: string; open?: string }>;
 }) {
-  const { q = "", soort = "" } = await searchParams;
+  const { q = "", soort = "", open = "" } = await searchParams;
   const { userId, profile } = await requireGeenDocent();
   const supabase = await createClient();
 
@@ -110,6 +110,7 @@ export default async function ContactenPage({
                 zoekwoorden: c.zoekwoorden,
               }}
               magBeheren={profile.role === "admin" || c.created_by === userId}
+              startOpen={open === c.id}
             />
           ))}
         </div>

@@ -45,16 +45,18 @@ export async function VandaagWidget({ userId, isDocent }: { userId: string; isDo
           ) : (
             <ul className="space-y-1.5">
               {bookings.map((b) => (
-                <li
-                  key={b.id}
-                  className={`rounded-lg border px-2.5 py-1.5 text-sm ${ACTIVITEIT_KLEUREN[b.type_activiteit]}`}
-                >
-                  <span className="font-medium">
-                    {b.start_tijd.slice(0, 5)}–{b.eind_tijd.slice(0, 5)} {b.vak}
-                  </span>
-                  <span className="ml-1 opacity-80">
-                    · {b.labs?.naam || "onbekend"} · {ACTIVITEIT_LABELS[b.type_activiteit]}
-                  </span>
+                <li key={b.id}>
+                  <Link
+                    href={`/planning?dag=${vandaag}&open=${b.id}`}
+                    className={`block rounded-lg border px-2.5 py-1.5 text-sm transition-shadow hover:shadow-md ${ACTIVITEIT_KLEUREN[b.type_activiteit]}`}
+                  >
+                    <span className="font-medium">
+                      {b.start_tijd.slice(0, 5)}–{b.eind_tijd.slice(0, 5)} {b.vak}
+                    </span>
+                    <span className="ml-1 opacity-80">
+                      · {b.labs?.naam || "onbekend"} · {ACTIVITEIT_LABELS[b.type_activiteit]}
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -67,13 +69,18 @@ export async function VandaagWidget({ userId, isDocent }: { userId: string; isDo
           ) : (
             <ul className="space-y-1.5">
               {tasks.map((t) => (
-                <li key={t.id} className="rounded-lg border border-border bg-black/[.02] px-2.5 py-1.5 text-sm">
-                  {t.titel}
-                  {t.deadline_op && (
-                    <span className="ml-1.5 rounded-full bg-danger/10 px-1.5 py-0.5 text-xs text-danger">
-                      ⏰ {formatAmsterdam(t.deadline_op, "HH:mm")}
-                    </span>
-                  )}
+                <li key={t.id}>
+                  <Link
+                    href={`/werkzaamheden?taak=${t.id}`}
+                    className="block rounded-lg border border-border bg-black/[.02] px-2.5 py-1.5 text-sm transition-colors hover:bg-black/[.05]"
+                  >
+                    {t.titel}
+                    {t.deadline_op && (
+                      <span className="ml-1.5 rounded-full bg-danger/10 px-1.5 py-0.5 text-xs text-danger">
+                        ⏰ {formatAmsterdam(t.deadline_op, "HH:mm")}
+                      </span>
+                    )}
+                  </Link>
                 </li>
               ))}
             </ul>

@@ -38,7 +38,7 @@ const TOOL_CSS = `
  * achtergrond loopt door) en een hoogte die meegroeit, zodat alleen de
  * pagina zelf scrolt en de tool voelt als een gewone hub-pagina.
  */
-export function ToolFrame({ naam, titel }: { naam: string; titel: string }) {
+export function ToolFrame({ naam, titel, query }: { naam: string; titel: string; query?: string }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [hoogte, setHoogte] = useState(900);
 
@@ -92,7 +92,7 @@ export function ToolFrame({ naam, titel }: { naam: string; titel: string }) {
     <div className="relative left-1/2 -mt-6 w-screen -translate-x-1/2 sm:-mt-8">
       <iframe
         ref={frameRef}
-        src={`/api/tools/${naam}`}
+        src={`/api/tools/${naam}${query ? `?${query}` : ""}`}
         title={titel}
         scrolling="no"
         allow="camera; clipboard-write"

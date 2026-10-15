@@ -931,7 +931,8 @@ async function start(){
     if (['overzicht','inzicht'].includes(huidig.view)) render();
   });
   if (DEMO) $('live').hidden = false;
-  go('overzicht');
+  const gewenst = new URLSearchParams(location.search).get('machine');
+  if (gewenst && M.some(m => m.code === gewenst)) go('machine', gewenst); else go('overzicht');
 }
 start();
 </script>

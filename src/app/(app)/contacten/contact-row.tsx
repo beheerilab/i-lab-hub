@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   getContactHierarchieAction,
   updateContactSoortAction,
@@ -27,8 +27,16 @@ type Contact = {
   zoekwoorden: string[];
 };
 
-export function ContactRow({ contact, magBeheren }: { contact: Contact; magBeheren: boolean }) {
-  const [open, setOpen] = useState(false);
+export function ContactRow({
+  contact,
+  magBeheren,
+  startOpen = false,
+}: {
+  contact: Contact;
+  magBeheren: boolean;
+  startOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(startOpen);
   const [afdelingen, setAfdelingen] = useState<AfdelingMetPersonen[] | null>(null);
   const [, startLoad] = useTransition();
   const [huidigSoort, setHuidigSoort] = useState(contact.soort);
@@ -40,6 +48,11 @@ export function ContactRow({ contact, magBeheren }: { contact: Contact; magBeher
   function laadHierarchie() {
     startLoad(async () => setAfdelingen(await getContactHierarchieAction(contact.id)));
   }
+
+  useEffect(() => {
+    if (startOpen) laadHierarchie();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function toggle() {
     if (!open && afdelingen === null) laadHierarchie();

@@ -58,7 +58,11 @@ export async function BestellingenWidget() {
       </div>
       <ul className="space-y-1.5">
         {items.slice(0, MAX_ZICHTBAAR).map((i) => (
-          <li key={i.id} className="flex items-center justify-between gap-3 text-sm">
+          <li key={i.id}>
+            <Link
+              href={`/bestellijst?open=${i.id}`}
+              className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-1 text-sm transition-colors hover:bg-black/[.04]"
+            >
             <span className="min-w-0 truncate">
               <span className="font-medium">{i.omschrijving}</span>
               {i.aantal && <span className="text-muted"> · {i.aantal}</span>}
@@ -81,6 +85,7 @@ export async function BestellingenWidget() {
                     : `Nodig ${format(new Date(`${i.nodigOp}T00:00`), "d MMM", { locale: nl })}`}
               </span>
             )}
+            </Link>
           </li>
         ))}
       </ul>

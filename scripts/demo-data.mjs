@@ -49,8 +49,16 @@ const get = (p) => rest("GET", p);
 async function insert(table, rows, manifest, idKey = "id") {
   if (rows.length === 0) return [];
   const uit = [];
-  for (let i = 0; i < rows.length; i += 100) {
-    uit.push(...(await rest("POST", table, rows.slice(i, i + 100))));
+  // PostgREST wil bij een bulk-insert in elke rij dezelfde sleutels: groepeer.
+  const groepen = new Map();
+  for (const r of rows) {
+    const sig = Object.keys(r).sort().join("|");
+    groepen.set(sig, [...(groepen.get(sig) ?? []), r]);
+  }
+  for (const groep of groepen.values()) {
+    for (let i = 0; i < groep.length; i += 100) {
+      uit.push(...(await rest("POST", table, groep.slice(i, i + 100))));
+    }
   }
   manifest[table] = [...(manifest[table] ?? []), ...uit.map((r) => r[idKey])];
   return uit;

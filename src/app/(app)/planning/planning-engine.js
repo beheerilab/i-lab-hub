@@ -919,7 +919,13 @@ function init(){
   state = Store.load();
   ui = { view:'dag', date:toWorkday(today()), room:'all' };
   try{ const p=JSON.parse(localStorage.getItem(CONFIG.storageKey+':ui')||'{}'); if(p.room) ui.room=p.room; }catch(e){}
-  bind(); render();
+  // Deep link vanaf het dashboard: ?dag=JJJJ-MM-DD&open=<boeking>
+  try{
+    const qp=new URLSearchParams(location.search), dag=qp.get('dag'), open=qp.get('open');
+    if(dag && /^\d{4}-\d{2}-\d{2}$/.test(dag)){ ui.date=toWorkday(dag); ui.view='dag'; }
+    bind(); render();
+    if(open && find(open)) openDetail(open);
+  }catch(e){ bind(); render(); }
 }
 init();
 return ()=>cleanups.forEach(f=>{try{f();}catch(e){}});

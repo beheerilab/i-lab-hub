@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { differenceInCalendarDays, format } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -21,7 +22,7 @@ export async function VerjaardagenWidget() {
 
   const { data: personen } = await supabase
     .from("contactpersonen")
-    .select("id, naam, geboortedatum, afdelingen(contacts(naam))")
+    .select("id, naam, geboortedatum, afdelingen(contacts(id, naam))")
     .not("geboortedatum", "is", null);
 
   const aankomend = (personen ?? [])
@@ -31,6 +32,7 @@ export async function VerjaardagenWidget() {
         id: p.id,
         naam: p.naam,
         bedrijf: p.afdelingen?.contacts?.naam ?? null,
+        contactId: p.afdelingen?.contacts?.id ?? null,
         datum,
         dagenTot,
       };
@@ -46,14 +48,19 @@ export async function VerjaardagenWidget() {
       <h2 className="mb-3 text-lg font-semibold">🎂 Aankomende verjaardagen</h2>
       <ul className="space-y-1.5">
         {aankomend.map((p) => (
-          <li key={p.id} className="flex items-center justify-between gap-2 text-sm">
-            <span>
-              <span className="font-medium">{p.naam}</span>
-              {p.bedrijf && <span className="text-muted"> — {p.bedrijf}</span>}
-            </span>
-            <span className="shrink-0 text-muted">
-              {p.dagenTot === 0 ? "vandaag" : format(p.datum, "d MMMM", { locale: nl })}
-            </span>
+          <li key={p.id}>
+            <Link
+              href={p.contactId ? `/contacten?open=${p.contactId}&q=${encodeURIComponent(p.naam)}` : `/contacten?q=${encodeURIComponent(p.naam)}`}
+              className="-mx-2 flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-sm transition-colors hover:bg-black/[.04]"
+            >
+              <span>
+                <span className="font-medium">{p.naam}</span>
+                {p.bedrijf && <span className="text-muted"> — {p.bedrijf}</span>}
+              </span>
+              <span className="shrink-0 text-muted">
+                {p.dagenTot === 0 ? "vandaag" : format(p.datum, "d MMMM", { locale: nl })}
+              </span>
+            </Link>
           </li>
         ))}
       </ul>

@@ -590,6 +590,9 @@ root.addEventListener('click', e => { if (e.target.closest('a[href]')) e.stopPro
 /* ---------- start ---------- */
 (function init() {
     render();
+    // Deep link vanaf het dashboard: ?open=<id>
+    const oid = new URLSearchParams(location.search).get('open');
+    if (oid && state.items.find(i => i.id === oid)) openEditor(oid);
 })();
 cleanups.push(() => { document.body.style.overflow = ''; });
 return () => cleanups.forEach(f => { try { f(); } catch (e) {} });

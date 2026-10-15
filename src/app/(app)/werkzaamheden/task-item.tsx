@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toggleTaskAction, archiveTaskAction } from "./actions";
 import { TaskDetailModal } from "./task-detail-modal";
 import type { TaskPrioriteit } from "@/lib/supabase/database.types";
@@ -47,6 +47,19 @@ export function TaskItem({
   const [isPending, startTransition] = useTransition();
   const [openDetail, setOpenDetail] = useState(false);
   const afgevinkt = status === "afgevinkt";
+
+  // Deep link vanaf het dashboard: ?taak=<id> opent deze werkzaamheid (één keer, ook als hij op twee plekken staat).
+  useEffect(() => {
+    const gewenst = new URLSearchParams(window.location.search).get("taak");
+    const w = window as unknown as { __taakGeopend?: boolean };
+    if (gewenst === id && !w.__taakGeopend) {
+      w.__taakGeopend = true;
+      setOpenDetail(true);
+    }
+    return () => {
+      if (gewenst === id) w.__taakGeopend = false;
+    };
+  }, [id]);
 
   return (
     <div

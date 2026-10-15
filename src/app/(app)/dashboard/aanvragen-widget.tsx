@@ -45,7 +45,11 @@ export async function AanvragenWidget() {
           const dagen = differenceInCalendarDays(new Date(`${a.datum}T00:00`), vandaag);
           const reeks = a.series_id ? reeksGrootte.get(a.series_id) ?? 1 : 1;
           return (
-            <li key={a.id} className="flex items-center justify-between gap-3 text-sm">
+            <li key={a.id}>
+              <Link
+                href={`/planning?dag=${a.datum}&open=${a.id}`}
+                className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-1 text-sm transition-colors hover:bg-black/[.04]"
+              >
               <span className="min-w-0 truncate">
                 <span className="font-medium">{a.vak}</span>
                 <span className="text-muted">
@@ -61,6 +65,7 @@ export async function AanvragenWidget() {
               >
                 {format(new Date(`${a.datum}T00:00`), "EEE d MMM", { locale: nl })} · {a.start_tijd.slice(0, 5)}
               </span>
+              </Link>
             </li>
           );
         })}
