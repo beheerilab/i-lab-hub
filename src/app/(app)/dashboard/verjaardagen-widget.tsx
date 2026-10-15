@@ -4,6 +4,7 @@ import { differenceInCalendarDays, format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { huidigeDatumAmsterdam } from "@/lib/tijd";
 import { Card } from "@/components/ui/card";
+import { UitklapLijst } from "./uitklap-lijst";
 
 function volgendeVerjaardag(geboortedatum: string, vandaag: Date) {
   const [, maandStr, dagStr] = geboortedatum.split("-");
@@ -38,16 +39,16 @@ export async function VerjaardagenWidget() {
       };
     })
     .filter((p) => p.dagenTot <= 30)
-    .sort((a, b) => a.dagenTot - b.dagenTot)
-    .slice(0, 5);
+    .sort((a, b) => a.dagenTot - b.dagenTot);
 
   if (aankomend.length === 0) return null;
 
   return (
     <Card className="mb-6">
       <h2 className="mb-3 text-lg font-semibold">🎂 Aankomende verjaardagen</h2>
-      <ul className="space-y-1.5">
-        {aankomend.map((p) => (
+      <UitklapLijst
+        aantal={5}
+        kinderen={aankomend.map((p) => (
           <li key={p.id}>
             <Link
               href={p.contactId ? `/contacten?open=${p.contactId}&q=${encodeURIComponent(p.naam)}` : `/contacten?q=${encodeURIComponent(p.naam)}`}
@@ -63,7 +64,7 @@ export async function VerjaardagenWidget() {
             </Link>
           </li>
         ))}
-      </ul>
+      />
     </Card>
   );
 }

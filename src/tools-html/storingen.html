@@ -38,6 +38,7 @@
   .tegel{background:var(--grijs);border-radius:16px;padding:14px 16px;border:2px solid transparent;font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,box-shadow .15s}
   .tegel:hover{border-color:var(--licht)}
   .tegel.aan{border-color:var(--blauw);box-shadow:0 0 0 3px rgba(0,117,191,.15)}
+  .filterhint{color:var(--zacht);margin:0 0 12px}
   .tegel b{display:block;font-size:34px;color:var(--navy);line-height:1.1}
   .tegel span{color:var(--zacht);font-size:15px}
   .tegel.rood b{color:var(--rood)} .tegel.oranje b{color:var(--oranje)} .tegel.groen b{color:var(--groen)}
@@ -331,7 +332,7 @@ const api = {
 /* ================= STATUS & NAVIGATIE ================= */
 let M = [], S = [], bekend = null;
 let huidig = { view:'overzicht', id:null };
-let filter = 'open', ernstFilter = '', zoekterm = '', scanner = null;
+let filter = 'open', ernstFilter = '', aandachtFilter = false, zoekterm = '', scanner = null;
 let selectie = null;   // null = geen selectiemodus, anders Set met id's
 const mach = code => M.find(m => m.code === code) || { code, naam: code, aantal: 1 };
 const meldUrl = () => CONFIG.MELD_URL || new URL('storing-melden.html', location.href).href;
@@ -370,6 +371,12 @@ async function render(){
 }
 
 document.addEventListener('click', e => {
+  const iz = e.target.closest('[data-inz]');
+  if (iz){
+    const v = iz.dataset.inz;
+    if (v === 'aandacht'){ aandachtFilter = !aandachtFilter; render().then(() => { const t = $('machineTabel'); if (t) t.scrollIntoView({ block:'start', behavior:'smooth' }); }); return; }
+    filter = v === 'totaal' ? 'alle' : v; ernstFilter = ''; go('overzicht'); return;
+  }
   const t = e.target.closest('[data-go]'); if (t){ e.preventDefault(); go(t.dataset.go, t.dataset.id || null); return; }
   const n = e.target.closest('[data-tab]'); if (n){ go(n.dataset.tab); return; }
   const img = e.target.closest('.foto'); if (img){ const g = document.createElement('div'); g.className='groot'; g.innerHTML=`<img src="${img.src}">`; g.onclick=()=>g.remove(); document.body.appendChild(g); }
@@ -417,6 +424,8 @@ function huidigeLijst(){
   let l = filter === 'open' ? S.filter(isOpen)
         : filter === 'dicht' ? S.filter(s => !isOpen(s))
         : filter === 'opgelost' ? S.filter(s => s.status === 'gerepareerd' && s.opgelost_op && new Date(s.opgelost_op) >= begin)
+        : filter === 'jaar' ? S.filter(s => new Date(s.gemeld_op) >= Date.now() - 365 * 864e5)
+        : filter === 'kosten' ? S.filter(s => Number(s.kosten) > 0)
         : S;
   if (ernstFilter) l = l.filter(s => s.ernst === ernstFilter);
   return l;
@@ -452,6 +461,7 @@ function vOverzicht(){
         <button class="btn rood" id="selWeg" ${selectie.size ? '' : 'disabled'}>Verwijderen</button>
         <button class="btn wit" id="selUit">Klaar</button>
       </div>` : ''}
+    ${(filter === 'jaar' || filter === 'kosten') ? `<p class="filterhint">Toont: <b>${filter === 'jaar' ? 'alle storingen van de laatste 12 maanden' : 'storingen met reparatiekosten'}</b> (${lijst.length}). <button class="chip" data-filter="open">Terug naar open storingen</button></p>` : ''}
     ${lijst.length ? `<div class="kaarten">${lijst.map(kaart).join('')}</div>`
       : `<div class="leeg">${filter === 'open' ? 'Geen open storingen. Alles werkt! 🎉' : 'Nog niets om te tonen.'}</div>`}`;
 }
@@ -868,16 +878,17 @@ function vInzicht(){
   return `
     <h2>Inzicht</h2>
     <div class="tegels">
-      <div class="tegel"><b>${S.length}</b><span>Storingen totaal</span></div>
-      <div class="tegel"><b>${S.filter(s => new Date(s.gemeld_op) >= jaar).length}</b><span>Laatste 12 maanden</span></div>
-      <div class="tegel"><b style="font-size:26px">${euro(totaalKosten)}</b><span>Reparatiekosten totaal</span></div>
-      <div class="tegel rood"><b>${perMachine.filter(aandacht).length}</b><span>Machines met aandacht</span></div>
+      <button type="button" class="tegel" data-inz="totaal"><b>${S.length}</b><span>Storingen totaal</span></button>
+      <button type="button" class="tegel" data-inz="jaar"><b>${S.filter(s => new Date(s.gemeld_op) >= jaar).length}</b><span>Laatste 12 maanden</span></button>
+      <button type="button" class="tegel" data-inz="kosten"><b style="font-size:26px">${euro(totaalKosten)}</b><span>Reparatiekosten totaal</span></button>
+      <button type="button" class="tegel rood ${aandachtFilter ? 'aan' : ''}" data-inz="aandacht"><b>${perMachine.filter(aandacht).length}</b><span>Machines met aandacht</span></button>
     </div>
     <h3>Per machine (laatste 12 maanden)</h3>
     <p style="color:var(--zacht);margin-top:-4px">Een machine krijgt het label <span class="aandacht">Aandacht</span> bij 3 of meer storingen per apparaat in een jaar: mogelijk versleten of van slechte kwaliteit. Bij sets wordt gerekend per stuk.</p>
-    ${perMachine.length ? `<div class="tabelwrap"><table>
+    ${aandachtFilter ? `<p class="filterhint">Toont alleen machines met aandacht. <button class="chip" data-inz="aandacht">Alle machines tonen</button></p>` : ''}
+    ${perMachine.length ? `<div class="tabelwrap" id="machineTabel"><table>
       <thead><tr><th>Machine</th><th>Merk</th><th>12 mnd</th><th style="width:25%"></th><th>Totaal</th><th>Gem. dagen</th><th>Kosten</th></tr></thead>
-      <tbody>${perMachine.map(r => `<tr class="klik" data-go="machine" data-id="${esc(r.m.code)}">
+      <tbody>${aandachtFilter && !perMachine.some(aandacht) ? '<tr><td colspan="7" style="color:var(--zacht)">Geen machines met aandacht.</td></tr>' : ''}${(aandachtFilter ? perMachine.filter(aandacht) : perMachine).map(r => `<tr class="klik" data-go="machine" data-id="${esc(r.m.code)}">
         <td><b>${esc(r.m.naam)}</b> <small class="code">${esc(r.m.code)}</small> ${aandacht(r) ? '<span class="aandacht">Aandacht</span>' : ''}</td>
         <td>${esc(r.m.merk || '–')}</td><td>${r.recent}</td><td><div class="staaf" style="width:${(r.recent / max * 100).toFixed(0)}%"></div></td>
         <td>${r.totaal}</td><td>${r.gem == null ? '–' : r.gem.toFixed(1)}</td><td>${euro(r.kosten)}</td></tr>`).join('')}</tbody></table></div>`

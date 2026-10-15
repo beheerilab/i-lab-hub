@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
+import { UitklapLijst } from "./uitklap-lijst";
 
 /** Open storingen (nieuw of in behandeling), voor de beheerder. */
 export async function StoringenWidget() {
@@ -38,8 +39,9 @@ export async function StoringenWidget() {
           Naar storingen →
         </Link>
       </div>
-      <ul className="space-y-1.5">
-        {gesorteerd.slice(0, 6).map((s) => (
+      <UitklapLijst
+        aantal={6}
+        kinderen={gesorteerd.map((s) => (
           <li key={s.id}>
             <Link
               href={`/storingen?machine=${encodeURIComponent(s.machine_code)}`}
@@ -60,8 +62,7 @@ export async function StoringenWidget() {
             </Link>
           </li>
         ))}
-      </ul>
-      {open.length > 6 && <p className="mt-3 text-xs text-muted">+ {open.length - 6} meer</p>}
+      />
     </Card>
   );
 }

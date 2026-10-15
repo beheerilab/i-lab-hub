@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { huidigeDatumAmsterdam } from "@/lib/tijd";
 import { Card } from "@/components/ui/card";
+import { UitklapLijst } from "./uitklap-lijst";
 import { differenceInCalendarDays, format } from "date-fns";
 import { nl } from "date-fns/locale";
 
@@ -56,8 +57,9 @@ export async function BestellingenWidget() {
           Naar bestellijst →
         </Link>
       </div>
-      <ul className="space-y-1.5">
-        {items.slice(0, MAX_ZICHTBAAR).map((i) => (
+      <UitklapLijst
+        aantal={MAX_ZICHTBAAR}
+        kinderen={items.map((i) => (
           <li key={i.id}>
             <Link
               href={`/bestellijst?open=${i.id}`}
@@ -88,12 +90,10 @@ export async function BestellingenWidget() {
             </Link>
           </li>
         ))}
-      </ul>
-      {(items.length > MAX_ZICHTBAAR || onderweg > 0 || teLaat > 0) && (
+      />
+      {(onderweg > 0 || teLaat > 0) && (
         <p className="mt-3 text-xs text-muted">
-          {items.length > MAX_ZICHTBAAR && `+ ${items.length - MAX_ZICHTBAAR} meer · `}
-          {teLaat > 0 && `${teLaat} te laat · `}
-          {onderweg > 0 && `${onderweg} onderweg`}
+          {[teLaat > 0 && `${teLaat} te laat`, onderweg > 0 && `${onderweg} onderweg`].filter(Boolean).join(" · ")}
         </p>
       )}
     </Card>

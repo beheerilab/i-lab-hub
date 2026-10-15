@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { differenceInCalendarDays, format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { huidigeDatumAmsterdam } from "@/lib/tijd";
+import { UitklapLijst } from "./uitklap-lijst";
 
 /** Openstaande lesaanvragen uit de Planning, voor de crew. */
 export async function AanvragenWidget() {
@@ -40,8 +41,9 @@ export async function AanvragenWidget() {
           Naar planning →
         </Link>
       </div>
-      <ul className="space-y-1.5">
-        {aanvragen.slice(0, 6).map((a) => {
+      <UitklapLijst
+        aantal={6}
+        kinderen={aanvragen.map((a) => {
           const dagen = differenceInCalendarDays(new Date(`${a.datum}T00:00`), vandaag);
           const reeks = a.series_id ? reeksGrootte.get(a.series_id) ?? 1 : 1;
           return (
@@ -69,8 +71,7 @@ export async function AanvragenWidget() {
             </li>
           );
         })}
-      </ul>
-      {aanvragen.length > 6 && <p className="mt-3 text-xs text-muted">+ {aanvragen.length - 6} meer</p>}
+      />
     </Card>
   );
 }
