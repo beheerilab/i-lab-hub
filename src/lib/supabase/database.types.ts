@@ -96,6 +96,12 @@ export interface Database {
         Update: { data?: { [key: string]: unknown }; gewijzigd?: string; updated_at?: string; updated_by?: string | null };
         Relationships: [];
       };
+      tool_opslag: {
+        Row: { tool: string; sleutel: string; scope: string; data: { [key: string]: unknown }; updated_at: string; updated_by: string | null };
+        Insert: { tool: string; sleutel: string; scope: string; data: { [key: string]: unknown }; updated_at?: string; updated_by?: string | null };
+        Update: { data?: { [key: string]: unknown }; updated_at?: string; updated_by?: string | null };
+        Relationships: [];
+      };
       bestel_items: {
         Row: {
           id: string;

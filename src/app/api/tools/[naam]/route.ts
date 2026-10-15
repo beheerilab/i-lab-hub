@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { requireGeenDocent } from "@/lib/auth";
+import { TOOL_OPSLAG, laadToolOpslag, opslagShim } from "@/lib/tool-opslag";
 import { createClient } from "@/lib/supabase/server";
 import { laadFacturatie } from "@/lib/facturatie";
 
@@ -29,7 +30,7 @@ const BARLOW_HEAD =
  * /facturatie tonen deze route in een kader binnen de hub.
  */
 export async function GET(_request: Request, { params }: { params: Promise<{ naam: string }> }) {
-  await requireGeenDocent();
+  const { userId } = await requireGeenDocent();
 
   const { naam } = await params;
   const bestand = TOOLS[naam];
@@ -48,6 +49,20 @@ export async function GET(_request: Request, { params }: { params: Promise<{ naa
       html = html.slice(0, eind) + script + html.slice(eind);
     } else {
       html = script + html;
+    }
+  }
+
+  // prijscalculator/reiskosten: localStorage omleiden naar Supabase.
+  if (TOOL_OPSLAG[naam]) {
+    const supabase = await createClient();
+    const waarden = await laadToolOpslag(supabase, naam, userId);
+    const shim = opslagShim(naam, waarden);
+    const kop = html.search(/<head[^>]*>/i);
+    if (kop >= 0) {
+      const eind = html.indexOf(">", kop) + 1;
+      html = html.slice(0, eind) + shim + html.slice(eind);
+    } else {
+      html = shim + html;
     }
   }
 
