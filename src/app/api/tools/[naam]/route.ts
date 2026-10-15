@@ -18,6 +18,13 @@ const TOOLS: Record<string, string> = {
 const EXTRA_CSS: Record<string, string> = {
   prijscalculator: "header.top img{display:none!important}",
   reiskosten: ".ov-logo{display:none!important}",
+  storingen:
+    "@media screen{header{background:transparent!important;color:var(--navy)!important;padding:10px 20px 0!important;max-width:1100px;margin:0 auto}nav{max-width:1100px;margin:0 auto}" +
+    "header #logo,header img,header .tekstlogo{display:none!important}" +
+    "header h1{color:var(--navy)!important;font-size:22px!important;opacity:1!important}" +
+    "header .kopknop{background:#fff!important;color:var(--blauw)!important;border:2px solid var(--licht)!important}" +
+    "header .live{color:var(--groen)!important}" +
+    "nav{background:transparent!important;border-bottom:0!important}}",
   facturatie: "header .brand img{display:none!important} header{background:transparent!important;border-bottom:0!important;backdrop-filter:none!important}",
 };
 

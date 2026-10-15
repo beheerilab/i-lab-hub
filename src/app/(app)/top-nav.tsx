@@ -8,13 +8,14 @@ import type { Role } from "@/lib/supabase/database.types";
 
 const DOCUMENTATIE_HREFS = ["/lesmateriaal", "/jaaroverzicht", "/handleidingen"];
 const OVERZICHTEN_HREFS = ["/contacten", "/sleutels", "/opslag"];
+const WERK_HREFS = ["/werkzaamheden", "/bestellijst", "/storingen"];
 
 export function TopNav({ rol }: { rol: Role }) {
   const pathname = usePathname();
   const zichtbareModules = modulesVoorRol(rol, MODULES);
 
   return (
-    <nav className="flex flex-nowrap items-center gap-1.5 overflow-x-auto">
+    <nav className="flex flex-wrap items-center gap-1.5">
       <Link
         href="/dashboard"
         className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
@@ -32,6 +33,11 @@ export function TopNav({ rol }: { rol: Role }) {
           return (
             <NavDropdown key="documentatie" rol={rol} label="Documentatie" icon="📚" hrefs={DOCUMENTATIE_HREFS} />
           );
+        }
+        if (WERK_HREFS.includes(mod.href)) {
+          const eerste = zichtbareModules.find((m) => WERK_HREFS.includes(m.href));
+          if (mod.href !== eerste?.href) return null;
+          return <NavDropdown key="werk" rol={rol} label="Werk" icon="🛠️" hrefs={WERK_HREFS} />;
         }
         if (OVERZICHTEN_HREFS.includes(mod.href)) {
           if (mod.href !== OVERZICHTEN_HREFS[0]) return null;
