@@ -84,6 +84,18 @@ export interface Database {
         Update: { open_van?: string; open_tot?: string; vervalt_na_werkdagen?: number };
         Relationships: [];
       };
+      facturatie_reserveringen: {
+        Row: { id: string; data: { [key: string]: unknown }; gewijzigd: string; updated_at: string; updated_by: string | null };
+        Insert: { id: string; data: { [key: string]: unknown }; gewijzigd?: string; updated_at?: string; updated_by?: string | null };
+        Update: { data?: { [key: string]: unknown }; gewijzigd?: string; updated_at?: string; updated_by?: string | null };
+        Relationships: [];
+      };
+      facturatie_instellingen: {
+        Row: { id: boolean; data: { [key: string]: unknown }; gewijzigd: string; updated_at: string; updated_by: string | null };
+        Insert: { id?: boolean; data?: { [key: string]: unknown }; gewijzigd?: string; updated_at?: string; updated_by?: string | null };
+        Update: { data?: { [key: string]: unknown }; gewijzigd?: string; updated_at?: string; updated_by?: string | null };
+        Relationships: [];
+      };
       bestel_items: {
         Row: {
           id: string;
