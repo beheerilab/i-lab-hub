@@ -6,6 +6,7 @@ import { ClaimAdminBanner } from "./claim-admin-banner";
 import { VandaagWidget } from "./vandaag-widget";
 import { VerjaardagenWidget } from "./verjaardagen-widget";
 import { BestellingenWidget } from "./bestellingen-widget";
+import { AanvragenWidget } from "./aanvragen-widget";
 
 export default async function DashboardPage() {
   const { userId, profile } = await requireProfile();
@@ -30,6 +31,8 @@ export default async function DashboardPage() {
       {showClaimAdminBanner && <ClaimAdminBanner />}
 
       <VandaagWidget userId={userId} isDocent={profile.role === "docent"} />
+
+      {profile.role !== "docent" && <AanvragenWidget />}
 
       {profile.role !== "docent" && <BestellingenWidget />}
 

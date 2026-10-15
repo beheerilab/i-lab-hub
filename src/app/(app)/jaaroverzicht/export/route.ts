@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
   const { data: bookingsRaw } = await supabase
     .from("bookings")
     .select("vak, school, datum, aantal_leerlingen, labs(naam)")
+    .eq("status", "confirmed")
     .gte("datum", start)
     .lte("datum", eind);
 

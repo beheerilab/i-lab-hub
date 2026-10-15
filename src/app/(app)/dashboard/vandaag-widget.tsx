@@ -16,8 +16,9 @@ export async function VandaagWidget({ userId, isDocent }: { userId: string; isDo
     .from("bookings")
     .select("id, start_tijd, eind_tijd, vak, type_activiteit, labs(naam)")
     .eq("datum", vandaag)
+    .in("status", isDocent ? ["pending", "confirmed"] : ["confirmed"])
     .order("start_tijd");
-  if (isDocent) bookingsQuery = bookingsQuery.eq("created_by", userId);
+  if (isDocent) bookingsQuery = bookingsQuery.or(`created_by.eq.${userId},docent_id.eq.${userId}`);
 
   const [{ data: bookings }, { data: tasks }] = await Promise.all([
     bookingsQuery,

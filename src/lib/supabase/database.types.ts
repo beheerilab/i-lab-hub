@@ -45,6 +45,45 @@ export interface Database {
         };
         Relationships: [];
       };
+      planning_sluitingen: {
+        Row: {
+          id: string;
+          titel: string;
+          van: string;
+          tot: string;
+          hele_dag: boolean;
+          start_tijd: string | null;
+          eind_tijd: string | null;
+          lab_ids: string[] | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          titel: string;
+          van: string;
+          tot: string;
+          hele_dag?: boolean;
+          start_tijd?: string | null;
+          eind_tijd?: string | null;
+          lab_ids?: string[] | null;
+        };
+        Update: {
+          titel?: string;
+          van?: string;
+          tot?: string;
+          hele_dag?: boolean;
+          start_tijd?: string | null;
+          eind_tijd?: string | null;
+          lab_ids?: string[] | null;
+        };
+        Relationships: [];
+      };
+      planning_instellingen: {
+        Row: { id: boolean; open_van: string; open_tot: string; vervalt_na_werkdagen: number };
+        Insert: { id?: boolean; open_van?: string; open_tot?: string; vervalt_na_werkdagen?: number };
+        Update: { open_van?: string; open_tot?: string; vervalt_na_werkdagen?: number };
+        Relationships: [];
+      };
       bestel_items: {
         Row: {
           id: string;
@@ -619,6 +658,8 @@ export interface Database {
           actief: boolean;
           docent_boekbaar: boolean;
           leerlingen_toegestaan: boolean;
+          capaciteit: number;
+          omschrijving: string | null;
         };
         Insert: {
           naam: string;
@@ -626,6 +667,8 @@ export interface Database {
           actief?: boolean;
           docent_boekbaar?: boolean;
           leerlingen_toegestaan?: boolean;
+          capaciteit?: number;
+          omschrijving?: string | null;
         };
         Update: {
           naam?: string;
@@ -633,6 +676,8 @@ export interface Database {
           actief?: boolean;
           docent_boekbaar?: boolean;
           leerlingen_toegestaan?: boolean;
+          capaciteit?: number;
+          omschrijving?: string | null;
         };
         Relationships: [];
       };
@@ -653,8 +698,17 @@ export interface Database {
           bijzonderheden: string | null;
           created_by: string | null;
           created_at: string;
+          status: string;
+          series_id: string | null;
+          niveau: string | null;
+          docent_id: string | null;
+          beoordeeld_door: string | null;
+          beoordeeld_op: string | null;
+          afwijs_reden: string | null;
+          geschiedenis: { at: string; by: string; action: string }[];
         };
         Insert: {
+          id?: string;
           lab_id: string;
           datum: string;
           start_tijd: string;
@@ -668,6 +722,14 @@ export interface Database {
           aantal_leerlingen: number;
           bijzonderheden?: string | null;
           created_by?: string | null;
+          status?: string;
+          series_id?: string | null;
+          niveau?: string | null;
+          docent_id?: string | null;
+          beoordeeld_door?: string | null;
+          beoordeeld_op?: string | null;
+          afwijs_reden?: string | null;
+          geschiedenis?: { at: string; by: string; action: string }[];
         };
         Update: {
           lab_id?: string;
@@ -682,6 +744,14 @@ export interface Database {
           categorie?: BoekingCategorie;
           aantal_leerlingen?: number;
           bijzonderheden?: string | null;
+          status?: string;
+          series_id?: string | null;
+          niveau?: string | null;
+          docent_id?: string | null;
+          beoordeeld_door?: string | null;
+          beoordeeld_op?: string | null;
+          afwijs_reden?: string | null;
+          geschiedenis?: { at: string; by: string; action: string }[];
         };
         Relationships: [
           {
@@ -823,11 +893,33 @@ export interface Database {
           aantal_leerlingen: number | null;
           bijzonderheden: string | null;
           created_by: string | null;
+          status: string;
+          series_id: string | null;
+          docent_id: string | null;
+          created_at: string;
+          is_eigen: boolean;
+          niveau: string | null;
+          afwijs_reden: string | null;
+          beoordeeld_door: string | null;
+          beoordeeld_op: string | null;
+          geschiedenis: { at: string; by: string; action: string }[] | null;
         };
         Relationships: [];
       };
     };
     Functions: {
+      planning_verlopen_opruimen: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          boeking_id: string;
+          email: string | null;
+          vak: string;
+          datum: string;
+          start_tijd: string;
+          eind_tijd: string;
+          lab_naam: string | null;
+        }[];
+      };
       is_admin: {
         Args: Record<PropertyKey, never>;
         Returns: boolean;

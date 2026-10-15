@@ -22,6 +22,7 @@ export default async function JaaroverzichtPage({
   const { data: bookingsRaw } = await supabase
     .from("bookings")
     .select("vak, school, datum, aantal_leerlingen, labs(naam)")
+    .eq("status", "confirmed")
     .gte("datum", start)
     .lte("datum", eind);
 
