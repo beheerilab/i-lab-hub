@@ -261,3 +261,6 @@ dl.pl-dl dd{margin:0; overflow-wrap:anywhere;}
   .pl-roomrow{grid-template-columns:minmax(0,1fr) minmax(0,1fr); } .pl-roomrow.head{display:none;}
   .pl-dlg-head,.pl-dlg-body,.pl-dlg-foot{padding-left:16px; padding-right:16px;}
 }
+
+/* Ruimtes-kaart heeft veel kolommen: over de volle breedte */
+.pl-card:has(.pl-roomrow){grid-column:1 / -1;}
