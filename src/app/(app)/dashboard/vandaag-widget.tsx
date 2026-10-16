@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { huidigeDatumAmsterdam, formatAmsterdam } from "@/lib/tijd";
+import { huidigeDatumAmsterdam } from "@/lib/tijd";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { Card } from "@/components/ui/card";
 import { ACTIVITEIT_KLEUREN, ACTIVITEIT_LABELS } from "../planning/types";
+import { sorteerTaken, timing } from "@/lib/werkzaamheden";
 
 export async function VandaagWidget({ userId, isDocent }: { userId: string; isDocent: boolean }) {
   const supabase = await createClient();
@@ -20,17 +21,22 @@ export async function VandaagWidget({ userId, isDocent }: { userId: string; isDo
     .order("start_tijd");
   if (isDocent) bookingsQuery = bookingsQuery.or(`created_by.eq.${userId},docent_id.eq.${userId}`);
 
-  const [{ data: bookings }, { data: tasks }] = await Promise.all([
+  const [{ data: bookings }, { data: taken }] = await Promise.all([
     bookingsQuery,
-    supabase
-      .from("tasks")
-      .select("id, titel, deadline_op")
-      .eq("toegewezen_aan", userId)
-      .eq("datum", vandaag)
-      .eq("status", "open")
-      .eq("gearchiveerd", false)
-      .order("created_at"),
+    isDocent
+      ? Promise.resolve({ data: [] as { id: string; title: string; due: string | null; lead_days: number; status: string; prio: string }[] })
+      : supabase
+          .from("werkzaamheden")
+          .select("id, title, due, lead_days, status, prio")
+          .in("who", [userId, "samen"])
+          .neq("status", "klaar"),
   ]);
+  const vandaagDatum = huidigeDatumAmsterdam();
+  // Jouw taken waarvan de deadline verstreken is of binnen 7 dagen valt.
+  const tasks = sorteerTaken(
+    (taken ?? []).filter((t) => ["late", "today", "soon"].includes(timing(t, vandaagDatum).k)),
+    vandaagDatum,
+  );
 
   return (
     <Card className="mb-6">
@@ -62,33 +68,40 @@ export async function VandaagWidget({ userId, isDocent }: { userId: string; isDo
             </ul>
           )}
         </div>
-        <div>
-          <h3 className="mb-2 text-sm font-semibold text-muted">Jouw werkzaamheden vandaag</h3>
-          {!tasks || tasks.length === 0 ? (
-            <p className="text-sm text-muted">Geen werkzaamheden voor vandaag.</p>
-          ) : (
-            <ul className="space-y-1.5">
-              {tasks.map((t) => (
-                <li key={t.id}>
-                  <Link
-                    href={`/werkzaamheden?taak=${t.id}`}
-                    className="block rounded-lg border border-border bg-black/[.02] px-2.5 py-1.5 text-sm transition-colors hover:bg-black/[.05]"
-                  >
-                    {t.titel}
-                    {t.deadline_op && (
-                      <span className="ml-1.5 rounded-full bg-danger/10 px-1.5 py-0.5 text-xs text-danger">
-                        ⏰ {formatAmsterdam(t.deadline_op, "HH:mm")}
-                      </span>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-          <Link href="/werkzaamheden" className="mt-2 inline-block text-sm text-accent underline">
-            Naar werkzaamheden →
-          </Link>
-        </div>
+        {!isDocent && (
+          <div>
+            <h3 className="mb-2 text-sm font-semibold text-muted">Jouw werkzaamheden (deze week)</h3>
+            {tasks.length === 0 ? (
+              <p className="text-sm text-muted">Niets dat nu aandacht vraagt.</p>
+            ) : (
+              <ul className="space-y-1.5">
+                {tasks.slice(0, 6).map((t) => {
+                  const tm = timing(t, vandaagDatum);
+                  return (
+                    <li key={t.id}>
+                      <Link
+                        href={`/werkzaamheden?open=${t.id}`}
+                        className="flex items-center justify-between gap-2 rounded-lg border border-border bg-black/[.02] px-2.5 py-1.5 text-sm transition-colors hover:bg-black/[.05]"
+                      >
+                        <span className="min-w-0 truncate">{t.title}</span>
+                        <span
+                          className={`shrink-0 rounded-full px-1.5 py-0.5 text-xs ${
+                            tm.k === "late" ? "bg-danger/10 text-danger" : "bg-black/[.05] text-muted"
+                          }`}
+                        >
+                          {tm.k === "late" ? "te laat" : tm.k === "today" ? "vandaag" : "deze week"}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <Link href="/werkzaamheden" className="mt-2 inline-block text-sm text-accent underline">
+              Naar werkzaamheden →
+            </Link>
+          </div>
+        )}
       </div>
     </Card>
   );

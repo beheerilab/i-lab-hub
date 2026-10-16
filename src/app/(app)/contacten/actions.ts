@@ -124,12 +124,7 @@ export async function getContactKoppelingenAction(contactId: string): Promise<Co
   const supabase = await createClient();
   const { data: contact } = await supabase.from("contacts").select("naam").eq("id", contactId).single();
   const [{ data: taken }, { data: bestellingen }] = await Promise.all([
-    supabase
-      .from("tasks")
-      .select("id, titel, status")
-      .eq("leverancier_id", contactId)
-      .eq("gearchiveerd", false)
-      .order("datum", { ascending: false }),
+    Promise.resolve({ data: [] as { id: string; titel: string; status: string }[] }),
     // De bestellijst kent leveranciers als vrije tekst: koppel op naam.
     contact
       ? supabase

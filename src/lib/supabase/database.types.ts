@@ -155,6 +155,93 @@ export interface Database {
           },
         ];
       };
+      werkzaamheden: {
+        Row: {
+          id: string;
+          nr: number;
+          title: string;
+          descr: string;
+          cat: string;
+          prio: string;
+          who: string;
+          status: string;
+          due: string | null;
+          lead_days: number;
+          repeat: string;
+          loc: string;
+          checklist: { t: string; d: boolean }[];
+          notes: { at: string; tm?: string; by: string; txt: string }[];
+          log: { at: string; by: string; txt: string }[];
+          series_id: string | null;
+          next_id: string | null;
+          done_at: string | null;
+          created_at: string;
+          created_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          descr?: string;
+          cat?: string;
+          prio?: string;
+          who?: string;
+          status?: string;
+          due?: string | null;
+          lead_days?: number;
+          repeat?: string;
+          loc?: string;
+          checklist?: { t: string; d: boolean }[];
+          notes?: { at: string; tm?: string; by: string; txt: string }[];
+          log?: { at: string; by: string; txt: string }[];
+          series_id?: string | null;
+          next_id?: string | null;
+          done_at?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+        };
+        Update: {
+          title?: string;
+          descr?: string;
+          cat?: string;
+          prio?: string;
+          who?: string;
+          status?: string;
+          due?: string | null;
+          lead_days?: number;
+          repeat?: string;
+          loc?: string;
+          checklist?: { t: string; d: boolean }[];
+          notes?: { at: string; tm?: string; by: string; txt: string }[];
+          log?: { at: string; by: string; txt: string }[];
+          series_id?: string | null;
+          next_id?: string | null;
+          done_at?: string | null;
+        };
+        Relationships: [];
+      };
+      werkzaamheden_bijlagen: {
+        Row: {
+          id: string;
+          task_id: string;
+          naam: string;
+          pad: string;
+          type: string | null;
+          grootte: number | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          task_id: string;
+          naam: string;
+          pad: string;
+          type?: string | null;
+          grootte?: number | null;
+          created_by?: string | null;
+        };
+        Update: { naam?: string };
+        Relationships: [];
+      };
       bestel_items: {
         Row: {
           id: string;

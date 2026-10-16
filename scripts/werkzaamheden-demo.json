@@ -1,0 +1,642 @@
+[
+ {
+  "title": "CV-ketel jaarlijks laten nakijken",
+  "descr": "Onderhoudsbeurt door installateur. Afspraak minimaal 6 weken van tevoren inplannen, in de winter is het druk.",
+  "cat": "onderhoud",
+  "prio": "normaal",
+  "who": "daan",
+  "status": "plannen",
+  "due": 60,
+  "lead": 56,
+  "repeat": "m12",
+  "loc": "Technische ruimte, kelder",
+  "checklist": [
+   {
+    "t": "Installateur bellen voor afspraak",
+    "d": false
+   },
+   {
+    "t": "Sleutel technische ruimte klaarleggen",
+    "d": false
+   },
+   {
+    "t": "Werkbon in de map documentatie",
+    "d": false
+   }
+  ],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "CV-ketel jaarlijks laten nakijken"
+ },
+ {
+  "title": "Lasersnijder: filters en lens vervangen",
+  "descr": "Kwartaalonderhoud volgens de handleiding: koolstoffilter en voorfilter vervangen, lens en spiegels reinigen.",
+  "cat": "onderhoud",
+  "prio": "hoog",
+  "who": "daan",
+  "status": "bezig",
+  "due": -2,
+  "lead": 14,
+  "repeat": "m3",
+  "loc": "Lab 4 · Makerspace",
+  "checklist": [
+   {
+    "t": "Nieuwe filterset besteld",
+    "d": true
+   },
+   {
+    "t": "Lens gereinigd/vervangen",
+    "d": true
+   },
+   {
+    "t": "Testsnede en focus controleren",
+    "d": false
+   }
+  ],
+  "notes": [
+   {
+    "at": -3,
+    "tm": "11:05",
+    "by": "Daan",
+    "txt": "Filters besteld en lens gereinigd. Testsnede volgt zodra de filters binnen zijn."
+   }
+  ],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "Lasersnijder: filters en lens vervangen"
+ },
+ {
+  "title": "Afzuiging houtwerkplaats valt uit",
+  "descr": "Afzuiging valt na een paar minuten draaien uit. Zaagmachines tot de reparatie niet gebruiken.",
+  "cat": "gebouw",
+  "prio": "urgent",
+  "who": "collega",
+  "status": "wacht",
+  "due": 4,
+  "lead": 0,
+  "repeat": "",
+  "loc": "Lab 2 · Hout",
+  "checklist": [],
+  "notes": [
+   {
+    "at": -2,
+    "tm": "09:40",
+    "by": "Collega",
+    "txt": "Motor maakt een ratelend geluid en valt na ±5 minuten uit. Storing gemeld bij de installateur."
+   },
+   {
+    "at": -1,
+    "tm": "14:15",
+    "by": "Daan",
+    "txt": "Installateur belt terug voor een afspraak, waarschijnlijk begin volgende week."
+   }
+  ],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "Afzuiging houtwerkplaats valt uit"
+ },
+ {
+  "title": "Bestelronde filament en lasermateriaal",
+  "descr": "",
+  "cat": "inkoop",
+  "prio": "normaal",
+  "who": "daan",
+  "status": "week",
+  "due": 3,
+  "lead": 7,
+  "repeat": "m1",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "Bestelronde filament en lasermateriaal"
+ },
+ {
+  "title": "Robotsets: accu's laden en tellen",
+  "descr": "",
+  "cat": "lessen",
+  "prio": "normaal",
+  "who": "collega",
+  "status": "week",
+  "due": 1,
+  "lead": 0,
+  "repeat": "",
+  "loc": "Opslag B, kast 3",
+  "checklist": [
+   {
+    "t": "Set 1–8",
+    "d": true
+   },
+   {
+    "t": "Set 9–16",
+    "d": false
+   }
+  ],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "Robotsets: accu's laden en tellen"
+ },
+ {
+  "title": "Opbouw open dag: labs inrichten",
+  "descr": "Demo-opstellingen per lab, bewegwijzering en presentatiescherm in de hal.",
+  "cat": "lessen",
+  "prio": "hoog",
+  "who": "samen",
+  "status": "plannen",
+  "due": 22,
+  "lead": 14,
+  "repeat": "",
+  "loc": "",
+  "checklist": [
+   {
+    "t": "Indeling per lab vastleggen",
+    "d": false
+   },
+   {
+    "t": "Bewegwijzering printen",
+    "d": false
+   },
+   {
+    "t": "Demo-materiaal klaarzetten",
+    "d": false
+   },
+   {
+    "t": "Opruimrooster maken",
+    "d": false
+   }
+  ],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "Opbouw open dag: labs inrichten"
+ },
+ {
+  "title": "Legionella: tappunten doorspoelen",
+  "descr": "",
+  "cat": "gebouw",
+  "prio": "normaal",
+  "who": "collega",
+  "status": "plannen",
+  "due": 5,
+  "lead": 7,
+  "repeat": "w2",
+  "loc": "Alle tappunten, logboek bij receptie",
+  "checklist": [],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "Legionella: tappunten doorspoelen"
+ },
+ {
+  "title": "3D-printers: nozzles en printbed controleren",
+  "descr": "",
+  "cat": "onderhoud",
+  "prio": "normaal",
+  "who": "collega",
+  "status": "plannen",
+  "due": 12,
+  "lead": 7,
+  "repeat": "m1",
+  "loc": "Lab 3 · 3D-print",
+  "checklist": [],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "3D-printers: nozzles en printbed controleren"
+ },
+ {
+  "title": "BHV-oefening plannen",
+  "descr": "Ontruimingsoefening met de BHV'ers. Datum afstemmen met de lesplanning.",
+  "cat": "veilig",
+  "prio": "normaal",
+  "who": "samen",
+  "status": "plannen",
+  "due": 40,
+  "lead": 28,
+  "repeat": "m12",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "BHV-oefening plannen"
+ },
+ {
+  "title": "Brandblussers laten keuren",
+  "descr": "",
+  "cat": "veilig",
+  "prio": "normaal",
+  "who": "collega",
+  "status": "plannen",
+  "due": 33,
+  "lead": 42,
+  "repeat": "m12",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "Brandblussers laten keuren"
+ },
+ {
+  "title": "Verantwoording Q4 aanleveren",
+  "descr": "Schoolbezoeken en leerlingaantallen uit de verantwoording-Excel.",
+  "cat": "admin",
+  "prio": "hoog",
+  "who": "daan",
+  "status": "plannen",
+  "due": 24,
+  "lead": 28,
+  "repeat": "",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "Verantwoording Q4 aanleveren"
+ },
+ {
+  "title": "E-keuring (NEN 3140) handgereedschap",
+  "descr": "",
+  "cat": "veilig",
+  "prio": "normaal",
+  "who": "daan",
+  "status": "plannen",
+  "due": 130,
+  "lead": 56,
+  "repeat": "m12",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "E-keuring (NEN 3140) handgereedschap"
+ },
+ {
+  "title": "Sleutelkast inventariseren",
+  "descr": "Wie heeft welke sleutel? Input voor de sleutelbeheer-module.",
+  "cat": "admin",
+  "prio": "laag",
+  "who": "",
+  "status": "plannen",
+  "due": "",
+  "lead": 0,
+  "repeat": "",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "Sleutelkast inventariseren"
+ },
+ {
+  "title": "Werkbanken lab 1 schuren en oliën",
+  "descr": "",
+  "cat": "onderhoud",
+  "prio": "laag",
+  "who": "collega",
+  "status": "plannen",
+  "due": 34,
+  "lead": 0,
+  "repeat": "",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": null,
+  "createdAt": -20,
+  "log": [
+   {
+    "at": -20,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   }
+  ],
+  "seriesKey": "Werkbanken lab 1 schuren en oliën"
+ },
+ {
+  "title": "Brandmeldinstallatie: kwartaaltest",
+  "descr": "",
+  "cat": "veilig",
+  "prio": "normaal",
+  "who": "daan",
+  "status": "klaar",
+  "due": -4,
+  "lead": 0,
+  "repeat": "",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": -5,
+  "createdAt": -40,
+  "log": [
+   {
+    "at": -40,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   },
+   {
+    "at": -5,
+    "by": "Daan",
+    "txt": "Afgerond"
+   }
+  ],
+  "seriesKey": "Brandmeldinstallatie: kwartaaltest"
+ },
+ {
+  "title": "EHBO-koffers aangevuld",
+  "descr": "",
+  "cat": "veilig",
+  "prio": "normaal",
+  "who": "collega",
+  "status": "klaar",
+  "due": -6,
+  "lead": 0,
+  "repeat": "",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": -3,
+  "createdAt": -30,
+  "log": [
+   {
+    "at": -30,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   },
+   {
+    "at": -3,
+    "by": "Collega",
+    "txt": "Afgerond"
+   }
+  ],
+  "seriesKey": "EHBO-koffers aangevuld"
+ },
+ {
+  "title": "Nieuwe roosters bij de labs opgehangen",
+  "descr": "",
+  "cat": "lessen",
+  "prio": "normaal",
+  "who": "collega",
+  "status": "klaar",
+  "due": "",
+  "lead": 0,
+  "repeat": "",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": -9,
+  "createdAt": -15,
+  "log": [
+   {
+    "at": -15,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   },
+   {
+    "at": -9,
+    "by": "Collega",
+    "txt": "Afgerond"
+   }
+  ],
+  "seriesKey": "Nieuwe roosters bij de labs opgehangen"
+ },
+ {
+  "title": "Dakgoten laten reinigen",
+  "descr": "",
+  "cat": "gebouw",
+  "prio": "normaal",
+  "who": "daan",
+  "status": "klaar",
+  "due": -20,
+  "lead": 0,
+  "repeat": "",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": -21,
+  "createdAt": -60,
+  "log": [
+   {
+    "at": -60,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   },
+   {
+    "at": -21,
+    "by": "Daan",
+    "txt": "Afgerond"
+   }
+  ],
+  "seriesKey": "Dakgoten laten reinigen"
+ },
+ {
+  "title": "Vinylsnijder: mes vervangen",
+  "descr": "",
+  "cat": "onderhoud",
+  "prio": "normaal",
+  "who": "daan",
+  "status": "klaar",
+  "due": -30,
+  "lead": 0,
+  "repeat": "",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": -27,
+  "createdAt": -45,
+  "log": [
+   {
+    "at": -45,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   },
+   {
+    "at": -27,
+    "by": "Daan",
+    "txt": "Afgerond"
+   }
+  ],
+  "seriesKey": "Vinylsnijder: mes vervangen"
+ },
+ {
+  "title": "Lasersnijder: filters en lens vervangen",
+  "descr": "",
+  "cat": "onderhoud",
+  "prio": "normaal",
+  "who": "daan",
+  "status": "klaar",
+  "due": -94,
+  "lead": 0,
+  "repeat": "m3",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": -92,
+  "createdAt": -120,
+  "log": [
+   {
+    "at": -120,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   },
+   {
+    "at": -92,
+    "by": "Daan",
+    "txt": "Afgerond"
+   }
+  ],
+  "seriesKey": "Lasersnijder: filters en lens vervangen"
+ },
+ {
+  "title": "Offertes nieuwe soldeerstations opgevraagd",
+  "descr": "",
+  "cat": "inkoop",
+  "prio": "normaal",
+  "who": "daan",
+  "status": "klaar",
+  "due": -36,
+  "lead": 0,
+  "repeat": "",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": -38,
+  "createdAt": -50,
+  "log": [
+   {
+    "at": -50,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   },
+   {
+    "at": -38,
+    "by": "Daan",
+    "txt": "Afgerond"
+   }
+  ],
+  "seriesKey": "Offertes nieuwe soldeerstations opgevraagd"
+ },
+ {
+  "title": "Legionella: tappunten doorspoelen",
+  "descr": "",
+  "cat": "gebouw",
+  "prio": "normaal",
+  "who": "collega",
+  "status": "klaar",
+  "due": -9,
+  "lead": 0,
+  "repeat": "w2",
+  "loc": "",
+  "checklist": [],
+  "notes": [],
+  "doneAt": -9,
+  "createdAt": -30,
+  "log": [
+   {
+    "at": -30,
+    "by": "Daan",
+    "txt": "Taak aangemaakt"
+   },
+   {
+    "at": -9,
+    "by": "Collega",
+    "txt": "Afgerond"
+   }
+  ],
+  "seriesKey": "Legionella: tappunten doorspoelen"
+ }
+]

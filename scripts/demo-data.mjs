@@ -289,33 +289,47 @@ async function seed() {
   for (let i = 0; i < 2; i++) mkBestel("geannuleerd", n++);
   await insert("bestel_items", bestelRijen, manifest);
 
-  /* ----- werkzaamheden ----- */
-  const TAKEN = [
-    ["Lasersnijder lenzen reinigen", "hoog"], ["3D-printers nivelleren", "normaal"], ["Voorraad filament tellen", "laag"], ["Veiligheidskeuring brandblussers controleren", "hoog"],
-    ["Gereedschapswand opruimen", "laag"], ["Nieuwe handleiding CNC uitprinten", "normaal"], ["Drone-accu's opladen en testen", "normaal"], ["Stofafzuiging filter vervangen", "hoog"],
-    ["Sleutelregistratie bijwerken", "laag"], ["Bestelling Conrad uitpakken en controleren", "normaal"], ["Opslagzone C opruimen", "laag"], ["Eerste hulp koffer aanvullen", "normaal"],
-    ["Werkbanken schoonmaken", "laag"], ["Arduino sets controleren op ontbrekende onderdelen", "normaal"], ["Gastles voorbereiden: robotica", "hoog"], ["Rondleiding gemeente voorbereiden", "normaal"],
-    ["Sticker labels printen voor nieuwe machines", "normaal"], ["Verlengsnoeren keuren", "hoog"], ["Soldeerstations controleren", "normaal"], ["Planning volgende week doorlopen", "laag"],
-  ];
-  const takenRijen = [];
-  const weekdagen = workdays(addDays(today, -3), 8);
-  TAKEN.forEach(([titel, prio], i) => {
-    const heeftDatum = i % 5 !== 4; // enkele zonder datum = backlog
-    const datum = heeftDatum ? pick(weekdagen) : null;
-    const klaar = heeftDatum && datum < today && chance(0.55);
-    takenRijen.push({
-      titel, beschrijving: chance(0.5) ? pick(["Zie handleiding in de map Documentatie.", "Even afstemmen met Harry.", "Foto toevoegen als het klaar is.", "Mag samen met de stagiair."]) : null,
-      datum: datum ? iso(datum) : null, toegewezen_aan: pick(mensen).id, status: klaar ? "afgevinkt" : "open",
-      afgevinkt_op: klaar ? stamp(datum, 15, 0) : null, deadline_op: chance(0.3) ? iso(addDays(today, int(-2, 10))) : null,
-      prioriteit: prio, gearchiveerd: false, created_by: admin.id,
-    });
+  /* ----- werkzaamheden (V2-voorbeelden uit scripts/werkzaamheden-demo.json) ----- */
+  const wzDemo = JSON.parse(fs.readFileSync(path.join(root, "scripts", "werkzaamheden-demo.json"), "utf8"));
+  const crewIds = profiles.filter((p) => p.role !== "docent").map((p) => p.id);
+  const wie = (w) => (w === "daan" ? crewIds[0] : w === "collega" ? (crewIds[1] ?? crewIds[0]) : w); // 'samen' en '' blijven
+  const dagIso = (n) => (typeof n === "number" ? iso(addDays(today, n)) : "");
+  const serie = new Map();
+  const wzRijen = wzDemo.map((t) => {
+    if (!serie.has(t.title)) serie.set(t.title, uuid());
+    return {
+      id: uuid(),
+      title: t.title,
+      descr: t.descr ?? "",
+      cat: t.cat,
+      prio: t.prio,
+      who: wie(t.who),
+      status: t.status,
+      due: dagIso(t.due) || null,
+      lead_days: t.lead ?? 0,
+      repeat: t.repeat ?? "",
+      loc: t.loc ?? "",
+      checklist: t.checklist ?? [],
+      notes: (t.notes ?? []).map((n) => ({ ...n, at: dagIso(n.at) })),
+      log: (t.log ?? []).map((l) => ({ ...l, at: dagIso(l.at) })),
+      series_id: serie.get(t.title),
+      done_at: dagIso(t.doneAt) || null,
+      created_by: admin.id,
+      created_at: stamp(addDays(today, typeof t.createdAt === "number" ? t.createdAt : -10), 9, 0),
+    };
   });
-  // extra opeenhoping: veel open taken op één dag
-  const druk = workdays(addDays(today, 1), 1)[0];
-  for (let i = 0; i < 9; i++) {
-    takenRijen.push({ titel: `${pick(["Controleren", "Opruimen", "Voorbereiden", "Bestellen", "Reinigen"])} ${pick(["zaagmachine", "kast 4", "labdeuren", "gereedschapskar", "printerkamer", "stofzuiger"])}`, beschrijving: null, datum: iso(druk), toegewezen_aan: pick(mensen).id, status: "open", afgevinkt_op: null, deadline_op: null, prioriteit: pick(["normaal", "laag", "hoog"]), gearchiveerd: false, created_by: admin.id });
+  // extra opeenhoping: veel taken met dezelfde deadline
+  const drukDag = iso(addDays(today, 3));
+  for (let i = 0; i < 8; i++) {
+    const id = uuid();
+    wzRijen.push({
+      id, title: `${pick(["Controleren", "Opruimen", "Voorbereiden", "Reinigen", "Keuren"])} ${pick(["zaagmachine", "kast 4", "labdeuren", "gereedschapskar", "printerkamer", "stofzuiger"])}`,
+      descr: "", cat: pick(["onderhoud", "gebouw", "veilig", "admin"]), prio: pick(["normaal", "laag", "hoog"]), who: pick([crewIds[0], crewIds[1] ?? crewIds[0], "samen"]),
+      status: "plannen", due: drukDag, lead_days: 0, repeat: "", loc: "", checklist: [], notes: [], log: [{ at: iso(today), by: "Demo", txt: "Taak aangemaakt" }],
+      series_id: id, done_at: null, created_by: admin.id,
+    });
   }
-  await insert("tasks", takenRijen, manifest);
+  await insert("werkzaamheden", wzRijen, manifest);
 
   /* ----- contacten ----- */
   const CONTACTEN = [
@@ -449,7 +463,7 @@ async function seed() {
 }
 
 /* ================= CLEAR ================= */
-const VOLGORDE = ["storingen", "machines", "contactmomenten", "contactpersonen", "afdelingen", "contacts", "bestel_items", "tasks", "bookings", "planning_sluitingen", "facturatie_reserveringen"];
+const VOLGORDE = ["storingen", "machines", "contactmomenten", "contactpersonen", "afdelingen", "contacts", "bestel_items", "tasks", "werkzaamheden", "bookings", "planning_sluitingen", "facturatie_reserveringen"];
 const KOLOM = { machines: "id" };
 
 async function laadManifest() {
