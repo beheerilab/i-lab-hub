@@ -14,13 +14,17 @@ export function PlanningApp({ initial }: { initial: PlanningData }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const root = ref.current;
-    if (!root) return;
+    const host = ref.current;
+    if (!host) return;
+    // Elke start krijgt een eigen element: zo blijven er geen dubbele luisteraars
+    // achter als React (in ontwikkelmodus) het onderdeel twee keer start.
+    const root = document.createElement("div");
     root.innerHTML = PLANNING_MARKUP;
+    host.appendChild(root);
     const stop = mountPlanning(root, JSON.parse(JSON.stringify(initial)) as PlanningData);
     return () => {
       stop();
-      root.innerHTML = "";
+      root.remove();
     };
   }, [initial]);
 

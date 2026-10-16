@@ -14,13 +14,17 @@ export function WerkzaamhedenApp({ initial }: { initial: WerkData }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const root = ref.current;
-    if (!root) return;
+    const host = ref.current;
+    if (!host) return;
+    // Elke start krijgt een eigen element: zo blijven er geen dubbele luisteraars
+    // achter als React (in ontwikkelmodus) het onderdeel twee keer start.
+    const root = document.createElement("div");
     root.innerHTML = WERKZAAMHEDEN_MARKUP;
+    host.appendChild(root);
     const stop = mountWerkzaamheden(root, JSON.parse(JSON.stringify(initial)) as WerkData);
     return () => {
       stop();
-      root.innerHTML = "";
+      root.remove();
     };
   }, [initial]);
 

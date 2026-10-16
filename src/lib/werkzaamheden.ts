@@ -87,12 +87,18 @@ export async function laadPersonen(supabase: Client) {
     .in("role", ["admin", "lid"])
     .order("full_name");
   const rijen = data ?? [];
+  const basisNaam = (p: (typeof rijen)[number]) => p.full_name || p.email || "Collega";
   const teller = new Map<string, number>();
-  rijen.forEach((p) => teller.set(p.full_name ?? "", (teller.get(p.full_name ?? "") ?? 0) + 1));
+  rijen.forEach((p) => teller.set(basisNaam(p), (teller.get(basisNaam(p)) ?? 0) + 1));
+  const lokaal = (e: string | null) => (e ? e.split("@")[0] : "");
+  const lokaalTeller = new Map<string, number>();
+  rijen.forEach((p) => lokaalTeller.set(`${basisNaam(p)}|${lokaal(p.email)}`, (lokaalTeller.get(`${basisNaam(p)}|${lokaal(p.email)}`) ?? 0) + 1));
   return rijen.map((p) => {
-    const basis = p.full_name || p.email || "Collega";
-    const dubbel = (teller.get(p.full_name ?? "") ?? 0) > 1;
-    return { id: p.id, name: dubbel && p.email ? `${basis} (${p.email.split("@")[0]})` : basis };
+    const basis = basisNaam(p);
+    if ((teller.get(basis) ?? 0) <= 1 || !p.email) return { id: p.id, name: basis };
+    // Dubbele namen: begin van het mailadres, en bij nog steeds gelijk het hele adres.
+    const uniek = (lokaalTeller.get(`${basis}|${lokaal(p.email)}`) ?? 0) <= 1;
+    return { id: p.id, name: `${basis} (${uniek ? lokaal(p.email) : p.email})` };
   });
 }
 
